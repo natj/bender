@@ -16,7 +16,7 @@ incl = pi/4
 #M    = 1.65Msun #5.0
 M    = 1.4Msun
 R    = 10km
-fs   = 700
+fs   = 0
 
 
 #derived dimensionless values
@@ -859,7 +859,7 @@ y_grid_d = linspace(ymin, ymax, Ny_dense)
 function radiation(Ir,
                    x,y,
                    phi, theta, cosa,
-                   X, Xob, Osb, sini)
+                   X, Xob, Osb, sini, Sig)
 
     nu2   = beta/3.0 - quad*0.5*(3*cos(theta)^2-1)
     B2    = beta
@@ -918,9 +918,10 @@ function radiation(Ir,
     end
 
     
-    dS = (Rgm)^2*sin(theta)*sqrt(1 + fa^2)
+    #dS = (Rgm)^2*sin(theta)*sqrt(1 + fa^2)
     cosap = cosa *delta
-    dOmega = dS*cosap
+    #dOmega = dS*cosap
+    dOmega = Sig
     
     dF = (EEd^3)*dOmega*Ir(cosap)
     
@@ -1162,7 +1163,7 @@ for j = 1:Ny_dense
         dF, dE = radiation(Ir,
                            x,y,
                            phi, theta, cosa,
-                           X, Xob, Osb, sini)
+                           X, Xob, Osb, sini, Sig)
 
         #if 0.79 < dE < 0.81
         #if dE < 0.79 || dE > 0.81
@@ -1422,7 +1423,7 @@ for k = 1:Nt
                 dF, dE = radiation(Ir,
                                    x,y,
                                    phi, theta, cosa,
-                                   X, Xob, Osb, sini)
+                                   X, Xob, Osb, sini, Sig)
 
                 
                 #img4[j,i] = painter(phi, theta)
