@@ -12,7 +12,7 @@ const Msun = 1.99e33
 const km = 1.0e5
 
 #initial parameters in physical units
-incl = pi/2
+incl = pi/4
 #M    = 1.65Msun #5.0
 M    = 1.4Msun
 R    = 10km
@@ -62,8 +62,8 @@ function Rgmf(theta, X, Osb)
     #derivative dR/dtheta
     dtR = -2*Osb^2*(o20+o21*X)*cos(theta)*sin(theta) #from AlGendy & Morsink 2014
 
-    return 1.0, 0.0
-    #return Rgm, dtR
+    #return 1.0, 0.0
+    return Rgm, dtR
 end
 
 ###################
@@ -107,7 +107,7 @@ function great_circle_dist(lon1, lon2, col1, col2)
 end
 
 #Area of a polygon on a sphere/spheroid
-function area_sphere(lons, cols, Rarea=1, ecc=0.0)
+function area_sphere(phi0,the0,lons, cols, Rarea=1, ecc=0.0)
 
     N = length(cols)
     
@@ -116,6 +116,7 @@ function area_sphere(lons, cols, Rarea=1, ecc=0.0)
         for i = 1:N
             cols[i] = authalic_lat(cols[i], ecc, qp)
         end
+        the0 = authalic_lat(the0, ecc, qp)
     end
 
     #sigs = zeros(N)
@@ -144,10 +145,15 @@ function area_sphere(lons, cols, Rarea=1, ecc=0.0)
         return mod2pi(az)
     end
 
+    #cols = pi/2 - cols
     #lats = cols - pi/2
     #lat0 = 0
-    col0 = pi/2
-    lon0 = 0
+
+    col0 = pi/2 - the0 
+    lon0 = phi0
+    #col0 = pi/2
+    #lon0 = 0
+
     colat = zeros(N+1)
     azimu = zeros(N+1)
     for i = 1:N
@@ -171,6 +177,27 @@ function area_sphere(lons, cols, Rarea=1, ecc=0.0)
 
     return area*4*pi*Rarea
 end
+
+function area_sphere_tri(lons, cols, Rarea=1, ecc=0.0)
+    N = length(cols)
+    
+    #transform to authalic sphere if we have spheroid
+    if ecc != 0.0
+        for i = 1:N
+            cols[i] = authalic_lat(cols[i], ecc, qp)
+        end
+    end
+
+    sigs = zeros(N)
+    for i = 1:N-1
+        sigs[i] = great_circle_dist(lons[i], lons[i+1], cols[i], cols[i+1])
+    end
+    sigs[N] = great_circle_dist(lons[N], lons[1], cols[N], cols[1]) 
+    area = Rarea^2 * (sum(abs(sigs)) - (N-2)*pi)
+
+    return area
+end
+
 
 
 ######
@@ -892,30 +919,32 @@ function radiation(Ir,
 
     
     dS = (Rgm)^2*sin(theta)*sqrt(1 + fa^2)
-    cosap = cosa #*delta
+    cosap = cosa *delta
     dOmega = dS*cosap
     
     dF = (EEd^3)*dOmega*Ir(cosap)
     
-    #return dF, EEd
+    return dF, EEd
     #return gamma, gamma2
-    return dS, dOmega
+    #return dS, dOmega
 end
 
     dxx = dx
     dyy = dy
 
-    dxx = 0.75*(x_grid_d[2] - x_grid_d[1])
-    dyy = 0.75*(y_grid_d[2] - y_grid_d[1])
+    dxx = 1.0*(x_grid_d[2] - x_grid_d[1])
+    dyy = 1.*(y_grid_d[2] - y_grid_d[1])
     dxdy = dxx*dyy*X^2
-    
+
+phi_interp_atan(y,x) = atan2(phi_interp_sin[y,x],phi_interp_cos[y,x])
+
 ##############################
 for j = 1:Ny_dense
     y = y_grid_d[j]
     for i = 1:Nx_dense
         
         # phi & theta
-        phi_interp_atan(y,x) = atan2(phi_interp_sin[y,x],phi_interp_cos[y,x])
+        
         
         x = x_grid_d[i]
         phi = phi_interp_atan(y,x)
@@ -933,7 +962,7 @@ for j = 1:Ny_dense
             ####
             
             #squares
-            function polyarea(x,y,dxx,dyy)
+            function polyarea(x,y,dxx,dyy,phi0,the0)
                               
                 #image plane
                 x1 = x - dxx/2
@@ -954,9 +983,15 @@ for j = 1:Ny_dense
                 #
                 #phi = (mod2pi(phi1)+mod2pi(phi2)+mod2pi(phi3)+mod2pi(phi4))/4
                 #theta = (mod2pi(the1)+mod2pi(the2)+mod2pi(the3)+mod2pi(the4))/4
-                parea = area_sphere([phi1, phi2, phi3, phi4],
+                #parea = area_sphere([phi1, phi2, phi3, phi4],
+                #                    [the1, the2, the3, the4],
+                #                    Rq, ecc)
+                parea = area_sphere(phi0,the0,
+                                    [phi1, phi2, phi3, phi4],
                                     [the1, the2, the3, the4],
                                     Rq, ecc)
+
+
                 
                 return parea
             end
@@ -973,25 +1008,26 @@ for j = 1:Ny_dense
                 phi1 = phi_interp_atan(y1, x1)
                 phi2 = phi_interp_atan(y1, x2)
                 phi3 = phi_interp_atan(y2, x)
-                #phi4 = phi_interp_atan(y2, x1)
                 the1 = theta_interp[y1, x1]
                 the2 = theta_interp[y1, x2]
                 the3 = theta_interp[y2, x]
-                #the4 = theta_interp[y2, x1]
-                
-                #
+
                 #phi = (mod2pi(phi1)+mod2pi(phi2)+mod2pi(phi3)+mod2pi(phi4))/4
                 #theta = (mod2pi(the1)+mod2pi(the2)+mod2pi(the3)+mod2pi(the4))/4
-                parea = area_sphere([phi1, phi2, phi3],
-                                    [the1, the2, the3],
-                                    Rq, ecc)
+                #parea = area_sphere([phi1, phi2, phi3],
+                #                    [the1, the2, the3],
+                #                    Rq, ecc)
+                parea = area_sphere_tri([phi1, phi2, phi3],
+                                        [the1, the2, the3],
+                                        Rq, ecc)
                 
                 return parea
             end
 
             
             #center value
-            Sig = dxdy/polyarea(x,y,dxx,dyy)
+            Sig = dxdy/polyarea(x,y,dxx,dyy,phi,theta)
+            #Sig = polyarea(x,y,dxx,dyy)
             #corners
             #Sig1 = dxdy/polyarea(x-dxx,y-dyy,dxx,dyy)
             #Sig2 = dxdy/polyarea(x+dxx,y-dyy,dxx,dyy)
@@ -1106,7 +1142,7 @@ for j = 1:Ny_dense
 
         #img3[j,i] = cosb
         #img3[j,i] = fa    
-            img3[j,i] = cosaa
+            #img3[j,i] = cosaa
             #img3[j,i] = cosz
             #img3[j,i] = cosz*bp
         end #if false/true for cosa
@@ -1331,7 +1367,7 @@ println("xmin=",x_grid_d[minimum(x1s[y1s:y2s])]*corr," xmax=",x_grid_d[maximum(x
 println("ymin=",y_grid_d[y1s]*corr," ymax=",y_grid_d[y2s]*corr)
 
 
-
+###Spot rotation
 if false
 
     
@@ -1369,7 +1405,7 @@ for k = 1:Nt
             theta = theta_interp[y,x]
 
             #rotate star
-            phi = phi_interp[y,x]
+            phi = phi_interp_atan(y,x)
             phi = phi - t*fs*2*pi
             phi = mod2pi(phi)
       
