@@ -1,6 +1,7 @@
 using Winston
 using Colors
 using Grid
+using Interpolations
 
 include("plot2d.jl")
 
@@ -16,7 +17,7 @@ incl = pi/4
 #M    = 1.65Msun #5.0
 M    = 1.4Msun
 R    = 10km
-fs   = 0
+fs   = 1400.0
 
 
 #derived dimensionless values
@@ -174,6 +175,35 @@ function area_sphere(phi0,the0,lons, cols, Rarea=1, ecc=0.0)
     integ = (1 .- cos(colat)) .* daz
     area = abs(sum(integ))/4/pi
     area = min(area, 1-area)
+
+    return area*4*pi*Rarea
+end
+
+function area_sphere_lambert(phi0, theta0, phis, thetas, Rarea=1, ecc=0.0)
+    N = length(thetas)
+    
+    #transform to authalic sphere if we have spheroid
+    if ecc != 0.0
+        for i = 1:N
+            thetas[i] = authalic_lat(thetas[i], ecc, qp)
+        end
+        theta0 = authalic_lat(theta0, ecc, qp)
+    end
+
+    lphis = pi/2 - thetas
+    lphi0 = pi/2 - theta0
+    llambdas = phis
+    llambda0 = phi0
+
+    kprime = sqrt(2 ./ (1 .+ sin(lphi0) .* sin(lphis) .+ cos(lphi0) .* cos(lphis) .* cos(llambdas-llambda0)))
+    xs = kprime .* cos(lphis) .* sin(llambdas-llambda0)
+    ys = kprime .* (cos(lphi0) .* sin(lphis) .- sin(lphi0) .* cos(lphis) .* cos(llambdas-llambda0))
+
+    xys = collect(zip(xs, ys))
+    xys2 = append!(xys[2:end], [xys[1]])
+    polygon = collect(zip(xys, xys2))
+    area = 0.5 * abs(sum(
+        [x0*y1 - x1*y0 for ((x0,y0), (x1,y1)) in polygon]))
 
     return area*4*pi*Rarea
 end
@@ -637,8 +667,8 @@ xmax = -xmin +0.01
 ymin = -10
 ymax = -ymin #+0.01
 
-Ny = 101
-Nx = 101
+Ny = 100
+Nx = 100
 Nt = 1
 
 xmid = round(Int,Nx/2)
@@ -811,29 +841,16 @@ Times = Times .- Times[ymid, xmid]
 time_interp = CoordInterpGrid((Yrange, Xrange), Times,
                               extrapolate, InterpLinear)
 
-phi_interp_sin = CoordInterpGrid((Yrange, Xrange), sin(Phis),
-                             extrapolate, InterpLinear)
-phi_interp_cos = CoordInterpGrid((Yrange, Xrange), cos(Phis),
-                             extrapolate, InterpLinear)
-        
-#phi_interp = CoordInterpGrid((Yrange, Xrange), Phis,
-#                             extrapolate, InterpLinear)
-                             #extrapolate, InterpQuadratic)
+phi_interp_sin = interpolate((Yrange , Xrange) , sin(Phis) , Gridded(Linear()))
+phi_interp_cos = interpolate((Yrange , Xrange) , cos(Phis) , Gridded(Linear()))
+#phi_interp    = interpolate((Yrange , Xrange) , Phis      , Gridded(Linear()))
+theta_interp   = interpolate((Yrange , Xrange) , Thetas    , Gridded(Linear()))
+Xs_interp      = interpolate((Yrange , Xrange) , Xs        , Gridded(Linear()))
+cosa_interp    = interpolate((Yrange , Xrange) , cosas     , Gridded(Linear()))
+hits_interp    = interpolate((Yrange , Xrange) , hits      , Gridded(Constant()))
 
-theta_interp = CoordInterpGrid((Yrange, Xrange), Thetas,
-                               extrapolate, method)
-
-Xs_interp = CoordInterpGrid((Yrange, Xrange), Xs,
-                             extrapolate, method)
-
-cosa_interp = CoordInterpGrid((Yrange, Xrange), cosas,
-                             extrapolate, method)
-
-hits_interp = CoordInterpGrid((Yrange, Xrange), hits,
-                             extrapolate, InterpLinear)
-
-
-
+#Ny_dense = Nx
+#Nx_dense = Ny
 Ny_dense = 1000
 Nx_dense = 1000
 Times_dense = zeros(Ny_dense, Nx_dense)
@@ -859,7 +876,7 @@ y_grid_d = linspace(ymin, ymax, Ny_dense)
 function radiation(Ir,
                    x,y,
                    phi, theta, cosa,
-                   X, Xob, Osb, sini, Sig)
+                   X, Xob, Osb, sini, earea)
 
     nu2   = beta/3.0 - quad*0.5*(3*cos(theta)^2-1)
     B2    = beta
@@ -921,9 +938,10 @@ function radiation(Ir,
     #dS = (Rgm)^2*sin(theta)*sqrt(1 + fa^2)
     cosap = cosa *delta
     #dOmega = dS*cosap
-    dOmega = Sig
     
-    dF = (EEd^3)*dOmega*Ir(cosap)
+    dF = (EEd^3)*Ir(cosap) * earea
+
+    #dF = (EEd^3)*dOmega*Ir(cosap)
     
     return dF, EEd
     #return gamma, gamma2
@@ -933,8 +951,8 @@ end
     dxx = dx
     dyy = dy
 
-    dxx = 1.0*(x_grid_d[2] - x_grid_d[1])
-    dyy = 1.*(y_grid_d[2] - y_grid_d[1])
+    dxx = 2.*(x_grid_d[2] - x_grid_d[1])
+    dyy = 2.*(y_grid_d[2] - y_grid_d[1])
     dxdy = dxx*dyy*X^2
 
 phi_interp_atan(y,x) = atan2(phi_interp_sin[y,x],phi_interp_cos[y,x])
@@ -964,22 +982,39 @@ for j = 1:Ny_dense
             
             #squares
             function polyarea(x,y,dxx,dyy,phi0,the0)
-                              
                 #image plane
                 x1 = x - dxx/2
                 x2 = x + dxx/2
                 y1 = y - dyy/2
                 y2 = y + dyy/2
+
+                pts = [ (y1, x1), (y1, x2), (y2, x2), (y2, x1) ]
+                inside = filter(x -> hits_interp[x[1], x[2]] >= 1.0, pts)
+
+                phis = map(x -> phi_interp_atan(x[1], x[2]), inside)
+                thetas = map(x -> theta_interp[x[1], x[2]], inside)
+
+                #if length(inside) < 4
+                #    println("pts    $pts")
+                #    println("inside $inside")
+                #    println("phis   $phis")
+                #    println("thetas $thetas")
+                #end
+
+                if length(inside) < 3
+                    return 0.0
+                end
+                parea = area_sphere_lambert(phi0, the0, phis, thetas, Rq, ecc)
             
                 #surface
-                phi1 = phi_interp_atan(y1, x1)
-                phi2 = phi_interp_atan(y1, x2)
-                phi3 = phi_interp_atan(y2, x2)
-                phi4 = phi_interp_atan(y2, x1)
-                the1 = theta_interp[y1, x1]
-                the2 = theta_interp[y1, x2]
-                the3 = theta_interp[y2, x2]
-                the4 = theta_interp[y2, x1]
+                #phi1 = phi_interp_atan(y1, x1)
+                #phi2 = phi_interp_atan(y1, x2)
+                #phi3 = phi_interp_atan(y2, x2)
+                #phi4 = phi_interp_atan(y2, x1)
+                #the1 = theta_interp[y1, x1]
+                #the2 = theta_interp[y1, x2]
+                #the3 = theta_interp[y2, x2]
+                #the4 = theta_interp[y2, x1]
                 
                 #
                 #phi = (mod2pi(phi1)+mod2pi(phi2)+mod2pi(phi3)+mod2pi(phi4))/4
@@ -987,12 +1022,8 @@ for j = 1:Ny_dense
                 #parea = area_sphere([phi1, phi2, phi3, phi4],
                 #                    [the1, the2, the3, the4],
                 #                    Rq, ecc)
-                parea = area_sphere(phi0,the0,
-                                    [phi1, phi2, phi3, phi4],
-                                    [the1, the2, the3, the4],
-                                    Rq, ecc)
-
-
+                #parea = area_sphere(phi0,the0, [phi1, phi2, phi3, phi4], [the1, the2, the3, the4], Rq, ecc)
+                #parea = area_sphere_lambert(phi0,the0, [phi1, phi2, phi3, phi4], [the1, the2, the3, the4], Rq, ecc)
                 
                 return parea
             end
@@ -1018,23 +1049,25 @@ for j = 1:Ny_dense
                 #parea = area_sphere([phi1, phi2, phi3],
                 #                    [the1, the2, the3],
                 #                    Rq, ecc)
-                parea = area_sphere_tri([phi1, phi2, phi3],
-                                        [the1, the2, the3],
-                                        Rq, ecc)
+                parea = area_sphere_tri([phi1, phi2, phi3], [the1, the2, the3], Rq, ecc)
                 
                 return parea
             end
 
             
             #center value
-            Sig = dxdy/polyarea(x,y,dxx,dyy,phi,theta)
-            #Sig = polyarea(x,y,dxx,dyy)
+            #dA1 = dxdy
+            #dA2 = polyarea(x,y,dxx,dyy,phi,theta)
+            #earea = dxdy/polyarea(x,y,dxx,dyy,phi,theta)
+            earea = polyarea(x,y,dxx,dyy,phi,theta)
+
+            #earea = polyarea(x,y,dxx,dyy)
             #corners
-            #Sig1 = dxdy/polyarea(x-dxx,y-dyy,dxx,dyy)
-            #Sig2 = dxdy/polyarea(x+dxx,y-dyy,dxx,dyy)
-            #Sig3 = dxdy/polyarea(x-dxx,y+dyy,dxx,dyy)
-            #Sig4 = dxdy/polyarea(x+dxx,y+dyy,dxx,dyy)
-            #Sig = (Sig+Sig1+Sig2+Sig3+Sig4)/5.0
+            #earea1 = dxdy/polyarea(x-dxx,y-dyy,dxx,dyy)
+            #earea2 = dxdy/polyarea(x+dxx,y-dyy,dxx,dyy)
+            #earea3 = dxdy/polyarea(x-dxx,y+dyy,dxx,dyy)
+            #earea4 = dxdy/polyarea(x+dxx,y+dyy,dxx,dyy)
+            #earea = (earea+earea1+earea2+earea3+earea4)/5.0
             
             
         Phis_dense[j,i] = phi
@@ -1149,7 +1182,7 @@ for j = 1:Ny_dense
         end #if false/true for cosa
             
         #img3[j,i] = time    
-        img3[j,i] = Sig
+        img3[j,i] = earea
 
         # Solid angle
         
@@ -1158,12 +1191,13 @@ for j = 1:Ny_dense
         ##################################
 
         #Radiation
-        Ir(cosa) = 1.0 #isotropic beaming
+        #Ir(cosa) = 1.0 #isotropic beaming
+        Ir(cosa) = cosa
             
         dF, dE = radiation(Ir,
                            x,y,
                            phi, theta, cosa,
-                           X, Xob, Osb, sini, Sig)
+                           X, Xob, Osb, sini, earea)
 
         #if 0.79 < dE < 0.81
         #if dE < 0.79 || dE > 0.81
@@ -1189,14 +1223,14 @@ p3 = plot2d(img, x_grid_d, y_grid_d)
 p4 = plot2d(img2, x_grid_d, y_grid_d, 0, 0, 0, "Blues")
 p5 = plot2d(img3, x_grid_d, y_grid_d, 0, 0.0, 1.2, "Blues")
 
-p6 = plot(y_grid_d, img2[:,511],"k-", yrange=[-0.1, 1.1])
-p6 = oplot(y_grid_d, img3[:,511], "r--")
-p6 = oplot(x_grid_d, img2[501,:], "b-")
-p6 = oplot(x_grid_d, img3[501,:], "r--")
+p6 = plot(y_grid_d, img2[:, int(Ny_dense/2)+1],"k-", yrange=[-0.1, 1.1])
+p6 = oplot(y_grid_d, img3[:,int(Ny_dense/2)+1], "r--")
+p6 = oplot(x_grid_d, img2[int(Nx_dense/2)+1,:], "b-")
+p6 = oplot(x_grid_d, img3[int(Nx_dense/2)+1,:], "r--")
 
 rel_err(x1,x2) = (x1 .- x2) ./ x1
-xslice = 501
-yslice = 501
+xslice = int(Nx_dense/2)+1
+yslice = int(Ny_dense/2)+1
 
 p6e = plot(y_grid_d, rel_err(img2[:,xslice],img3[:,xslice]), "k-",yrange=[-0.05, 0.05])
 p6e = oplot(y_grid_d, rel_err(img2[yslice,:],img3[yslice,:]), "b-")
@@ -1369,7 +1403,7 @@ println("ymin=",y_grid_d[y1s]*corr," ymax=",y_grid_d[y2s]*corr)
 
 
 ###Spot rotation
-if false
+if true
 
     
 ########
@@ -1423,17 +1457,17 @@ for k = 1:Nt
                 dF, dE = radiation(Ir,
                                    x,y,
                                    phi, theta, cosa,
-                                   X, Xob, Osb, sini, Sig)
+                                   X, Xob, Osb, sini, img3[j,i])
 
                 
                 #img4[j,i] = painter(phi, theta)
-                img4[j,i] += dF
+                img4[j,i] += dF*1e4
                 
             end #if inside            
         end# for x
     end#for y
 
-    p10 = plot2d(img4, x_grid_d, y_grid_d, 0, 0, 0, "Blues")
+    p10 = plot2d(img4, x_grid_d, y_grid_d, 0, 0, 5, "Blues")
     #p10 = plot2d(img4, x_grid_d, y_grid_d, 0, -1., 1., "RdBu")
     display(p10)
     
