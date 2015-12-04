@@ -16,8 +16,10 @@ incl = pi/4
 #M    = 1.65Msun #5.0
 M    = 1.4Msun
 R    = 10km
-fs   = 700
+fs   = 50
 
+#initial step with flat space
+#increase level around ptheta zero
 
 #derived dimensionless values
 const sini = sin(incl)
@@ -259,9 +261,9 @@ end
 function pphi(a, b, sini,
               x, nu2, B2, zeta2, wp, theta, Rg)
     
-    #if -1e-5 < theta < 1e-5
-    #    return 0.0
-    #end
+    if -1e-5 < theta < 1e-5
+        return 0.0
+    end
 
     return (16*x^2*((a*exp(4*x^3*nu2)*(-2 + x)^4*csc(theta)^2*sini)/(Rg^2*(4 + (-1 + 4*B2)*x^2)^2) - (x*(2 + x)^4*(1 - x*3)*wp*(1 + a*x^3*(1 - x*3)*wp*sini))/16.))/(exp(2*x^3*nu2)*(-4 + x^2)^2)
 end
@@ -323,7 +325,7 @@ function bender3(x, y, sini,
     zn = zm1 + h*dz
 
     #initial values for integration
-    rr -= h/256
+    #rr -= h/256
     hi = h
     level = 0.5
 
@@ -341,13 +343,15 @@ function bender3(x, y, sini,
     oneturn = true
     while rr <= Xob
         #rr += hi
-        rr = rr + rsign*hi
+        #rr = rr + rsign*hi
         
         err = 1.0
         
         yni = yn
         psigni = psign
         rsigni = rsign
+
+        
         
         tp1 = 0.0
         yp1 = 0.0
@@ -373,7 +377,7 @@ function bender3(x, y, sini,
             
             #take a step
             k1t, k1y, k1z, tturn1, rturn1 = rk_step(rr, yn, x, y, sini, wp, Rg)
-            k2t, k2y, k2z, tturn2, rturn2 = rk_step(rr+hi, yn+ psign*k1y*hi, x, y, sini, wp, Rg)
+            k2t, k2y, k2z, tturn2, rturn2 = rk_step(rr+rsign*hi, yn+ psign*k1y*hi, x, y, sini, wp, Rg)
             
             #check if our photon turns around
             if (tturn1 || tturn2)
@@ -408,6 +412,8 @@ function bender3(x, y, sini,
             #level *= 2
         end
 
+        rr = rr + rsign*hi
+        
         push!(lvs, log2(level))
         #push!(lvs, level*psign)
         push!(ers, err)
@@ -560,14 +566,15 @@ end
 #println(bender3(0,6.5,sini,X,Osb,beta,quad,wp,Rg))
 #println(bender3(0,8,sini,X,Osb,beta,quad,wp,Rg))
 
+#IF photon path i.e. integrator debugger
 if false
 
     #i=pi/2.01
-    xpoint = 4.0
-    ypoint = 0.1
+    xpoint = 5.0
+    ypoint = 0.004999999999999005
     #xpoint2 = 7.4374
-    xpoint2 = 4.0
-    ypoint2 = 0.3
+    xpoint2 = 5.0
+    ypoint2 = 0.20509999999999806
 
     #i=pi/4
     #xpoint = 5.0
@@ -589,7 +596,7 @@ println(pi/2-yns[end])
 p1 = plot(rns, (pi/2-yns), "b-")
 rns, yns, zns, ers, lvs = bender3(xpoint2, ypoint2, sini,X, Osb,
                                   beta, quad, wp, Rg)
-p1 = oplot(rns, -(pi/2-yns), "r--")
+p1 = oplot(rns, (pi/2-yns), "r--")
 println(pi/2-yns[end])
     
 rns, yns, zns, ers, lvs = bender3(xpoint, ypoint, sini,X, Osb,
@@ -627,15 +634,15 @@ t[4,1] = p4
 end
 
 
-
+#IF compute image
 if true
 ######################
 ######################
 #grid setup
 xmin = -10
-xmax = -xmin +0.01
+xmax = -xmin +0.005
 ymin = -10
-ymax = -ymin #+0.01
+ymax = -ymin +0.005
 
 Ny = 101
 Nx = 101
@@ -788,8 +795,11 @@ for j = ymid:-1:1
 end
 toc()
 
-    end #if -tru
-    if true
+end #if -tru
+
+
+#IF interpolation
+if true
     
 p00 = plot2d(Times, x_grid, y_grid)
 p11 = plot2d(Phis, x_grid, y_grid)
@@ -1367,7 +1377,7 @@ println("xmin=",x_grid_d[minimum(x1s[y1s:y2s])]*corr," xmax=",x_grid_d[maximum(x
 println("ymin=",y_grid_d[y1s]*corr," ymax=",y_grid_d[y2s]*corr)
 
 
-###Spot rotation
+#IF Spot animation
 if false
 
     

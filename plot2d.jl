@@ -71,8 +71,8 @@ function chess_board(phi, theta, cosa=0, dF=0, Es=0)
 
     #println("phi = $phi")
     #println("theta = $theta")
-    xd = round(Int,40*phi/2pi)
-    yd = round(Int,40*theta/2pi)
+    xd = round(Int,80*phi/2pi)
+    yd = round(Int,80*theta/2pi)
 
     if isodd(xd) && isodd(yd)
         return black
