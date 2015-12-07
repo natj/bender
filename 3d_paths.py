@@ -94,9 +94,18 @@ ax.set_zlabel("z")
 R = 3.4
 u = np.linspace(0, 2 * np.pi, 100)
 v = np.linspace(0, np.pi, 100)
-x = R * np.outer(np.cos(u), np.sin(v))
-y = R * np.outer(np.sin(u), np.sin(v))
-z = R * np.outer(np.ones(np.size(u)), np.cos(v))
+#x = R * np.outer(np.cos(u), np.sin(v))
+#y = R * np.outer(np.sin(u), np.sin(v))
+#z = R * np.outer(np.ones(np.size(u)), np.cos(v))
+
+#oblate spheroid
+ecc = 0.648
+eta = 0.5*np.log((2-ecc**2)/ecc**2)
+x = R * np.cosh(eta)*np.outer(np.cos(u), np.sin(v))
+y = R * np.cosh(eta)*np.outer(np.sin(u), np.sin(v))
+z = R * np.sinh(eta)*np.outer(np.ones(np.size(u)), np.cos(v))
+
+
 ax.plot_surface(x, y, z,
                 rstride=4, cstride=4,
                 alpha = 0.05,
