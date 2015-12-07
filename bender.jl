@@ -275,14 +275,13 @@ function pthe(a, b, sini,
               x, nu2, B2, zeta2, wp, theta, Rg)
     
     tturn = false
-    
     sq = a^2 + b^2 - a^2*(sini*csc(theta))^2
     if sq < 0.0
         sq = -sq
         #sq = 0.0
         tturn = true
     end
-
+    
     return 16*exp(x^2*(2x*nu2-zeta2))*(x-2)*x^2*sqrt(sq)/(Rg^2*(2+x)^3*(4+(4*B2-1)*x^2)), tturn
 end
 
@@ -290,7 +289,7 @@ end
 function pphi(a, b, sini,
               x, nu2, B2, zeta2, wp, theta, Rg)
     
-    if -1e-5 < theta < 1e-5
+    if -1.0e-5 < theta < 1.0e-5
         return 0.0
     end
 
@@ -330,7 +329,8 @@ function bender3(x, y, sini,
         psign = 1.0
     end
     rsign = 1.0
-    
+
+    #psign *= -1.0
     ######################
     #leapfrog tracing
     const h = 0.002
@@ -342,16 +342,22 @@ function bender3(x, y, sini,
     rr = 0.0
 
     #first step
+    #rr += h/16384
     rr += h/256
     
     tm1 = 0.0
     ym1 = incl
     zm1 = 0.0
-    dt, dy, dz, tturn1, rturn1 = rk_step(rr, ym1, x, y, sini, wp, Rg)
 
-    tn = tm1 + h*dt
-    yn = ym1 + h*dy*psign
-    zn = zm1 + h*dz
+    #dt, dy, dz, tturn1, rturn1 = rk_step(rr, ym1, x, y, sini, wp, Rg)
+    #tn = tm1 + rr*dt
+    #yn = ym1 + rr*dy*psign
+    #zn = zm1 + rr*dz
+
+    #series expanded initial values for moments assuming O(rr)^1
+    tn = tm1 + rr*(x^2 + y^2)/2/Rg #referenced from x=y=0 photon
+    yn = ym1 - rr*y*psign
+    zn = zm1 + rr*(x/sini/Rg)
 
     #initial values for integration
     #rr -= h/256
@@ -387,12 +393,12 @@ function bender3(x, y, sini,
         zp1 = 0.0
 
         ###XXX
-        #k1y = 0.0
-        #k2y = 0.0
-        #k1z = 0.0
-        #k2z = 0.0
-        #k1t = 0.0
-        #k2t = 0.0
+        k1y = 0.0
+        k2y = 0.0
+        k1z = 0.0
+        k2z = 0.0
+        k1t = 0.0
+        k2t = 0.0
             
         
         while err > tol && level <= 2^7
@@ -467,7 +473,7 @@ function bender3(x, y, sini,
         push!(yns, yn)
         push!(rns, rr)
         push!(zns, zn)
-        #push!(zns, k2y)
+        #push!(zns, k1z)
         
 
         nu2   = beta/3.0 - quad*0.5*(3*cos(yn)^2-1)
@@ -588,8 +594,8 @@ function bender3(x, y, sini,
     end
     cosa = clamp(cosa, 0.0, 1.0)
     
-    return rns, yns, zns, ers, lvs, hit
-    #return time, phi, theta, Xob, hit, cosa
+    #return rns, yns, zns, ers, lvs, hit
+    return time, phi, theta, Xob, hit, cosa
 end
 
 #println(bender3(0,6.5,sini,X,Osb,beta,quad,wp,Rg))
@@ -600,10 +606,16 @@ if false
 
     #i=pi/2.01
     xpoint = 5.0
-    ypoint = 0.004999999999999005
+    ypoint = -0.4
+
+    #xpoint = 0.01
+    #ypoint = -0.01
+    
+    #ypoint = -1.0
     #xpoint2 = 7.4374
     xpoint2 = 5.0
-    ypoint2 = 0.20509999999999806
+    #ypoint2 = -0.087
+    ypoint2 = -0.0017
 
     #i=pi/4
     #xpoint = 5.0
@@ -622,7 +634,7 @@ rns, yns, zns, ers, lvs, hit = bender3(xpoint, ypoint, sini,X, Osb,
                                   beta, quad, wp, Rg)
 
 println(pi/2-yns[end])
-p1 = plot(rns, (pi/2-yns), "b-")
+p1 = plot(rns, (pi/2-yns), "b-")#,xrange=[0.0, 0.0001])
 rns, yns, zns, ers, lvs, hit = bender3(xpoint2, ypoint2, sini,X, Osb,
                                   beta, quad, wp, Rg)
 p1 = oplot(rns, (pi/2-yns), "r--")
@@ -630,14 +642,15 @@ println(pi/2-yns[end])
     
 rns, yns, zns, ers, lvs, hit = bender3(xpoint, ypoint, sini,X, Osb,
                                   beta, quad, wp, Rg)
-p2 = plot(rns, zns, "b-")
+p2 = plot(rns, zns, "b-")#, xrange=[0.0, 0.0001])
 rns, yns, zns, ers, lvs, hit = bender3(xpoint2, ypoint2, sini,X, Osb,
                                   beta, quad, wp, Rg)
 p2 = oplot(rns, zns, "r-")
 
+    
 rns, yns, zns, ers, lvs, hit = bender3(xpoint, ypoint, sini,X, Osb,
                                   beta, quad, wp, Rg)
-p3 = plot(rns, ers, "b--")
+p3 = plot(rns, ers, "b-", yrange=[0.0, 2.0e-5])
 rns, yns, zns, ers, lvs, hit = bender3(xpoint2, ypoint2, sini,X, Osb,
                                   beta, quad, wp, Rg)
 p3 = oplot(rns, ers, "r--")
@@ -666,14 +679,22 @@ end
 #IF trace photons 3d path
 if true
 
-#grid setup
-    x_grid = collect(linspace(-10, 10, 10))
-    y_grid = collect(linspace(-10, 10, 10))
+    #grid setup
+    #x_grid = collect(linspace(-10, 10, 10))
+    #y_grid = collect(linspace(-10, 10, 10))
 
+    x_grid = collect(linspace(3.0, 10, 200))
+    y_grid = [0.005, 0.15, 0.3]
+    
+    mkpath("ppath")
+    
     for j = 1:length(y_grid)
         ypoint = y_grid[j]
+        #ypoint = 0.005
+
         for i = 1:length(x_grid)
             xpoint = x_grid[i]
+            #xpoint = 4.998743743743744
             
             rns, yns, zns, ers, lvs, hit = bender3(xpoint, ypoint, sini,X, Osb,
                                                    beta, quad, wp, Rg)
@@ -692,7 +713,7 @@ end #end trace 3d paths
 
 
 #IF compute image
-if false
+if true
 ######################
 ######################
 #grid setup
@@ -856,7 +877,7 @@ end #if -tru
 
 
 #IF interpolation
-if false
+if true
     
 p00 = plot2d(Times, x_grid, y_grid)
 p11 = plot2d(Phis, x_grid, y_grid)

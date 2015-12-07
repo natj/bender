@@ -43,7 +43,7 @@ def read_path(fname):
     return da[:,0], da[:,1], da[:,2], da[:,3], da[:,4]
 
 
-def spher_2_cart(rad, theta, phi, rcut=20.0):
+def spher_2_cart(rad, theta, phi, rcutmin=0.0, rcutmax=20.0):
 
     xs = []
     ys = []
@@ -52,7 +52,7 @@ def spher_2_cart(rad, theta, phi, rcut=20.0):
     N = len(rad)
     for i in range(N):
         if rad[i] != 0.0:
-            if (1/rad[i]) < rcut:
+            if rcutmin < (1/rad[i]) < rcutmax:
                 rad1 = rad[i]
                 the1 = theta[i]
                 phi1 = phi[i]
@@ -71,7 +71,8 @@ def spher_2_cart(rad, theta, phi, rcut=20.0):
     return np.asarray(xs),np.asarray(ys),np.asarray(zs)
 
             
-fdir = "ppath_incl0/"
+#fdir = "ppath_x2_yslice/"
+fdir = "ppath/"
 
 
 #####################
@@ -112,11 +113,17 @@ for i in range(len(onlyfiles)):
     if 'p_' in pfile:
         fname = fdir+pfile
 
-        print fname
+        #extract x and y from dirname
+        xx = float(pfile.split('_')[1])
+        yy = float((pfile.split('_')[2]).split('.csv')[0])
+                
+        print fname, xx, yy
+
         rad, theta, phi, err, lvl = read_path(fname)
         xs, ys, zs = spher_2_cart(rad, theta, phi)
-        ax.plot(xs, ys, zs, "b", alpha=0.5)
 
+        ax.plot(xs, ys, zs, "b", alpha=0.5)
+        
 
 
 #trick to force equal unit scale
