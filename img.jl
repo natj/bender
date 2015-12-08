@@ -1,5 +1,7 @@
 #Compute image and make plots from raw image grid
 
+#include("bender.jl")
+#include("comp_img.jl")
 
 
 p00 = plot2d(Times, x_grid, y_grid)
@@ -8,24 +10,29 @@ p21 = plot2d(Thetas, x_grid, y_grid)
 p31 = plot2d(hits, x_grid, y_grid)
 
 #interpolate into dense grid
-println("interpolating into dense grid...")
-method = InterpLinear
-extrapolate = BCnearest
+print("interpolating into dense grid...")
+#method = InterpLinear
+#extrapolate = BCnearest
 
 Xrange = xmin:dx:xmax
 Yrange = ymin:dy:ymax
 
 Times = Times .- Times[ymid, xmid]    
-time_interp    = interpolate((Yrange , Xrange) , Times     ,  Gridded(Linear()))
-phi_interp_sin = interpolate((Yrange , Xrange) , sin(Phis) ,  Gridded(Linear()))
-phi_interp_cos = interpolate((Yrange , Xrange) , cos(Phis) ,  Gridded(Linear()))
-theta_interp   = interpolate((Yrange , Xrange) , Thetas    ,  Gridded(Linear()))
-Xs_interp      = interpolate((Yrange , Xrange) , Xs        ,  Gridded(Linear()))
-cosa_interp    = interpolate((Yrange , Xrange) , cosas     ,  Gridded(Linear()))
-hits_interp    = interpolate((Yrange , Xrange) , hits      ,  Gridded(Linear()))
+time_interp    = interpolate((Yrange , Xrange), Times     ,Gridded(Linear()))
+phi_interp_sin = interpolate((Yrange , Xrange), sin(Phis) ,Gridded(Linear()))
+phi_interp_cos = interpolate((Yrange , Xrange), cos(Phis) ,Gridded(Linear()))
+theta_interp   = interpolate((Yrange , Xrange), Thetas    ,Gridded(Linear()))
+Xs_interp      = interpolate((Yrange , Xrange), Xs        ,Gridded(Linear()))
+cosa_interp    = interpolate((Yrange , Xrange), cosas     ,Gridded(Linear()))
+hits_interp    = interpolate((Yrange , Xrange), hits      ,Gridded(Linear()))
 
-Ny_dense = 1000
-Nx_dense = 1000
+
+#wrapper for tan(phi) formalism
+phi_interp_atan(y,x) = atan2(phi_interp_sin[y,x], phi_interp_cos[y,x])
+
+
+Ny_dense = 500
+Nx_dense = 500
 Times_dense = zeros(Ny_dense, Nx_dense)
 Phis_dense = zeros(Ny_dense, Nx_dense)
 Thetas_dense = zeros(Ny_dense, Nx_dense)
@@ -44,7 +51,9 @@ painter = chess_board
 x_grid_d = linspace(xmin, xmax, Nx_dense)
 y_grid_d = linspace(ymin, ymax, Ny_dense)
 
-    
+dx_d = abs(x_grid_d[2] - x_grid_d[1])
+dy_d = abs(y_grid_d[2] - y_grid_d[1])
+
 
 function radiation(Ir,
                    x,y,
@@ -99,7 +108,7 @@ function radiation(Ir,
 
     
     #dS = (Rgm)^2*sin(theta)*sqrt(1 + fa^2)
-    cosap = cosa *delta
+    cosap = cosa * delta
     #dOmega = dS*cosap
     
     dF = (EEd^3)*Ir(cosap) * earea
@@ -113,81 +122,171 @@ end
 
 
 #Image pizel size elements
-dxx = dx
-dyy = dy
+#dxx = dx
+#dyy = dy
 
-dxx = 2.*(x_grid_d[2] - x_grid_d[1])
-dyy = 2.*(y_grid_d[2] - y_grid_d[1])
+dxx = 1.0*(x_grid_d[2] - x_grid_d[1])
+dyy = 1.0*(y_grid_d[2] - y_grid_d[1])
 dxdy = dxx*dyy #*X^2
 
-#help-function for phi-atan formalism
-phi_interp_atan(y,x) = atan2(phi_interp_sin[y,x],phi_interp_cos[y,x])
 
+#squares
+function polyarea(x,y,dxx,dyy,phi0,the0;
+                  exact=false)
+    #image plane
+    x1 = x - dxx/2
+    x2 = x + dxx/2
+    y1 = y - dyy/2
+    y2 = y + dyy/2
+
+    pts = [ (y1, x1), (y1, x2), (y2, x2), (y2, x1) ]
+    
+    if exact
+        phis = Float64[]
+        thetas = Float64[]
+        for (yp, xp) in pts
+            time, phi, theta, Xob, hit, cosa = bender3(xp, yp, sini,
+                                                       X, Osb,
+                                                       beta, quad, wp, Rg)
+            if hit
+                push!(phis, phi)
+                push!(thetas, theta)
+            end
+        end
+    else
+        inside = filter(x -> hits_interp[x[1], x[2]] >= 1.0, pts)
+
+        phis = map(x -> phi_interp_atan(x[1], x[2]), inside)
+        thetas = map(x -> theta_interp[x[1], x[2]], inside)
+    end
+    
+    if length(phis) < 3
+        return 0.0
+    end
+    parea = area_sphere_lambert(phi0, the0, phis, thetas, Rq, ecc)
+    
+    return parea
+end
+
+#triangles
+function polyarea2(x,y,dxx,dyy)
+                              
+    #image plane
+    x1 = x - dxx
+    x2 = x + dxx
+    y1 = y - dyy/2
+    y2 = y + dyy/2
+            
+    #surface
+    phi1 = phi_interp_atan(y1, x1)
+    phi2 = phi_interp_atan(y1, x2)
+    phi3 = phi_interp_atan(y2, x)
+    the1 = theta_interp[y1, x1]
+    the2 = theta_interp[y1, x2]
+    the3 = theta_interp[y2, x]
+    
+    parea = area_sphere_tri([phi1, phi2, phi3], [the1, the2, the3], Rq, ecc)
+    return parea
+end
+
+#Get rough edge locations
+x1s = zeros(Int, Ny)
+x2s = zeros(Int, Ny)
+y1s = 0
+y2s = 0
+
+top = false
+for j = 1:Ny
+    y = y_grid[j]
+
+    left = false
+    for i = 1:Nx
+        x = x_grid[i]
+        
+        hit = hits[j,i]
+        hiti = round(Int,hit - 0.45)
+
+        if hiti == 1
+            if left == false
+                x1s[j] = i
+                left = true
+            else
+                x2s[j] = i
+            end
+
+            if top == false
+                y1s = j
+                top = true
+            else
+                y2s = j
+            end
+        end
+    end
+end
+
+println()
+println("size (isotropic)")
+println("xmin=",x_grid[minimum(x1s[y1s:y2s])]," xmax=",x_grid[maximum(x2s[y1s:y2s])])
+println("ymin=",y_grid[y1s]," ymax=",y_grid[y2s])
+
+xmin_edge = x_grid[minimum(x1s[y1s:y2s])-1]
+xmax_edge = x_grid[maximum(x2s[y1s:y2s])+1]
+ymin_edge = y_grid[y1s-1]
+ymax_edge = y_grid[y2s+1]
+
+
+tic()
 ##############################
-for j = 1:Ny_dense
+for j = 1:Ny_dense    
     y = y_grid_d[j]
-    for i = 1:Nx_dense
-        
-        # phi & theta
-        x = x_grid_d[i]
-        phi = phi_interp_atan(y,x)
-        theta = theta_interp[y,x]
-        Xob = Xs_interp[y,x]
-        time = time_interp[y,x]
-        
-        #test if we hit the surface
-        hit = hits_interp[y,x]
-        hiti = round(Int,hit - 0.1)
 
+    if !(ymin_edge < y < ymax_edge)
+        continue
+    end
+    
+    for i = 1:Nx_dense
+        x = x_grid_d[i]
+
+        if !(xmin_edge < x < xmax_edge)
+            continue
+        end
+        
+        #println("x=$x y=$y")
+        
+        #interpolate if we are not on the edge or near the zipper
+        rstar_min = min(abs(xmin_edge), abs(xmax_edge), abs(ymin_edge), abs(ymax_edge))
+        rstar_max = max(abs(xmin_edge), abs(xmax_edge), abs(ymin_edge), abs(ymax_edge))
+
+        #ring = rstar_min*0.99 < sqrt(x^2 + y^2) < 1.01*rstar_max
+        #zipper = abs(x) < 0.1 && y > 3.0
+        ring = false
+        zipper = false
+                    
+        if ring || zipper
+            time, phi, theta, Xob, hit, cosa = bender3(x, y, sini,
+                                                       X, Osb,
+                                                       beta, quad, wp, Rg)
+        else
+            # phi & theta
+            phi = phi_interp_atan(y,x)
+            theta = theta_interp[y,x]
+            Xob = Xs_interp[y,x]
+            time = time_interp[y,x]
+            cosa = cosa_interp[y,x]
+        
+            #test if we hit the surface
+            hit = hits_interp[y,x]
+        end
+
+        hiti = round(Int,hit - 0.49)
+
+        
         if hiti > 0
             #solid angle
             ####
             
-            #squares
-            function polyarea(x,y,dxx,dyy,phi0,the0)
-                #image plane
-                x1 = x - dxx/2
-                x2 = x + dxx/2
-                y1 = y - dyy/2
-                y2 = y + dyy/2
-
-                pts = [ (y1, x1), (y1, x2), (y2, x2), (y2, x1) ]
-                inside = filter(x -> hits_interp[x[1], x[2]] >= 1.0, pts)
-
-                phis = map(x -> phi_interp_atan(x[1], x[2]), inside)
-                thetas = map(x -> theta_interp[x[1], x[2]], inside)
-
-                if length(inside) < 3
-                    return 0.0
-                end
-                parea = area_sphere_lambert(phi0, the0, phis, thetas, Rq, ecc)
-            
-                return parea
-            end
-
-            #triangles
-            function polyarea2(x,y,dxx,dyy)
-                              
-                #image plane
-                x1 = x - dxx
-                x2 = x + dxx
-                y1 = y - dyy/2
-                y2 = y + dyy/2
-            
-                #surface
-                phi1 = phi_interp_atan(y1, x1)
-                phi2 = phi_interp_atan(y1, x2)
-                phi3 = phi_interp_atan(y2, x)
-                the1 = theta_interp[y1, x1]
-                the2 = theta_interp[y1, x2]
-                the3 = theta_interp[y2, x]
-
-                parea = area_sphere_tri([phi1, phi2, phi3], [the1, the2, the3], Rq, ecc)
-                return parea
-            end
-
-            
-            earea = polyarea(x,y,dxx,dyy,phi,theta)
+            earea = polyarea(x,y,dxx,dyy,phi,theta,
+                             exact=(ring || zipper))
 
             
             Phis_dense[j,i] = phi
@@ -196,12 +295,13 @@ for j = 1:Ny_dense
             
             #chess board
             img[j,i] = painter(phi, theta)
-            
+                    
             #mu = sqrt(1-sini^2)*cos(theta) + sini*sin(theta)*cos(phi)
             #img2[j,i] = mu
 
             #radiation
-            cosa = cosa_interp[y,x]
+            #cosa = cosa_interp[y,x]
+
             #if 0 < cosa < 1
 
             nu2   = beta/3.0 - quad*0.5*(3*cos(theta)^2-1)
@@ -328,9 +428,18 @@ for j = 1:Ny_dense
     end
 end
 
+#Interpolate flux and redshift
+Xrange_d = xmin:dx_d:xmax
+Yrange_d = ymin:dy_d:ymax
+
+flux_interp    = interpolate((Yrange_d , Xrange_d), Flux, Gridded(Linear()))
+reds_interp    = interpolate((Yrange_d , Xrange_d), Reds, Gridded(Linear()))
+
+toc()#end of interpolation into dense grid
+
 
 #Make plots
-p0 = plot2d(Times_dense, x_grid_d, y_grid_d, 0,0,0,"Blues")
+p0 = plot2d(Times_dense, x_grid_d, y_grid_d, 0,0,10.0,"Blues")
 p1 = plot2d(Phis_dense, x_grid_d, y_grid_d)
 p2 = plot2d(Thetas_dense, x_grid_d, y_grid_d)
 p3 = plot2d(img, x_grid_d, y_grid_d)
@@ -471,7 +580,7 @@ for j = 1:Ny_dense
         x = x_grid_d[i]
         
         hit = hits_interp[y,x]
-        hiti = round(Int,hit - 0.1)
+        hiti = round(Int,hit - 0.45)
 
         if hiti == 1
             if left == false

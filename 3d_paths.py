@@ -72,8 +72,8 @@ def spher_2_cart(rad, theta, phi, rcutmin=0.0, rcutmax=20.0):
 
             
 #fdir = "ppath_x2_yslice/"
-fdir = "ppath/"
-
+#fdir = "ppath/"
+fdir = "ppath_inclpi4/"
 
 #####################
 fig = figure()

@@ -12,10 +12,10 @@ const Msun = 1.99e33
 const km = 1.0e5
 
 #initial parameters in physical units
-incl = pi/4
-M    = 1.4Msun
-R    = 10km
-fs   = 1400
+incl = pi/3
+M    = 1.6Msun
+R    = 12km
+fs   = 100
 #increase level around ptheta zero
 
 #derived dimensionless values
@@ -31,11 +31,11 @@ println("x=$X ($U) and Osb=$Osb incl=$incl")
 #const beta = 0.4454*Osb^2*X #Matter quadrupole moment; Morsink 2014
 #const quad = -0.11*(Osb/X)^2 #Energy quadrupole moment; Morsink 2014
 I = sqrt(X)*(1.136-2.53*X+5.6*X^2) #Moment of inertia; Morsink 2014
-const wp = 2*I*(2pi*fs)/X^2 / (G*M/c^2)
+#const wp = 2*I*(2pi*fs)/X^2 / (G*M/c^2)
 
 const beta = 0.0
 const quad = 0.0
-#const wp = 0.0
+const wp = 0.0
 println("beta=$beta q=$quad wp=$wp")
 
 #
@@ -43,7 +43,7 @@ wf = (2*I*2pi*fs/X^2)*X^3*(1-3*X)
 println("w=$(wf/2pi)")
 
 
-#Load spherical trigonometric functions
+#Load spherical trigonometric functions and ellipsoid shape
 include("strig.jl")
 
 
@@ -347,7 +347,7 @@ function bender3(x, y, sini,
     ep = 1.0
     ds = 1.0
     mult = ds*(1 - (B*w*sin(theta)*Rg/Xob/enu^2)^2)/ep
-    
+
     t1 = (ep + Lz*w)
     
     sq2 =  (ep + Lz*w)^2 - C*(enu^4)*(Xob^2)/(B^2)/(Rg^2)

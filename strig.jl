@@ -14,8 +14,8 @@ function Rgmf(theta, X, Osb)
     #derivative dR/dtheta
     dtR = -2*Osb^2*(o20+o21*X)*cos(theta)*sin(theta) #from AlGendy & Morsink 2014
 
-    #return 1.0, 0.0
-    return Rgm, dtR
+    return 1.0, 0.0
+    #return Rgm, dtR
 end
 
 
