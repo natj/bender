@@ -11,25 +11,25 @@ p31 = plot2d(hits, x_grid, y_grid)
 
 #interpolate into dense grid
 print("interpolating into dense grid...")
-#method = InterpLinear
+#method = Gridded(Linear())
+method = Gridded(Constant())
 #extrapolate = BCnearest
 
 Xrange = xmin:dx:xmax
 Yrange = ymin:dy:ymax
 
 Times = Times .- Times[ymid, xmid]    
-time_interp    = interpolate((Yrange , Xrange), Times     ,Gridded(Linear()))
-phi_interp_sin = interpolate((Yrange , Xrange), sin(Phis) ,Gridded(Linear()))
-phi_interp_cos = interpolate((Yrange , Xrange), cos(Phis) ,Gridded(Linear()))
-theta_interp   = interpolate((Yrange , Xrange), Thetas    ,Gridded(Linear()))
-Xs_interp      = interpolate((Yrange , Xrange), Xs        ,Gridded(Linear()))
-cosa_interp    = interpolate((Yrange , Xrange), cosas     ,Gridded(Linear()))
-hits_interp    = interpolate((Yrange , Xrange), hits      ,Gridded(Linear()))
+time_interp    = interpolate((Yrange , Xrange), Times     ,method)
+phi_interp_sin = interpolate((Yrange , Xrange), sin(Phis) ,method)
+phi_interp_cos = interpolate((Yrange , Xrange), cos(Phis) ,method)
+theta_interp   = interpolate((Yrange , Xrange), Thetas    ,method)
+Xs_interp      = interpolate((Yrange , Xrange), Xs        ,method)
+cosa_interp    = interpolate((Yrange , Xrange), cosas     ,method)
+hits_interp    = interpolate((Yrange , Xrange), hits      ,method)
 
 
 #wrapper for tan(phi) formalism
 phi_interp_atan(y,x) = atan2(phi_interp_sin[y,x], phi_interp_cos[y,x])
-
 
 Ny_dense = 500
 Nx_dense = 500
@@ -79,40 +79,35 @@ function radiation(Ir,
     sing = fa*cosg
 
 
-    if false
+    #if false
     ####
-    vphi = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
-    b = R*vphi/c
+    #vphi = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
+    #b = R*vphi/c
+    #vw = Rgm*(1/enu)*sin(theta)*w #isoradial space vel
+    #bp = R*vw/c
+    #gamma = 1/sqrt(1 - b^2)
+    #cosi = sqrt(1-sini^2)
+    #sina = sqrt(1-cosa^2)
+    #cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
+    #cosz = -sina*sini*sin(phi)/sqrt(1-cospsi^2)
+    #delta = (1/gamma)/(1 - b*cosz)
+    #EEd = delta*enu*(1 + cosz*bp)
+    #else
 
-    vw = Rgm*(1/enu)*sin(theta)*w #isoradial space vel
-    bp = R*vw/c
-        
-    gamma = 1/sqrt(1 - b^2)
-    cosi = sqrt(1-sini^2)
-    sina = sqrt(1-cosa^2)
-    cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
-        
-    cosz = -sina*sini*sin(phi)/sqrt(1-cospsi^2)
- 
-    delta = (1/gamma)/(1 - b*cosz)
-    EEd = delta*enu*(1 + cosz*bp)
-
-    else
+    
     vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
     bz = R*vz/c
 
     gamma = 1/sqrt(1-bz^2)
     delta = 1/gamma/(1 + Lz*(2pi*fs)/(G*M/c^2))
     EEd = delta*enu
-    end
-
+    #end
     
     #dS = (Rgm)^2*sin(theta)*sqrt(1 + fa^2)
     cosap = cosa * delta
     #dOmega = dS*cosap
     
-    dF = (EEd^3)*Ir(cosap) * earea
-
+    dF = (EEd^3)*Ir(cosap) * earea #??? * delta
     #dF = (EEd^3)*dOmega*Ir(cosap)
     
     return dF, EEd
@@ -125,8 +120,8 @@ end
 #dxx = dx
 #dyy = dy
 
-dxx = 1.0*(x_grid_d[2] - x_grid_d[1])
-dyy = 1.0*(y_grid_d[2] - y_grid_d[1])
+dxx = 2.0*(x_grid_d[2] - x_grid_d[1])
+dyy = 2.0*(y_grid_d[2] - y_grid_d[1])
 dxdy = dxx*dyy #*X^2
 
 
@@ -234,6 +229,9 @@ xmax_edge = x_grid[maximum(x2s[y1s:y2s])+1]
 ymin_edge = y_grid[y1s-1]
 ymax_edge = y_grid[y2s+1]
 
+rstar_min = min(abs(xmin_edge), abs(xmax_edge), abs(ymin_edge), abs(ymax_edge))
+rstar_max = max(abs(xmin_edge), abs(xmax_edge), abs(ymin_edge), abs(ymax_edge))
+
 
 tic()
 ##############################
@@ -254,9 +252,6 @@ for j = 1:Ny_dense
         #println("x=$x y=$y")
         
         #interpolate if we are not on the edge or near the zipper
-        rstar_min = min(abs(xmin_edge), abs(xmax_edge), abs(ymin_edge), abs(ymax_edge))
-        rstar_max = max(abs(xmin_edge), abs(xmax_edge), abs(ymin_edge), abs(ymax_edge))
-
         #ring = rstar_min*0.99 < sqrt(x^2 + y^2) < 1.01*rstar_max
         #zipper = abs(x) < 0.1 && y > 3.0
         ring = false
@@ -286,7 +281,8 @@ for j = 1:Ny_dense
             ####
             
             earea = polyarea(x,y,dxx,dyy,phi,theta,
-                             exact=(ring || zipper))
+                             exact=(ring || zipper)
+                             )
 
             
             Phis_dense[j,i] = phi
@@ -404,6 +400,9 @@ for j = 1:Ny_dense
             #img3[j,i] = time    
             img3[j,i] = earea
 
+            #if earea == 0
+            #    println("x=$x y=$y")
+            #end
             # Solid angle
         
             
@@ -432,8 +431,8 @@ end
 Xrange_d = xmin:dx_d:xmax
 Yrange_d = ymin:dy_d:ymax
 
-flux_interp    = interpolate((Yrange_d , Xrange_d), Flux, Gridded(Linear()))
-reds_interp    = interpolate((Yrange_d , Xrange_d), Reds, Gridded(Linear()))
+flux_interp    = interpolate((Yrange_d , Xrange_d), Flux, method)
+reds_interp    = interpolate((Yrange_d , Xrange_d), Reds, method)
 
 toc()#end of interpolation into dense grid
 
@@ -447,14 +446,14 @@ p3 = plot2d(img, x_grid_d, y_grid_d)
 p4 = plot2d(img2, x_grid_d, y_grid_d, 0, 0, 0, "Blues")
 p5 = plot2d(img3 ./ dxdy, x_grid_d, y_grid_d, 0, 0.0, 2.0, "Blues")
 
-p6 = plot(y_grid_d, img2[:, int(Ny_dense/2)+1],"k-", yrange=[-0.1, 1.1])
-p6 = oplot(y_grid_d, img3[:,int(Ny_dense/2)+1], "r--")
-p6 = oplot(x_grid_d, img2[int(Nx_dense/2)+1,:], "b-")
-p6 = oplot(x_grid_d, img3[int(Nx_dense/2)+1,:], "r--")
+p6 = plot(y_grid_d, img2[:, round(Int,Ny_dense/2)+1],"k-", yrange=[-0.1, 1.1])
+p6 = oplot(y_grid_d, img3[:,round(Int,Ny_dense/2)+1], "r--")
+p6 = oplot(x_grid_d, img2[round(Int,Nx_dense/2)+1,:], "b-")
+p6 = oplot(x_grid_d, img3[round(Int,Nx_dense/2)+1,:], "r--")
 
 rel_err(x1,x2) = (x1 .- x2) ./ x1
-xslice = int(Nx_dense/2)+1
-yslice = int(Ny_dense/2)+1
+xslice = round(Int,Nx_dense/2)+1
+yslice = round(Int,Ny_dense/2)+1
 
 p6e = plot(y_grid_d, rel_err(img2[:,xslice],img3[:,xslice]), "k-",yrange=[-0.05, 0.05])
 p6e = oplot(y_grid_d, rel_err(img2[yslice,:],img3[yslice,:]), "b-")
@@ -510,7 +509,7 @@ function line_prof(Flux, Reds)
     emin = minimum(xarrs)
     emax = maximum(xarrs)
     println("emin=$emin emax=$emax")
-    Nr = 150
+    Nr = 70
     es = collect(linspace(emin, emax, Nr))
     yy2 = zeros(Nr)
     

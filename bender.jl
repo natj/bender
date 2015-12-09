@@ -15,7 +15,7 @@ const km = 1.0e5
 incl = pi/3
 M    = 1.6Msun
 R    = 12km
-fs   = 100
+fs   = 400
 #increase level around ptheta zero
 
 #derived dimensionless values

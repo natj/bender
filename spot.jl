@@ -7,15 +7,15 @@
 #Compute raw image
 #include("comp_img.jl")
 
-#Interpolate from raw image
-#include("img.jl")
+#Interpolate from raw image and compute radiation processes
+#include("radiation.jl")
 
 
 
 ########
 function spot(t, phi, theta;
               stheta = deg2rad(50.0), #spot latitude
-              delta = 1.0*pi/180 #spot half-opening angle
+              delta = deg2rad(30.0) #spot half-opening angle
               )
 
     #Vincenty's formula
@@ -31,10 +31,7 @@ end
 img4 = zeros(Ny_dense, Nx_dense) #debug array
 
 #Spot image frame size
-Nx_frame = 100
-Ny_frame = 100
-img5 = zeros(Ny_frame, Nx_frame) #debug array
-
+N_frame = 50
 
 
 #Beaming function for the radiation
@@ -49,7 +46,7 @@ spot_flux = zeros(Nt)
 
 tic()
 for k = 1:Nt
-#for k = 90:90
+#for k = 30:30
 #for k = 80:80
 #for k = 24:38
 #for k = 20:45
@@ -57,7 +54,7 @@ for k = 1:Nt
     img4[:,:] = 0.0
     
     t = times[k]
-
+    println("t: $t k: $k")
     
     #set whole image as starting frame
     frame_y2 = y_grid_d[1]
@@ -65,6 +62,7 @@ for k = 1:Nt
     frame_x1 = x_grid_d[end]
     frame_x2 = x_grid_d[1]
 
+    #inf_small = true
     
     for j = y1s:y2s
         y = y_grid_d[j]
@@ -86,6 +84,8 @@ for k = 1:Nt
             inside = spot(0.0, phi, theta)
             
             if inside
+            #if inside && inf_small
+            #    inf_small = false
                 
                 #track down spot edges
                 frame_y2 = frame_y2 < y ? y : frame_y2 #top #max
@@ -106,10 +106,10 @@ for k = 1:Nt
                 dE = reds_interp[y,x]
                                 
                 #img4[j,i] = painter(phi, theta)
-                img4[j,i] += 3.0*dF/dxdy
+                img4[j,i] += 3.0*dF /dxdy
 
                 #img4[j,i] = 5.0
-                #spot_flux[k] += dF
+                spot_flux[k] += dF
             end #if inside            
 
             
@@ -117,70 +117,142 @@ for k = 1:Nt
         end# for x
     end#for y
 
+    #continue
+    
     #TODO: deal with hidden spot
+    #i.e. skip time bin
+
     
     #expand image a bit
-    frame_expansion = abs(x_grid_d[2] - x_grid_d[1])*5.0
-    frame_y2 += frame_expansion
-    frame_y1 -= frame_expansion
-    frame_x1 -= frame_expansion
-    frame_x2 += frame_expansion
+    #########
+    #frame_expansion_x = abs(x_grid_d[end] - x_grid_d[1]) #*5.0
+    #frame_expansion_y = abs(y_grid_d[end] - y_grid_d[1]) #*5.0
+    #frame_y2 += frame_expansion_y
+    #frame_y1 -= frame_expansion_y
+    #frame_x1 -= frame_expansion_x
+    #frame_x2 += frame_expansion_x
+
+    #Exapand image a bit keeping the aspect ratio
+    ##########
+    frame_expansion_x = abs(frame_x2 - frame_x1)
+    frame_expansion_y = abs(frame_y2 - frame_y1)
+
+    frame_y1 -= frame_expansion_y*0.02
+    frame_y2 += frame_expansion_y*0.02
+    frame_x1 -= frame_expansion_x*0.02
+    frame_x2 += frame_expansion_x*0.02
+
+    frame_xs = abs(frame_x2 - frame_x1)/N_frame
+    frame_ys = abs(frame_y2 - frame_y1)/N_frame
+
+
+    println("x1: $frame_x1  x2: $frame_x2  y1: $frame_y1 y2: $frame_y2")  
+    println("x = $frame_xs y = $frame_ys")
+
+    if frame_xs > frame_ys
+        Nx_frame = N_frame
+        Ny_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
+    else
+        Ny_frame = N_frame
+        Nx_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
+    end
+
+    println("Nx= $Nx_frame Ny = $Ny_frame")
     
+    frame_xgrid = collect(linspace(frame_x1, frame_x2, Nx_frame))
+    frame_ygrid = collect(linspace(frame_y1, frame_y2, Ny_frame))
+    frame_dxx = 1.0*(frame_xgrid[2] - frame_xgrid[1])
+    frame_dyy = 1.0*(frame_ygrid[2] - frame_ygrid[1])
+    frame_dxdy = frame_dxx*frame_dyy #*X^2
+
+    #Locate spot edges on the old grid
+    ##########
+    
+    #Plot large image with bounding box for the spot
     p10 = plot2d(img4, x_grid_d, y_grid_d, 0, 0, 5, "Blues")
     Winston.add(p10, Curve([frame_x1, frame_x2, frame_x2, frame_x1, frame_x1],
                            [frame_y1, frame_y1, frame_y2, frame_y2, frame_y1],
-                           linestyle="dashed"))
-    
-    #display(p10)
+                           linestyle="solid"))
+    #add time stamp
+    xs = x_grid_d[1] + 0.84*(x_grid_d[end] - x_grid_d[1])
+    ys = y_grid_d[1] + 0.93*(y_grid_d[end] - y_grid_d[1])
+    Winston.add(p10, Winston.DataLabel(xs, ys, "$(k)"))
+    display(p10)
 
+    #println("dx = $(frame_dxx) dy = $(frame_dyy)")
+
+
+    
     #Integrate flux inside of the spot image frames
-    frame_xgrid = collect(linspace(frame_x1, frame_x2, Nx_frame))
-    frame_ygrid = collect(linspace(frame_y1, frame_y2, Nx_frame))
-    frame_dxx = 2.*(frame_xgrid[2] - frame_xgrid[1])
-    frame_dyy = 2.*(frame_ygrid[2] - frame_ygrid[1])
-    frame_dxdy = frame_dxx*frame_dyy #*X^2
-
-    println("dx = $(frame_dxx) dy = $(frame_dyy)")
     
-    img5[:,:] = 0.0
+    #img5[:,:] = 0.0
+    img5 = zeros(Ny_frame, Nx_frame) #debug array
     
     for j = 1:Ny_frame
         y = frame_ygrid[j]
         for i = 1:Nx_frame
             x = frame_xgrid[i]
-
             
+            #interpolate if we are not on the edge or near the zipper
+            #ring = rstar_min*0.98 < sqrt(x^2 + y^2) < 1.01*rstar_max
+            #zipper = abs(x) < 0.1 && y > 3.0
+            ring = false
+            zipper = false
+
+            if ring || zipper
+                time, phi, theta, Xob, hit, cosa = bender3(x, y, sini,
+                                                           X, Osb,
+                                                           beta, quad, wp, Rg)
+            else
+                # phi & theta
+                phi = phi_interp_atan(y,x)
+                theta = theta_interp[y,x]
+                Xob = Xs_interp[y,x]
+                time = time_interp[y,x]
+                cosa = cosa_interp[y,x]
+        
+                #test if we hit the surface
+                hit = hits_interp[y,x]
+            end
+
             #time, phi, theta, Xob, hit, cosa = bender3(x, y, sini,
             #                                           X, Osb,
             #                                           beta, quad, wp, Rg)
 
             #test if we hit the surface
-            hit = hits_interp[y,x]
-            hiti = round(Int,hit - 0.49)
-            #hiti = round(Int, hit)
+            #hit = hits_interp[y,x]
+            #hiti = round(Int,hit - 0.49)
+            hiti = round(Int, hit)
             
             if hiti > 0
-                phi = phi_interp_atan(y,x)
-                theta = theta_interp[y,x]
+                #phi = phi_interp_atan(y,x)
+                #theta = theta_interp[y,x]
 
                 #rotatate star
                 phi = phi - t*fs*2*pi
                 phi = mod2pi(phi)
                 
                 img5[j,i] = painter(phi, theta)/2.0
+                #if (ring || zipper)
+                #    img5[j,i] = painter(phi, theta)/2.0
+                #end
+
                 
                 inside = spot(0.0, phi, theta)
             
                 if inside
-                    time = time_interp[y,x]
+                    #time = time_interp[y,x]
 
                     #compute 
                     earea = polyarea(x, y,
                                      frame_dxx, frame_dyy,
-                                     phi, theta)
+                                     phi, theta,
+                                     exact=(ring || zipper)
+                                     #exact=false
+                    )
                 
-                    Xob = Xs_interp[y,x] 
-                    cosa = cosa_interp[y,x]
+                    #Xob = Xs_interp[y,x] 
+                    #cosa = cosa_interp[y,x]
                     dF, dE = radiation(Ir,
                                        x,y,
                                        phi, theta, cosa,
@@ -191,21 +263,25 @@ for k = 1:Nt
                     
                     
                     #img4[j,i] = painter(phi, theta)
-                    img5[j,i] += 3.0*dF/frame_dxdy
+                    img5[j,i] += 3.0*dF / frame_dxdy
+
                     #img5[j,i] = 5.0
-                    spot_flux[k] += dF
+                    #spot_flux[k] += dF * frame_dxdy
                 end #inside spot
             end#hiti
         end #x
     end#y
 
     p10 = plot2d(img5, frame_xgrid, frame_ygrid, 0, 0, 5, "Blues")
-    display(p10)
 
+    #add time stamp
+    xs = frame_xgrid[1] + 0.84*(frame_xgrid[end]-frame_xgrid[1])
+    ys = frame_ygrid[1] + 0.93*(frame_ygrid[end]-frame_ygrid[1])
+    Winston.add(p10, Winston.DataLabel(xs, ys, "$(k)"))
+    #display(p10)
     
 end#for t
 toc()
 
 
-#p10 = plot2d(img4, x_grid_d, y_grid_d, 0, 0, 0, "Blues")
 
