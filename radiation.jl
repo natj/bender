@@ -11,14 +11,14 @@ p31 = plot2d(hits, x_grid, y_grid)
 
 #interpolate into dense grid
 print("interpolating into dense grid...")
-#method = Gridded(Linear())
-method = Gridded(Constant())
+method = Gridded(Linear())
+#method = Gridded(Constant())
 #extrapolate = BCnearest
 
 Xrange = xmin:dx:xmax
 Yrange = ymin:dy:ymax
 
-Times = Times .- Times[ymid, xmid]    
+#Times = Times .- Times[ymid, xmid]    
 time_interp    = interpolate((Yrange , Xrange), Times     ,method)
 phi_interp_sin = interpolate((Yrange , Xrange), sin(Phis) ,method)
 phi_interp_cos = interpolate((Yrange , Xrange), cos(Phis) ,method)
@@ -107,7 +107,7 @@ function radiation(Ir,
     cosap = cosa * delta
     #dOmega = dS*cosap
     
-    dF = (EEd^3)*Ir(cosap) * earea #??? * delta
+    dF = (EEd^3)*Ir(cosap) * earea * delta
     #dF = (EEd^3)*dOmega*Ir(cosap)
     
     return dF, EEd
@@ -120,8 +120,8 @@ end
 #dxx = dx
 #dyy = dy
 
-dxx = 2.0*(x_grid_d[2] - x_grid_d[1])
-dyy = 2.0*(y_grid_d[2] - y_grid_d[1])
+dxx = 1.0*(x_grid_d[2] - x_grid_d[1])
+dyy = 1.0*(y_grid_d[2] - y_grid_d[1])
 dxdy = dxx*dyy #*X^2
 
 
@@ -148,18 +148,29 @@ function polyarea(x,y,dxx,dyy,phi0,the0;
                 push!(thetas, theta)
             end
         end
-    else
+    else     
         inside = filter(x -> hits_interp[x[1], x[2]] >= 1.0, pts)
 
-        phis = map(x -> phi_interp_atan(x[1], x[2]), inside)
+        #phis = map(x -> phi_interp_atan(x[1], x[2]), inside)
+        sinphis = map(x -> phi_interp_sin[x[1], x[2]], inside)
+        cosphis = map(x -> phi_interp_cos[x[1], x[2]], inside)
+        
         thetas = map(x -> theta_interp[x[1], x[2]], inside)
     end
     
-    if length(phis) < 3
+    if length(thetas) < 3
         return 0.0
     end
-    parea = area_sphere_lambert(phi0, the0, phis, thetas, Rq, ecc)
+    #parea = area_sphere_lambert(phi0, the0, phis, thetas, Rq, ecc)
+    #parea = area_sphere(phi0, the0, phis, thetas, Rq, ecc)
+    parea = area_sphere_lambert2(phi0, the0, sinphis, cosphis, thetas, Rq, ecc)
     
+    #if abs(x) < 0.15
+    #     println("x:$x phi:$phi0 the:$the0 $parea")
+    #     #println(phis)
+    #     println()
+    # end
+         
     return parea
 end
 
@@ -235,7 +246,8 @@ rstar_max = max(abs(xmin_edge), abs(xmax_edge), abs(ymin_edge), abs(ymax_edge))
 
 tic()
 ##############################
-for j = 1:Ny_dense    
+for j = 1:Ny_dense
+#for j = 380:380
     y = y_grid_d[j]
 
     if !(ymin_edge < y < ymax_edge)
@@ -253,7 +265,7 @@ for j = 1:Ny_dense
         
         #interpolate if we are not on the edge or near the zipper
         #ring = rstar_min*0.99 < sqrt(x^2 + y^2) < 1.01*rstar_max
-        #zipper = abs(x) < 0.1 && y > 3.0
+        #zipper = abs(x) < 0.2 && y > 4.67
         ring = false
         zipper = false
                     
@@ -353,7 +365,7 @@ for j = 1:Ny_dense
                 
                 img4[j,i] = 1 - (1-cospsi)*(enu^2)#non-rotating reference approx
             
-                cosaa = 1 - (1-cospsi)*(enu^2)/(1+cosz*bp)^3 #*(1-bp^2)^2
+                cosaa = 1 - (1-cospsi)*(enu^2)/(1+cosz*bp)^2 #*(1-bp^2)^2
                 #cosaa = 1 - (1-cospsi)*(enu^2)/(1+cosz*bp)^2.0 /((1-bp^2)^2)
                 #cosaa = 1 - (1-cospsi)*(enu^2)*(1 + cosz*bp)^2 #Sul
                 
@@ -427,6 +439,46 @@ for j = 1:Ny_dense
     end
 end
 
+
+#mad h4xs to smoothen the flux
+##############################
+Nsmooth = 3
+for j = 1:Ny_dense
+    y = y_grid_d[j]
+    if !(ymin_edge < y < ymax_edge)
+        continue
+    end
+    #for i = 1:Nx_dense
+    for i = (round(Int, Nx_dense/2)-10):(round(Int, Nx_dense/2)+10)
+        x = x_grid_d[i]
+        if !(xmin_edge < x < xmax_edge)
+            continue
+        end
+
+        #Flux[j,i:i+Nsmooth] = toolbox.smooth(vec(Flux[j,i:i+Nsmooth]))
+        #zipper = abs(x) < 0.2 && y > 4.67
+        phi = phi_interp_atan(y,x)
+        theta = theta_interp[y,x]
+
+        hit = hits_interp[y,x]
+        hiti = round(Int,hit - 0.49)
+
+        x2
+        x2 = x_grid_d[i+1]
+        phi2 = phi_interp_atan(y,x2)
+        
+        if hiti > 0
+            if phi/phi2 < 0
+                Flux[j, (i-Nsmooth):(i+Nsmooth)] = ones(2*Nsmooth+1)*mean([Flux[j,i-Nsmooth],
+                                                                       Flux[j,i-Nsmooth+1],
+                                                                       Flux[j,i+Nsmooth-1],
+                                                                       Flux[j,i+Nsmooth]])
+                continue
+            end
+        end
+    end
+end
+            
 #Interpolate flux and redshift
 Xrange_d = xmin:dx_d:xmax
 Yrange_d = ymin:dy_d:ymax

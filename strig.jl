@@ -55,12 +55,17 @@ function great_circle_dist(lon1, lon2, col1, col2)
 
     lat1 = pi/2 - col1
     lat2 = pi/2 - col2
-    dlon = lon2 - lon1
-    
-    xx = (cos(lat1)*sin(dlon))^2 + (cos(lat1)*sin(lat2) - sin(lat1)*cos(lat2)*cos(dlon))^2
-    yy = sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2)*cos(dlon)
+    #lat1 = col1
+    #lat2 = col2
+    dlon = abs(lon2 - lon1)
+    dlat = abs(lat2 - lat1)
 
-    return atan2(sqrt(xx), yy)
+    #haversine formula; mmm nice and round
+    return 2.0*asin(sqrt(sin(dlat/2)^2 + cos(lat1)*cos(lat2)*sin(dlon/2)^2))
+    
+    #xx = (cos(lat1)*sin(dlon))^2 + (cos(lat1)*sin(lat2) - sin(lat1)*cos(lat2)*cos(dlon))^2
+    #yy = sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2)*cos(dlon)
+    #return atan2(sqrt(xx), yy)
 end
 
 #Area of a polygon on a sphere/spheroid
@@ -117,6 +122,10 @@ end
 #Area on top of a sphere using lambert projection to cartesian space
 function area_sphere_lambert(phi0, theta0, phis, thetas, Rarea=1, ecc=0.0)
     N = length(thetas)
+
+    #for i = 1:N
+    #    phis[i] = mod2pi(phis[i])
+    #end
     
     #transform to authalic sphere if we have spheroid
     if ecc != 0.0
@@ -135,6 +144,49 @@ function area_sphere_lambert(phi0, theta0, phis, thetas, Rarea=1, ecc=0.0)
     xs = kprime .* cos(lphis) .* sin(llambdas-llambda0)
     ys = kprime .* (cos(lphi0) .* sin(lphis) .- sin(lphi0) .* cos(lphis) .* cos(llambdas-llambda0))
 
+    xys = collect(zip(xs, ys))
+    xys2 = append!(xys[2:end], [xys[1]])
+    polygon = collect(zip(xys, xys2))
+    area = 0.5 * abs(sum(
+        [x0*y1 - x1*y0 for ((x0,y0), (x1,y1)) in polygon]))
+
+    return area*4*pi*Rarea
+end
+
+#Area on top of a sphere using lambert projection to cartesian space
+#using sin & cos of phi for numerical stability
+function area_sphere_lambert2(phi0, theta0, sinphis, cosphis, thetas, Rarea=1, ecc=0.0)
+    N = length(thetas)
+
+    #for i = 1:N
+    #    phis[i] = mod2pi(phis[i])
+    #end
+    
+    #transform to authalic sphere if we have spheroid
+    if ecc != 0.0
+        for i = 1:N
+            thetas[i] = authalic_lat(thetas[i], ecc, qp)
+        end
+        theta0 = authalic_lat(theta0, ecc, qp)
+    end
+
+    lphis = pi/2 - thetas
+    lphi0 = pi/2 - theta0
+    #llambdas = phis
+    llambda0 = phi0
+
+    #kprime = sqrt(2 ./ (1 .+ sin(lphi0) .* sin(lphis) .+ cos(lphi0) .* cos(lphis) .* cos(llambdas-llambda0)))
+    #xs = kprime .* cos(lphis) .* sin(llambdas-llambda0)
+    #ys = kprime .* (cos(lphi0) .* sin(lphis) .- sin(lphi0) .* cos(lphis) .* cos(llambdas-llambda0))
+
+    coslml0 = sin(llambda0)*sinphis .+ cos(llambda0)*cosphis
+    sinlml0 = cos(llambda0)*sinphis .- sin(llambda0)*cosphis
+    
+    kprime = sqrt(2 ./ (1 .+ sin(lphi0) .* sin(lphis) .+ cos(lphi0) .* cos(lphis) .* coslml0))
+    xs = kprime .* cos(lphis) .* sinlml0
+    ys = kprime .* (cos(lphi0) .* sin(lphis) .- sin(lphi0) .* cos(lphis) .* coslml0)
+
+    
     xys = collect(zip(xs, ys))
     xys2 = append!(xys[2:end], [xys[1]])
     polygon = collect(zip(xys, xys2))

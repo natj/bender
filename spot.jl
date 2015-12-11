@@ -10,6 +10,8 @@
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
+rho = deg2rad(30.0)
+colat = deg2rad(50.0)
 
 
 ########
@@ -19,6 +21,7 @@ function spot(t, phi, theta;
               )
 
     #Vincenty's formula
+    #d = great_circle_dist(0.0, phi, stheta, theta)
     d = great_circle_dist(0.0, phi, stheta, theta)
     
     if abs(d) < delta
@@ -27,6 +30,44 @@ function spot(t, phi, theta;
     
     return false
 end
+
+
+#photon time lag function
+# returns new time-array index taking into account time delay effect
+function time_lag(t, k, times, Nt, tbin, phi, theta)
+
+    #exact from raytracing
+    #dt = t/c
+    dt = t*G*M/c^3
+    
+    #approximative
+    #cosi = sqrt(1-sini^2)
+    #cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
+    #y = 1 - cospsi
+
+    #dt0 = y*R/c
+    #dt01 = y*(1.0 + (U*y/8.0)*(1+ y*(1.0/3.0 - U/14.0)))*R/c
+    #println("dt: $dt  dt0: $dt0  dt: $dt01 ")
+    #println(" $(dt01/dt) ")
+
+    #get new timebin index
+    kd = 1
+    while dt > (2kd - 1)*tbin
+        kd += 1
+    end
+    kd -= 1
+
+    kindx = k + kd
+    if kindx > Nt; kindx -= Nt; end
+        
+    #println("k: $k kd: $kd kindx: $kindx")
+    #println()
+    
+    return kindx
+end
+
+
+
 
 img4 = zeros(Ny_dense, Nx_dense) #debug array
 
@@ -40,13 +81,15 @@ Ir(cosa) = 1.0 #isotropic beaming
 
 #Time parameters
 Nt = 64
-times = linspace(0, 1/fs, Nt)
+times = collect(linspace(0, 1/fs, Nt))
+tbin = abs(times[2] - times[1])/2.0 
+
 spot_flux = zeros(Nt)
 
 
 tic()
 for k = 1:Nt
-#for k = 30:30
+#for k = 25:25
 #for k = 80:80
 #for k = 24:38
 #for k = 20:45
@@ -72,16 +115,20 @@ for k = 1:Nt
         for i = x1s[j]:x2s[j]
             x = x_grid_d[i]
 
+            #trace back to star
             theta = theta_interp[y,x]
+            phi = phi_interp_atan(y,x)
 
             #rotate star
-            phi = phi_interp_atan(y,x)
             phi = phi - t*fs*2*pi
             phi = mod2pi(phi)
       
             img4[j,i] = painter(phi, theta)/2.0
 
-            inside = spot(0.0, phi, theta)
+            inside = spot(0.0, phi, theta,
+                          stheta = colat,
+                          delta = rho
+                          )
             
             if inside
             #if inside && inf_small
@@ -93,9 +140,12 @@ for k = 1:Nt
                 frame_x1 = frame_x1 > x ? x : frame_x1 #left min
                 frame_x2 = frame_x2 < x ? x : frame_x2 #right max
                 
-                
+
+                #Time shifts for differnt parts
                 time = time_interp[y,x]
-                
+                cosa = cosa_interp[y,x]
+                kd = time_lag(time, k, times, Nt, tbin, phi, theta)
+    
                 #Xob = Xs_interp[y,x] 
                 #cosa = cosa_interp[y,x]
                 #dF, dE = radiation(Ir,
@@ -107,9 +157,12 @@ for k = 1:Nt
                                 
                 #img4[j,i] = painter(phi, theta)
                 img4[j,i] += 3.0*dF /dxdy
-
                 #img4[j,i] = 5.0
-                spot_flux[k] += dF
+
+                #zipper = abs(x) < 0.18 && y > 4.67
+                #if !zipper
+                spot_flux[kd] += dF
+                #end
             end #if inside            
 
             
@@ -176,7 +229,7 @@ for k = 1:Nt
     #add time stamp
     xs = x_grid_d[1] + 0.84*(x_grid_d[end] - x_grid_d[1])
     ys = y_grid_d[1] + 0.93*(y_grid_d[end] - y_grid_d[1])
-    Winston.add(p10, Winston.DataLabel(xs, ys, "$(k)"))
+    Winston.add(p10, Winston.DataLabel(xs, ys, "$(k) ($(round(times[k]*fs,3)))"))
     display(p10)
 
     #println("dx = $(frame_dxx) dy = $(frame_dyy)")
@@ -238,8 +291,11 @@ for k = 1:Nt
                 #end
 
                 
-                inside = spot(0.0, phi, theta)
-            
+                inside = spot(0.0, phi, theta,
+                              stheta = colat,
+                              delta = rho
+                              )
+
                 if inside
                     #time = time_interp[y,x]
 
@@ -250,7 +306,9 @@ for k = 1:Nt
                                      exact=(ring || zipper)
                                      #exact=false
                     )
-                
+
+                    kd = time_lag(time, k, times, Nt, tbin, phi, theta)
+
                     #Xob = Xs_interp[y,x] 
                     #cosa = cosa_interp[y,x]
                     dF, dE = radiation(Ir,
@@ -266,7 +324,7 @@ for k = 1:Nt
                     img5[j,i] += 3.0*dF / frame_dxdy
 
                     #img5[j,i] = 5.0
-                    #spot_flux[k] += dF * frame_dxdy
+                    #spot_flux[kd] += dF * frame_dxdy
                 end #inside spot
             end#hiti
         end #x
@@ -284,4 +342,14 @@ end#for t
 toc()
 
 
+#write to file
+opath = "out/"
+mkpath(opath)
 
+#fname = "f$(fs)_lamb_bb_R$(round(R/1e5,1))_M$(round(M/Msun,1))_rho30.csv"
+fname = "f$(round(Int,fs))_lamb_bb_R$(round(R/1e5,1))_M$(round(M/Msun,1))_rho$(round(Int,rad2deg(rho))).csv"
+phase = collect(times .* fs)
+wmatr = zeros(Nt, 2)
+wmatr[:,1] = phase
+wmatr[:,2] = spot_flux
+writecsv(opath*fname, wmatr)
