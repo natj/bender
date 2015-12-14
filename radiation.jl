@@ -15,24 +15,22 @@ method = Gridded(Linear())
 #method = Gridded(Constant())
 #extrapolate = BCnearest
 
-Xrange = xmin:dx:xmax
-Yrange = ymin:dy:ymax
 
 #Times = Times .- Times[ymid, xmid]    
-time_interp    = interpolate((Yrange , Xrange), Times     ,method)
-phi_interp_sin = interpolate((Yrange , Xrange), sin(Phis) ,method)
-phi_interp_cos = interpolate((Yrange , Xrange), cos(Phis) ,method)
-theta_interp   = interpolate((Yrange , Xrange), Thetas    ,method)
-Xs_interp      = interpolate((Yrange , Xrange), Xs        ,method)
-cosa_interp    = interpolate((Yrange , Xrange), cosas     ,method)
-hits_interp    = interpolate((Yrange , Xrange), hits      ,method)
+time_interp    = interpolate((y_grid , x_grid), Times     ,method)
+phi_interp_sin = interpolate((y_grid , x_grid), sin(Phis) ,method)
+phi_interp_cos = interpolate((y_grid , x_grid), cos(Phis) ,method)
+theta_interp   = interpolate((y_grid , x_grid), Thetas    ,method)
+Xs_interp      = interpolate((y_grid , x_grid), Xs        ,method)
+cosa_interp    = interpolate((y_grid , x_grid), cosas     ,method)
+hits_interp    = interpolate((y_grid , x_grid), hits      ,method)
 
 
 #wrapper for tan(phi) formalism
 phi_interp_atan(y,x) = atan2(phi_interp_sin[y,x], phi_interp_cos[y,x])
 
-Ny_dense = 500
-Nx_dense = 500
+Ny_dense = Ny
+Nx_dense = Nx
 Times_dense = zeros(Ny_dense, Nx_dense)
 Phis_dense = zeros(Ny_dense, Nx_dense)
 Thetas_dense = zeros(Ny_dense, Nx_dense)
@@ -51,8 +49,11 @@ painter = chess_board
 x_grid_d = linspace(xmin, xmax, Nx_dense)
 y_grid_d = linspace(ymin, ymax, Ny_dense)
 
-dx_d = abs(x_grid_d[2] - x_grid_d[1])
-dy_d = abs(y_grid_d[2] - y_grid_d[1])
+#dx_d = abs(x_grid_d[2] - x_grid_d[1])
+#dy_d = abs(y_grid_d[2] - y_grid_d[1])
+
+dx_d = diff(x_grid_d)[1]
+dy_d = diff(y_grid_d)[1]
 
 
 function radiation(Ir,
@@ -107,7 +108,7 @@ function radiation(Ir,
     cosap = cosa * delta
     #dOmega = dS*cosap
     
-    dF = (EEd^3)*Ir(cosap) * earea * delta
+    dF = (EEd^3)*Ir(cosap) * earea #* delta
     #dF = (EEd^3)*dOmega*Ir(cosap)
     
     return dF, EEd
@@ -120,8 +121,8 @@ end
 #dxx = dx
 #dyy = dy
 
-dxx = 1.0*(x_grid_d[2] - x_grid_d[1])
-dyy = 1.0*(y_grid_d[2] - y_grid_d[1])
+dxx = 1.0*abs(x_grid_d[2] - x_grid_d[1])
+dyy = 1.0*abs(y_grid_d[2] - y_grid_d[1])
 dxdy = dxx*dyy #*X^2
 
 
@@ -137,14 +138,20 @@ function polyarea(x,y,dxx,dyy,phi0,the0;
     pts = [ (y1, x1), (y1, x2), (y2, x2), (y2, x1) ]
     
     if exact
-        phis = Float64[]
+        #phis = Float64[]
+        sinphis = Float64[]
+        cosphis = Float64[]
+        
         thetas = Float64[]
         for (yp, xp) in pts
             time, phi, theta, Xob, hit, cosa = bender3(xp, yp, sini,
                                                        X, Osb,
                                                        beta, quad, wp, Rg)
             if hit
-                push!(phis, phi)
+                #push!(phis, phi)
+                push!(sinphis, sin(phi))
+                push!(cosphis, cos(phi))
+                
                 push!(thetas, theta)
             end
         end
@@ -480,11 +487,8 @@ for j = 1:Ny_dense
 end
             
 #Interpolate flux and redshift
-Xrange_d = xmin:dx_d:xmax
-Yrange_d = ymin:dy_d:ymax
-
-flux_interp    = interpolate((Yrange_d , Xrange_d), Flux, method)
-reds_interp    = interpolate((Yrange_d , Xrange_d), Reds, method)
+flux_interp    = interpolate((y_grid_d , x_grid_d), Flux, method)
+reds_interp    = interpolate((y_grid_d , x_grid_d), Reds, method)
 
 toc()#end of interpolation into dense grid
 

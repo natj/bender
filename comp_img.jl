@@ -8,19 +8,24 @@ xmax = -xmin +0.005
 ymin = -10
 ymax = -ymin +0.005
 
-Ny = 500
-Nx = 500
+Ny = 1000
+Nx = 1000
 Nt = 1
 
 xmid = round(Int,Nx/2)
 ymid = round(Int,Ny/2)
 hdata3 = zeros(Ny, Nx)
 
-dx = (xmax-xmin)/(Nx-1)
-dy = (ymax-ymin)/(Ny-1)
-    
-x_grid = collect(xmin:dx:xmax)
-y_grid = collect(ymin:dy:ymax)   
+#dx = (xmax-xmin)/(Nx-1)
+#dy = (ymax-ymin)/(Ny-1)
+#x_grid = collect(xmin:dx:xmax)
+#y_grid = collect(ymin:dy:ymax)   
+
+x_grid = collect(linspace(xmin,xmax, Nx))
+y_grid = collect(linspace(ymin,ymax, Ny))
+dx = diff(x_grid)[1]
+dy = diff(y_grid)[1]
+                 
 
 Times = zeros(Ny,Nx)
 Phis = zeros(Ny,Nx)
@@ -31,8 +36,8 @@ Xs = zeros(Ny,Nx)
 
 #Get middle point
 time, phi, theta, Xob, hit, cosa = bender3(x_grid[xmid], y_grid[ymid], sini,
-                                     X, Osb,
-                                     beta, quad, wp, Rg)
+                                           X, Osb,
+                                           beta, quad, wp, Rg)
 
 Times[ymid, xmid] = time
 Phis[ymid, xmid] = phi

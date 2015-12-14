@@ -72,7 +72,7 @@ end
 img4 = zeros(Ny_dense, Nx_dense) #debug array
 
 #Spot image frame size
-N_frame = 50
+N_frame = 100
 
 
 #Beaming function for the radiation
@@ -161,7 +161,7 @@ for k = 1:Nt
 
                 #zipper = abs(x) < 0.18 && y > 4.67
                 #if !zipper
-                spot_flux[kd] += dF
+                #spot_flux[kd] += dF
                 #end
             end #if inside            
 
@@ -230,7 +230,7 @@ for k = 1:Nt
     xs = x_grid_d[1] + 0.84*(x_grid_d[end] - x_grid_d[1])
     ys = y_grid_d[1] + 0.93*(y_grid_d[end] - y_grid_d[1])
     Winston.add(p10, Winston.DataLabel(xs, ys, "$(k) ($(round(times[k]*fs,3)))"))
-    display(p10)
+    #display(p10)
 
     #println("dx = $(frame_dxx) dy = $(frame_dyy)")
 
@@ -303,9 +303,10 @@ for k = 1:Nt
                     earea = polyarea(x, y,
                                      frame_dxx, frame_dyy,
                                      phi, theta,
-                                     exact=(ring || zipper)
-                                     #exact=false
-                    )
+                                     #exact=(ring || zipper)
+                                     #exact=true
+                                     exact=false
+                                     )
 
                     kd = time_lag(time, k, times, Nt, tbin, phi, theta)
 
@@ -325,6 +326,7 @@ for k = 1:Nt
 
                     #img5[j,i] = 5.0
                     #spot_flux[kd] += dF * frame_dxdy
+                    spot_flux[kd] += frame_dxdy
                 end #inside spot
             end#hiti
         end #x
@@ -336,7 +338,7 @@ for k = 1:Nt
     xs = frame_xgrid[1] + 0.84*(frame_xgrid[end]-frame_xgrid[1])
     ys = frame_ygrid[1] + 0.93*(frame_ygrid[end]-frame_ygrid[1])
     Winston.add(p10, Winston.DataLabel(xs, ys, "$(k)"))
-    #display(p10)
+    display(p10)
     
 end#for t
 toc()
