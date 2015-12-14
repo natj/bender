@@ -151,7 +151,7 @@ function bender3(x, y, sini,
 
     #initial values for integration
     hi = h
-    level = 0.5
+    #level = 0.5
 
     #Photon trace arrays
     tns = Float64[tm1,tn]
@@ -163,6 +163,8 @@ function bender3(x, y, sini,
 
     Xob = 100.0
     maxr = rr
+
+    hcorr = 1.0e-3
     
     oneturn = true
     while rr <= Xob
@@ -171,8 +173,6 @@ function bender3(x, y, sini,
         yni = yn
         psigni = psign
         rsigni = rsign
-
-        
         
         tp1 = 0.0
         yp1 = 0.0
@@ -185,27 +185,35 @@ function bender3(x, y, sini,
         #k2z = 0.0
         #k1t = 0.0
         #k2t = 0.0
-                    
-        while err > tol && level <= 2^7
-            level *= 2
-            
+        hcorr = 0.5
+                
+        while err > tol && hcorr > 1.0e-4
+            #level *= 2
+            #println("rr=$rr hi=$hi hcorr=$hcorr")
             #reset current state
             yn = yni
             psign = psigni
             rsign = rsigni
-            hi = h / level
+            hi = h*hcorr
             
             #take a step
             k1t, k1y, k1z, tturn1, rturn1 = rk_step(rr, yn, x, y, sini, wp, Rg)
             k2t, k2y, k2z, tturn2, rturn2 = rk_step(rr+rsign*hi, yn+ psign*k1y*hi, x, y, sini, wp, Rg)
             
             #check if our photon turns around
-            if (tturn1 || tturn2)
+            #if (tturn1 || tturn2)
+            #    psign *= -1.0
+            #end
+            #if (rturn1 || rturn2)
+            #    rsign *= -1.0
+            #end
+            if tturn1
                 psign *= -1.0
             end
-            if (rturn1 || rturn2)
+            if rturn1
                 rsign *= -1.0
             end
+            
             #if rturn1 && rturn2 #|| rturn3 || rturn4 || rturn5 || rturn6
             #    hit = false
             #    #return rns, yns, zns, ers, lvs
@@ -228,15 +236,18 @@ function bender3(x, y, sini,
 
             err = max(abs(erry/yp1), abs(errz/zp1), abs(errt/tp1)) #rel err
             #err = max(abs(erry), abs(errz)) #abs err
+
+            #hcorr = min(1.0, 0.9*tol/err)
+            hcorr = 0.9*tol/err
         end
 
         rr = rr + rsign*hi
         
-        push!(lvs, log2(level))
+        #push!(lvs, log2(level))
+        push!(lvs, log2(h/hi))
         #push!(lvs, level*psign)
         push!(ers, err)
-
-        level = max(0.5, level/4.0)
+        #level = max(0.5, level/4.0)
         
         
         #theta & theta
@@ -277,7 +288,8 @@ function bender3(x, y, sini,
         #Break down if we are close to the star;
         #helps with surface detection and with 1/r^3 functions
         if rr > Xob*0.95
-            level = 2.0^6
+            #level = 2.0^6
+            hcorr = 1.0e-3
         end
     end
 
