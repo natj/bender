@@ -104,12 +104,13 @@ function radiation(Ir,
     EEd = delta*enu
     #end
     
-    #dS = (Rgm)^2*sin(theta)*sqrt(1 + fa^2)
+    dS = (Rgm)^2*sin(theta)*sqrt(1 + fa^2)
     cosap = cosa * delta
-    #dOmega = dS*cosap
+    dOmega = dS*cosap
     
-    dF = (EEd^3)*Ir(cosap) * earea #* delta
+    dF = (EEd^3)*Ir(cosap) * earea * delta
     #dF = (EEd^3)*dOmega*Ir(cosap)
+    #dF = (EEd^3)*dOmega*delta
     
     return dF, EEd
     #return gamma, gamma2
@@ -669,6 +670,8 @@ B2    = beta
 enu = (1-Xob/2)/(1+Xob/2)*exp(nu2*Xob^3)
 B = (1-Xob/2)*(1+Xob/2) + B2*Xob^2
 corr = enu/B
+
+println("X: $(2.0*Xob)")
 
 println()
 println("size (isoradial)")

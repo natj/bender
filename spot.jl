@@ -21,7 +21,6 @@ function spot(t, phi, theta;
               )
 
     #Vincenty's formula
-    #d = great_circle_dist(0.0, phi, stheta, theta)
     d = great_circle_dist(0.0, phi, stheta, theta)
     
     if abs(d) < delta
@@ -38,15 +37,15 @@ function time_lag(t, k, times, Nt, tbin, phi, theta)
 
     #exact from raytracing
     #dt = t/c
-    dt = t*G*M/c^3
+    #dt = t*G*M/c^3
     
     #approximative
-    #cosi = sqrt(1-sini^2)
-    #cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
-    #y = 1 - cospsi
+    cosi = sqrt(1-sini^2)
+    cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
+    y = 1 - cospsi
 
     #dt0 = y*R/c
-    #dt01 = y*(1.0 + (U*y/8.0)*(1+ y*(1.0/3.0 - U/14.0)))*R/c
+    dt = y*(1.0 + (U*y/8.0)*(1+ y*(1.0/3.0 - U/14.0)))*R/c
     #println("dt: $dt  dt0: $dt0  dt: $dt01 ")
     #println(" $(dt01/dt) ")
 
@@ -72,7 +71,7 @@ end
 img4 = zeros(Ny_dense, Nx_dense) #debug array
 
 #Spot image frame size
-N_frame = 100
+N_frame = 50
 
 
 #Beaming function for the radiation
@@ -83,6 +82,7 @@ Ir(cosa) = 1.0 #isotropic beaming
 Nt = 64
 times = collect(linspace(0, 1/fs, Nt))
 tbin = abs(times[2] - times[1])/2.0 
+phase = collect(times .* fs)
 
 spot_flux = zeros(Nt)
 
@@ -161,7 +161,8 @@ for k = 1:Nt
 
                 #zipper = abs(x) < 0.18 && y > 4.67
                 #if !zipper
-                #spot_flux[kd] += dF
+                spot_flux[kd] += dF
+                #spot_flux[k] += dF
                 #end
             end #if inside            
 
@@ -178,12 +179,12 @@ for k = 1:Nt
     
     #expand image a bit
     #########
-    #frame_expansion_x = abs(x_grid_d[end] - x_grid_d[1]) #*5.0
-    #frame_expansion_y = abs(y_grid_d[end] - y_grid_d[1]) #*5.0
-    #frame_y2 += frame_expansion_y
-    #frame_y1 -= frame_expansion_y
-    #frame_x1 -= frame_expansion_x
-    #frame_x2 += frame_expansion_x
+    frame_expansion_x = abs(x_grid_d[2] - x_grid_d[1]) #*5.0
+    frame_expansion_y = abs(y_grid_d[2] - y_grid_d[1]) #*5.0
+    frame_y2 += frame_expansion_y
+    frame_y1 -= frame_expansion_y
+    frame_x1 -= frame_expansion_x
+    frame_x2 += frame_expansion_x
 
     #Exapand image a bit keeping the aspect ratio
     ##########
@@ -222,14 +223,14 @@ for k = 1:Nt
     ##########
     
     #Plot large image with bounding box for the spot
-    p10 = plot2d(img4, x_grid_d, y_grid_d, 0, 0, 5, "Blues")
-    Winston.add(p10, Curve([frame_x1, frame_x2, frame_x2, frame_x1, frame_x1],
+    p10a = plot2d(img4, x_grid_d, y_grid_d, 0, 0, 5, "Blues")
+    Winston.add(p10a, Curve([frame_x1, frame_x2, frame_x2, frame_x1, frame_x1],
                            [frame_y1, frame_y1, frame_y2, frame_y2, frame_y1],
                            linestyle="solid"))
     #add time stamp
     xs = x_grid_d[1] + 0.84*(x_grid_d[end] - x_grid_d[1])
     ys = y_grid_d[1] + 0.93*(y_grid_d[end] - y_grid_d[1])
-    Winston.add(p10, Winston.DataLabel(xs, ys, "$(k) ($(round(times[k]*fs,3)))"))
+    Winston.add(p10a, Winston.DataLabel(xs, ys, "$(k) ($(round(times[k]*fs,3)))"))
     #display(p10)
 
     #println("dx = $(frame_dxx) dy = $(frame_dyy)")
@@ -251,7 +252,10 @@ for k = 1:Nt
             #zipper = abs(x) < 0.1 && y > 3.0
             ring = false
             zipper = false
+            #ring = true
+            #zipper = true
 
+            
             if ring || zipper
                 time, phi, theta, Xob, hit, cosa = bender3(x, y, sini,
                                                            X, Osb,
@@ -300,25 +304,25 @@ for k = 1:Nt
                     #time = time_interp[y,x]
 
                     #compute 
-                    earea = polyarea(x, y,
-                                     frame_dxx, frame_dyy,
-                                     phi, theta,
-                                     #exact=(ring || zipper)
-                                     #exact=true
-                                     exact=false
-                                     )
+                    #earea = polyarea(x, y,
+                    #                 frame_dxx, frame_dyy,
+                    #                 phi, theta,
+                    #                 exact=(ring || zipper)
+                    #                 #exact=true
+                    #                 #exact=false
+                    #                 )
 
-                    kd = time_lag(time, k, times, Nt, tbin, phi, theta)
+                    #kd = time_lag(time, k, times, Nt, tbin, phi, theta)
 
                     #Xob = Xs_interp[y,x] 
                     #cosa = cosa_interp[y,x]
-                    dF, dE = radiation(Ir,
-                                       x,y,
-                                       phi, theta, cosa,
-                                       X, Xob, Osb, sini, earea)
+                    #dF, dE = radiation(Ir,
+                    #                   x,y,
+                    #                   phi, theta, cosa,
+                    #                   X, Xob, Osb, sini, earea)
                     
-                    #dF = flux_interp[y,x]
-                    #dE = reds_interp[y,x]
+                    dF = flux_interp[y,x]
+                    dE = reds_interp[y,x]
                     
                     
                     #img4[j,i] = painter(phi, theta)
@@ -326,20 +330,32 @@ for k = 1:Nt
 
                     #img5[j,i] = 5.0
                     #spot_flux[kd] += dF * frame_dxdy
-                    spot_flux[kd] += frame_dxdy
+                    #spot_flux[kd] += frame_dxdy
+                    #spot_flux[k] += dF * frame_dxdy
                 end #inside spot
             end#hiti
         end #x
     end#y
 
-    p10 = plot2d(img5, frame_xgrid, frame_ygrid, 0, 0, 5, "Blues")
+    p10b = plot2d(img5, frame_xgrid, frame_ygrid, 0, 0, 5, "Blues")
 
     #add time stamp
     xs = frame_xgrid[1] + 0.84*(frame_xgrid[end]-frame_xgrid[1])
     ys = frame_ygrid[1] + 0.93*(frame_ygrid[end]-frame_ygrid[1])
-    Winston.add(p10, Winston.DataLabel(xs, ys, "$(k)"))
-    display(p10)
-    
+    Winston.add(p10b, Winston.DataLabel(xs, ys, "$(k)"))
+    #display(p10)
+
+    p10c = plot(phase, spot_flux, "k-")
+    p10c = oplot([phase[k]], [spot_flux[k]], "ko")
+
+    tt = Table(3,1)
+    tt[1,1] = p10a
+    tt[2,1] = p10b
+    tt[3,1] = p10c
+    display(tt)
+
+    #readline(STDIN)
+
 end#for t
 toc()
 
@@ -350,7 +366,6 @@ mkpath(opath)
 
 #fname = "f$(fs)_lamb_bb_R$(round(R/1e5,1))_M$(round(M/Msun,1))_rho30.csv"
 fname = "f$(round(Int,fs))_lamb_bb_R$(round(R/1e5,1))_M$(round(M/Msun,1))_rho$(round(Int,rad2deg(rho))).csv"
-phase = collect(times .* fs)
 wmatr = zeros(Nt, 2)
 wmatr[:,1] = phase
 wmatr[:,2] = spot_flux

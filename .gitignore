@@ -1,0 +1,6 @@
+.DS_Store
+*.pdf
+*.png
+out/*.eps
+out/*.csv
+ppath*

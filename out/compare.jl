@@ -6,10 +6,10 @@ using toolbox
 #fname1 = "f400_lamb_bb_R12.0_M1.6_rho30.csv"
 #fname1 = "f400_lamb_bb_R12.0_M1.6_rho4.csv"
 #fname1 = "f1_lamb_bb_R12.0_M1.6_rho1.csv"
+#fname1 = "f1_lamb_bb_R12.0_M1.6_rho2.csv"
 #fname1 = "f1_lamb_bb_R12.0_M1.6_rho4.csv"
 fname1 = "f1_lamb_bb_R12.0_M1.6_rho30.csv"
 #fname1 = "f1_lamb_bb_R12.0_M1.6_rho15.csv"
-
 
 da1 = readcsv(fname1)
 
@@ -57,7 +57,7 @@ end
 
 p2 = plot(phase2[1:Np], err,
           xrange = [0.0, 1.0],
-          yrange = [-0.1, 0.15],
+          yrange = [-0.1, 0.1],
           xlabel = "Phase",
           ylabel = "Relative error"
           )

@@ -132,7 +132,7 @@ function bender3(x, y, sini,
     ######################
     #leapfrog tracing
     const h = 0.002
-    const tol = 1.0e-5 #relative tol
+    const tol = 1.0e-6 #relative tol
     
     hit = true
     rr = 0.0
@@ -151,7 +151,7 @@ function bender3(x, y, sini,
 
     #initial values for integration
     hi = h
-    level = 0.5
+    level = 2.0^7
 
     #Photon trace arrays
     tns = Float64[tm1,tn]
@@ -186,9 +186,10 @@ function bender3(x, y, sini,
         #k1t = 0.0
         #k2t = 0.0
                     
-        while err > tol && level <= 2^7
-            level *= 2
-            
+        while err > tol && level <= 128.0
+            level *= 2.0
+            #level = max(level*2.0, min(128.0, 1.1*err/tol))
+                        
             #reset current state
             yn = yni
             psign = psigni
@@ -200,12 +201,20 @@ function bender3(x, y, sini,
             k2t, k2y, k2z, tturn2, rturn2 = rk_step(rr+rsign*hi, yn+ psign*k1y*hi, x, y, sini, wp, Rg)
             
             #check if our photon turns around
-            if (tturn1 || tturn2)
+            #if (tturn1 || tturn2)
+            #    psign *= -1.0
+            #end
+            #if (rturn1 || rturn2)
+            #    rsign *= -1.0
+            #end
+            if tturn1
                 psign *= -1.0
             end
-            if (rturn1 || rturn2)
+            if rturn1
                 rsign *= -1.0
             end
+
+            
             #if rturn1 && rturn2 #|| rturn3 || rturn4 || rturn5 || rturn6
             #    hit = false
             #    #return rns, yns, zns, ers, lvs
@@ -256,11 +265,18 @@ function bender3(x, y, sini,
         B2    = beta
         enu = (1-rr/2)/(1+rr/2)*exp(nu2*rr^3)
         B = (1-rr/2)*(1+rr/2) + B2*rr^2
-        
+
+        #old radius (isoradial)
         Rgm, dtR = Rgmf(yn, X, Osb) #isoradial
         Xobi = X/Rgm #isoradial coordinate
         Xob = Xobi*B/enu #isotropic x to be referenced with rr
 
+        #new radius (isotropic)
+        #Rgm, dtR = Rgmf(yn, X, Osb) #isoradial
+        #Xobi = X/Rgm
+        #Xob = Xobi*enu/B
+
+        
         #Keep track of photon U-turns
         if rr > maxr
             maxr = rr

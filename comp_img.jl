@@ -10,7 +10,6 @@ ymax = -ymin +0.005
 
 Ny = 1000
 Nx = 1000
-Nt = 1
 
 xmid = round(Int,Nx/2)
 ymid = round(Int,Ny/2)
@@ -25,7 +24,7 @@ x_grid = collect(linspace(xmin,xmax, Nx))
 y_grid = collect(linspace(ymin,ymax, Ny))
 dx = diff(x_grid)[1]
 dy = diff(y_grid)[1]
-                 
+
 
 Times = zeros(Ny,Nx)
 Phis = zeros(Ny,Nx)

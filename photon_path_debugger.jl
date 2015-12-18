@@ -25,7 +25,15 @@ ypoint2 = -0.0017
 #xpoint2 = 3.0
 #ypoint2 = 3.0
 
-
+println("timing bender...")
+tic()
+for i = 1:100
+    rns, yns, zns, ers, lvs, hit = bender3(xpoint, ypoint, sini,X, Osb,
+                                           beta, quad, wp, Rg)
+    rns, yns, zns, ers, lvs, hit = bender3(xpoint2, ypoint2, sini,X, Osb,
+                                           beta, quad, wp, Rg)
+end
+toc()
 
 rns, yns, zns, ers, lvs, hit = bender3(xpoint, ypoint, sini,X, Osb,
                                   beta, quad, wp, Rg)
