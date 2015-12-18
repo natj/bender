@@ -4,33 +4,34 @@
 #include("comp_img.jl")
 
 
-p00 = plot2d(Times, x_grid, y_grid)
-p11 = plot2d(Phis, x_grid, y_grid)
-p21 = plot2d(Thetas, x_grid, y_grid)
-p31 = plot2d(hits, x_grid, y_grid)
+#p00 = plot2d(Times, x_grid, y_grid)
+#p11 = plot2d(Phis, x_grid, y_grid)
+#p21 = plot2d(Thetas, x_grid, y_grid)
+#p31 = plot2d(hits, x_grid, y_grid)
 
 #interpolate into dense grid
-print("interpolating into dense grid...")
-method = Gridded(Linear())
+#print("interpolating into dense grid...")
+#method = Gridded(Linear())
 #method = Gridded(Constant())
 #extrapolate = BCnearest
 
 
 #Times = Times .- Times[ymid, xmid]    
-time_interp    = interpolate((y_grid , x_grid), Times     ,method)
-phi_interp_sin = interpolate((y_grid , x_grid), sin(Phis) ,method)
-phi_interp_cos = interpolate((y_grid , x_grid), cos(Phis) ,method)
-theta_interp   = interpolate((y_grid , x_grid), Thetas    ,method)
-Xs_interp      = interpolate((y_grid , x_grid), Xs        ,method)
-cosa_interp    = interpolate((y_grid , x_grid), cosas     ,method)
-hits_interp    = interpolate((y_grid , x_grid), hits      ,method)
+#time_interp    = interpolate((y_grid , x_grid), Times     ,method)
+#phi_interp_sin = interpolate((y_grid , x_grid), sin(Phis) ,method)
+#phi_interp_cos = interpolate((y_grid , x_grid), cos(Phis) ,method)
+#theta_interp   = interpolate((y_grid , x_grid), Thetas    ,method)
+#Xs_interp      = interpolate((y_grid , x_grid), Xs        ,method)
+#cosa_interp    = interpolate((y_grid , x_grid), cosas     ,method)
+#hits_interp    = interpolate((y_grid , x_grid), hits      ,method)
 
 
 #wrapper for tan(phi) formalism
-phi_interp_atan(y,x) = atan2(phi_interp_sin[y,x], phi_interp_cos[y,x])
+#phi_interp_atan(y,x) = atan2(phi_interp_sin[y,x], phi_interp_cos[y,x])
 
-Ny_dense = Ny
-Nx_dense = Nx
+Ny_dense = 1000
+Nx_dense = 1000
+
 Times_dense = zeros(Ny_dense, Nx_dense)
 Phis_dense = zeros(Ny_dense, Nx_dense)
 Thetas_dense = zeros(Ny_dense, Nx_dense)
@@ -45,6 +46,19 @@ Flux = zeros(Ny_dense, Nx_dense)
 Reds = zeros(Ny_dense, Nx_dense)
 
 painter = chess_board
+
+Ny = 100
+Nx = 100
+
+xmin = -10
+xmax = -xmin +0.005
+ymin = -10
+ymax = -ymin +0.005
+
+x_grid = collect(linspace(xmin,xmax, Nx))
+y_grid = collect(linspace(ymin,ymax, Ny))
+dx = diff(x_grid)[1]
+dy = diff(y_grid)[1]
 
 x_grid_d = linspace(xmin, xmax, Nx_dense)
 y_grid_d = linspace(ymin, ymax, Ny_dense)
@@ -122,10 +136,13 @@ end
 #dxx = dx
 #dyy = dy
 
-dxx = 1.0*abs(x_grid_d[2] - x_grid_d[1])
-dyy = 1.0*abs(y_grid_d[2] - y_grid_d[1])
-dxdy = dxx*dyy #*X^2
+#dxx = 1.0*abs(x_grid_d[2] - x_grid_d[1])
+#dyy = 1.0*abs(y_grid_d[2] - y_grid_d[1])
 
+
+dxx = dchi[1]
+dyy = drad[1]
+dxdy = dxx*dyy #*X^2
 
 #squares
 function polyarea(x,y,dxx,dyy,phi0,the0;
@@ -203,53 +220,109 @@ function polyarea2(x,y,dxx,dyy)
     return parea
 end
 
-#Get rough edge locations
-x1s = zeros(Int, Ny)
-x2s = zeros(Int, Ny)
-y1s = 0
-y2s = 0
+#sectors in polar coordinates
+function polyarea3(rad,chi,dr,dchi,phi0,the0;
+                   exact=false)
 
-top = false
-for j = 1:Ny
-    y = y_grid[j]
+    #image plane
+    x1 = min(0.0, rad - dxx/2)
+    x2 = rad + dxx/2
+    y1 = chi - dyy/2
+    y2 = chi + dyy/2
 
-    left = false
-    for i = 1:Nx
-        x = x_grid[i]
+    pts = [ (y1, x1), (y1, x2), (y2, x2), (y2, x1) ]
+    
+    if exact
+        #phis = Float64[]
+        sinphis = Float64[]
+        cosphis = Float64[]
         
-        hit = hits[j,i]
-        hiti = round(Int,hit - 0.45)
-
-        if hiti == 1
-            if left == false
-                x1s[j] = i
-                left = true
-            else
-                x2s[j] = i
-            end
-
-            if top == false
-                y1s = j
-                top = true
-            else
-                y2s = j
+        thetas = Float64[]
+        for (yp, xp) in pts
+            time, phi, theta, Xob, hit, cosa = bender3p(xp, yp, sini,
+                                                        X, Osb,
+                                                        beta, quad, wp, Rg)
+            if hit
+                #push!(phis, phi)
+                push!(sinphis, sin(phi))
+                push!(cosphis, cos(phi))
+                
+                push!(thetas, theta)
             end
         end
+    else     
+        inside = filter(x -> hits_interp[x[1], x[2]] >= 1.0, pts)
+
+        #phis = map(x -> phi_interp_atan(x[1], x[2]), inside)
+        sinphis = map(x -> phi_interp_sin[x[1], x[2]], inside)
+        cosphis = map(x -> phi_interp_cos[x[1], x[2]], inside)
+        
+        thetas = map(x -> theta_interp[x[1], x[2]], inside)
     end
+    
+    if length(thetas) < 3
+        return 0.0
+    end
+    #parea = area_sphere_lambert(phi0, the0, phis, thetas, Rq, ecc)
+    #parea = area_sphere(phi0, the0, phis, thetas, Rq, ecc)
+    parea = area_sphere_lambert2(phi0, the0, sinphis, cosphis, thetas, Rq, ecc)
+    
+    #if abs(x) < 0.15
+    #     println("x:$x phi:$phi0 the:$the0 $parea")
+    #     #println(phis)
+    #     println()
+    # end
+         
+    return parea
 end
 
-println()
-println("size (isotropic)")
-println("xmin=",x_grid[minimum(x1s[y1s:y2s])]," xmax=",x_grid[maximum(x2s[y1s:y2s])])
-println("ymin=",y_grid[y1s]," ymax=",y_grid[y2s])
+#Get rough edge locations
+#x1s = zeros(Int, Ny)
+#x2s = zeros(Int, Ny)
+#y1s = 0
+#y2s = 0
 
-xmin_edge = x_grid[minimum(x1s[y1s:y2s])-1]
-xmax_edge = x_grid[maximum(x2s[y1s:y2s])+1]
-ymin_edge = y_grid[y1s-1]
-ymax_edge = y_grid[y2s+1]
+#top = false
+#for j = 1:Ny
+#    y = y_grid[j]
 
-rstar_min = min(abs(xmin_edge), abs(xmax_edge), abs(ymin_edge), abs(ymax_edge))
-rstar_max = max(abs(xmin_edge), abs(xmax_edge), abs(ymin_edge), abs(ymax_edge))
+#    left = false
+#    for i = 1:Nx
+#        x = x_grid[i]
+        
+#        hit = hits[j,i]
+#        hiti = round(Int,hit - 0.45)
+
+#        if hiti == 1
+#            if left == false
+#                x1s[j] = i
+#                left = true
+#            else
+#                x2s[j] = i
+#            end
+
+#            if top == false
+#                y1s = j
+#                top = true
+#            else
+#                y2s = j
+#            end
+#        end
+#    end
+#end
+
+#println()
+#println("size (isotropic)")
+#println("xmin=",x_grid[minimum(x1s[y1s:y2s])]," xmax=",x_grid[maximum(x2s[y1s:y2s])])
+#println("ymin=",y_grid[y1s]," ymax=",y_grid[y2s])
+
+#xmin_edge = x_grid[minimum(x1s[y1s:y2s])-1]
+#xmax_edge = x_grid[maximum(x2s[y1s:y2s])+1]
+#ymin_edge = y_grid[y1s-1]
+#ymax_edge = y_grid[y2s+1]
+
+#rstar_min = min(abs(xmin_edge), abs(xmax_edge), abs(ymin_edge), abs(ymax_edge))
+#rstar_max = max(abs(xmin_edge), abs(xmax_edge), abs(ymin_edge), abs(ymax_edge))
 
 
 tic()
@@ -258,16 +331,20 @@ for j = 1:Ny_dense
 #for j = 380:380
     y = y_grid_d[j]
 
-    if !(ymin_edge < y < ymax_edge)
-        continue
-    end
+    #if !(ymin_edge < y < ymax_edge)
+    #    continue
+    #end
     
     for i = 1:Nx_dense
         x = x_grid_d[i]
 
-        if !(xmin_edge < x < xmax_edge)
+        if hypot(x,y) > rmax
             continue
         end
+        
+        #if !(xmin_edge < x < xmax_edge)
+        #    continue
+        #end
         
         #println("x=$x y=$y")
         
@@ -277,21 +354,27 @@ for j = 1:Ny_dense
         ring = false
         zipper = false
                     
-        if ring || zipper
-            time, phi, theta, Xob, hit, cosa = bender3(x, y, sini,
-                                                       X, Osb,
-                                                       beta, quad, wp, Rg)
-        else
-            # phi & theta
-            phi = phi_interp_atan(y,x)
-            theta = theta_interp[y,x]
-            Xob = Xs_interp[y,x]
-            time = time_interp[y,x]
-            cosa = cosa_interp[y,x]
+        #if ring || zipper
+        #    time, phi, theta, Xob, hit, cosa = bender3(x, y, sini,
+        #                                               X, Osb,
+        #                                               beta, quad, wp, Rg)
+        #else
+
+        rad = hypot(x,y)
+        chi = atan2(y,x)
+
+        #println("x=$x y=$y r=$rad chi=$chi")
         
-            #test if we hit the surface
-            hit = hits_interp[y,x]
-        end
+        # phi & theta
+        phi = phi_interp_atan(rad,chi)
+        theta = theta_interp[rad,chi]
+        Xob = Xs_interp[rad,chi]
+        time = time_interp[rad,chi]
+        cosa = cosa_interp[rad,chi]
+        
+        #test if we hit the surface
+        hit = hits_interp[rad,chi]
+        #end
 
         hiti = round(Int,hit - 0.49)
 
@@ -300,9 +383,9 @@ for j = 1:Ny_dense
             #solid angle
             ####
             
-            earea = polyarea(x,y,dxx,dyy,phi,theta,
-                             exact=(ring || zipper)
-                             )
+            #earea = polyarea3(rad, chi, dxx, dyy,phi,theta,
+            #                  exact=(ring || zipper)
+            #                  ) 
 
             
             Phis_dense[j,i] = phi
@@ -316,7 +399,7 @@ for j = 1:Ny_dense
             #img2[j,i] = mu
 
             #radiation
-            #cosa = cosa_interp[y,x]
+            #cosa = cosa_interp[rad,chi]
 
             #if 0 < cosa < 1
 
@@ -336,7 +419,7 @@ for j = 1:Ny_dense
             ##################################
             #approximative cosa test
             #if false
-            if true        
+            if false
 
                 nu2   = beta/3.0 - quad*0.5*(3*cos(theta)^2-1)
                 B2    = beta
@@ -418,8 +501,9 @@ for j = 1:Ny_dense
             end #if false/true for cosa
 
             #img3[j,i] = time    
-            img3[j,i] = earea
-
+            #img3[j,i] = earea * rad
+            img3[j,i] = rad
+            
             #if earea == 0
             #    println("x=$x y=$y")
             #end
@@ -436,7 +520,8 @@ for j = 1:Ny_dense
             dF, dE = radiation(Ir,
                                x,y,
                                phi, theta, cosa,
-                               X, Xob, Osb, sini, earea)
+                               #X, Xob, Osb, sini, earea)
+                               X, Xob, Osb, sini, 1.0)
 
             #if 0.79 < dE < 0.81
             #if dE < 0.79 || dE > 0.81
@@ -453,27 +538,30 @@ end
 Nsmooth = 3
 for j = 1:Ny_dense
     y = y_grid_d[j]
-    if !(ymin_edge < y < ymax_edge)
-        continue
-    end
+    #if !(ymin_edge < y < ymax_edge)
+    #    continue
+    #end
     #for i = 1:Nx_dense
     for i = (round(Int, Nx_dense/2)-10):(round(Int, Nx_dense/2)+10)
         x = x_grid_d[i]
-        if !(xmin_edge < x < xmax_edge)
-            continue
-        end
+        #if !(xmin_edge < x < xmax_edge)
+        #    continue
+        #end
+
+        rad = hypot(x,y)
+        chi = atan2(y,x)
 
         #Flux[j,i:i+Nsmooth] = toolbox.smooth(vec(Flux[j,i:i+Nsmooth]))
         #zipper = abs(x) < 0.2 && y > 4.67
-        phi = phi_interp_atan(y,x)
-        theta = theta_interp[y,x]
+        phi = phi_interp_atan(rad,chi)
+        theta = theta_interp[rad,chi]
 
-        hit = hits_interp[y,x]
+        hit = hits_interp[rad,chi]
         hiti = round(Int,hit - 0.49)
 
         x2
         x2 = x_grid_d[i+1]
-        phi2 = phi_interp_atan(y,x2)
+        phi2 = phi_interp_atan(rad,chi)
         
         if hiti > 0
             if phi/phi2 < 0
@@ -634,8 +722,11 @@ for j = 1:Ny_dense
     left = false
     for i = 1:Nx_dense
         x = x_grid_d[i]
-        
-        hit = hits_interp[y,x]
+
+        rad = hypot(x,y)
+        chi = atan2(y,x)
+
+        hit = hits_interp[rad,chi]
         hiti = round(Int,hit - 0.45)
 
         if hiti == 1

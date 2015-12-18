@@ -51,13 +51,15 @@ include("strig.jl")
 ####################################
 ####################################
 #Moments
+
+
 function ptim(a, b, sini,
               x, nu2, B2, zeta2, wp, theta, Rg)
 
     return exp(-2*x^3*nu2)*(2+x)^2*(-1 + a*x^3*(-1 + 3*x)*wp*sini)/(-2 + x)^2
 end
 
-#Radial moment pr
+#Radial moment p^r
 function prad(a, b, sini,
               x, nu2, B2, zeta2, wp, theta, Rg)
     
@@ -116,6 +118,20 @@ function rk_step(rri, yni,
     return dt, dy, dz, tturn, rturn
 end
 
+#polar coordinate wrapper
+function bender3p(rad, chi, sini,
+                  X, Osb,
+                  beta, quad, wp, Rg)
+
+    x = rad*cos(chi)
+    y = rad*sin(chi)
+
+    #println("x=$x y=$y")
+    
+    bender3(x, y,sini,
+            X, Osb,
+            beta, quad, wp, Rg)
+end
 
 ######################
 function bender3(x, y, sini,
