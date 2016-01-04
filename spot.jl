@@ -115,10 +115,13 @@ for k = 1:Nt
         for i = x1s[j]:x2s[j]
             x = x_grid_d[i]
 
+            rad = hypot(x,y)
+            chi = mod2pi(pi/2 - atan2(y,x))
+            
             #trace back to star
-            theta = theta_interp[y,x]
-            phi = phi_interp_atan(y,x)
-
+            phi = phi_interp_atan(rad,chi)
+            theta = theta_interp[rad,chi]
+                        
             #rotate star
             phi = phi - t*fs*2*pi
             phi = mod2pi(phi)
@@ -142,8 +145,9 @@ for k = 1:Nt
                 
 
                 #Time shifts for differnt parts
-                time = time_interp[y,x]
-                cosa = cosa_interp[y,x]
+                time = time_interp[rad,chi]
+                cosa = cosa_interp[rad,chi]
+ 
                 kd = time_lag(time, k, times, Nt, tbin, phi, theta)
     
                 #Xob = Xs_interp[y,x] 

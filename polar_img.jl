@@ -3,15 +3,17 @@ include("bender.jl")
 
 
 #grid setup
-Nrad = 30
-Nchi = 20
+Nrad = 100
+Nchi = 100
 
 rmin = 0.0
 rmax = 10.0
 
-chimin = 0.0
-chimax = 3.0pi/2.0
-#chimax = pi/2
+dchi_edge = 0.01
+chimin = 0.0 - dchi_edge
+chimax = 2.0pi + dchi_edge
+#chimin = -pi
+#chimax = pi
 
 
 #get radius limits for the image
@@ -52,6 +54,7 @@ drad = diff(rad_grid)
 dchi = diff(chi_grid)
 
 
+
 Times = zeros(Nrad, Nchi)
 Phis = zeros(Nrad, Nchi)
 Thetas = zeros(Nrad, Nchi)
@@ -88,9 +91,8 @@ for i = 1:Nchi
         Xs[j,i] = Xob
         hits[j,i] = float(hit)
         cosas[j,i] = cosa
-        
         #end
-        
+            
         if !hit; break; end
     end
 end
@@ -98,6 +100,7 @@ toc()
 
 print("interpolating into dense grid...")
 method = Gridded(Linear())
+#method = Gridded(Constant())
 
 time_interp    = interpolate((rad_grid, chi_grid), Times     ,method)
 phi_interp_sin = interpolate((rad_grid, chi_grid), sin(Phis) ,method)

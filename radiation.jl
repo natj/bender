@@ -51,9 +51,9 @@ Ny = 100
 Nx = 100
 
 xmin = -10
-xmax = -xmin +0.005
+xmax = -xmin #+0.005
 ymin = -10
-ymax = -ymin +0.005
+ymax = -ymin #+0.005
 
 x_grid = collect(linspace(xmin,xmax, Nx))
 y_grid = collect(linspace(ymin,ymax, Ny))
@@ -140,8 +140,11 @@ end
 #dyy = 1.0*abs(y_grid_d[2] - y_grid_d[1])
 
 
-dxx = dchi[1]
-dyy = drad[1]
+#dxx = drad[1]
+#dyy = dchi[1]
+dxx = 0.01
+dyy = 0.01
+
 dxdy = dxx*dyy #*X^2
 
 #squares
@@ -221,23 +224,40 @@ function polyarea2(x,y,dxx,dyy)
 end
 
 #sectors in polar coordinates
-function polyarea3(rad,chi,dr,dchi,phi0,the0;
+function polyarea3(#rad,chi,dr,dchi,phi0,the0;
+                   x, y,
+                   #dr, dchi,
+                   dxx, dyy,
+                   phi0,the0;
                    exact=false)
 
-    #image plane
-    x1 = min(0.0, rad - dxx/2)
-    x2 = rad + dxx/2
-    y1 = chi - dyy/2
-    y2 = chi + dyy/2
-
-    pts = [ (y1, x1), (y1, x2), (y2, x2), (y2, x1) ]
+    #image plane on polar grid
+    #y1 = min(0.0, rad - dxx/2)
+    #y2 = rad + dxx/2
+    #x1 = chi - dyy/2
+    #x2 = chi + dyy/2
+    #pts = [ (y1, x1), (y1, x2), (y2, x2), (y2, x1) ]
+    
+    #image corners on cartesian grid
+    x1 = x - dxx/2
+    x2 = x + dxx/2
+    y1 = y - dyy/2
+    y2 = y + dyy/2
+    
+    pts = [ (hypot(x1,y1), mod2pi(pi/2 - atan2(y1,x1))),
+            (hypot(x2,y1), mod2pi(pi/2 - atan2(y1,x2))),
+            (hypot(x2,y2), mod2pi(pi/2 - atan2(y2,x2))),
+            (hypot(x1,y2), mod2pi(pi/2 - atan2(y2,x1)))
+            ]
+             
+    #println("rad:$rad $dr chi:$chi $dchi") 
     
     if exact
         #phis = Float64[]
         sinphis = Float64[]
         cosphis = Float64[]
-        
         thetas = Float64[]
+
         for (yp, xp) in pts
             time, phi, theta, Xob, hit, cosa = bender3p(xp, yp, sini,
                                                         X, Osb,
@@ -254,8 +274,8 @@ function polyarea3(rad,chi,dr,dchi,phi0,the0;
         inside = filter(x -> hits_interp[x[1], x[2]] >= 1.0, pts)
 
         #phis = map(x -> phi_interp_atan(x[1], x[2]), inside)
-        sinphis = map(x -> phi_interp_sin[x[1], x[2]], inside)
-        cosphis = map(x -> phi_interp_cos[x[1], x[2]], inside)
+        sinphis = map(x -> clamp(phi_interp_sin[x[1], x[2]], -1.0, 1.0), inside)
+        cosphis = map(x -> clamp(phi_interp_cos[x[1], x[2]], -1.0, 1.0), inside)
         
         thetas = map(x -> theta_interp[x[1], x[2]], inside)
     end
@@ -361,7 +381,7 @@ for j = 1:Ny_dense
         #else
 
         rad = hypot(x,y)
-        chi = atan2(y,x)
+        chi = mod2pi(pi/2 - atan2(y,x))
 
         #println("x=$x y=$y r=$rad chi=$chi")
         
@@ -382,11 +402,14 @@ for j = 1:Ny_dense
         if hiti > 0
             #solid angle
             ####
-            
-            #earea = polyarea3(rad, chi, dxx, dyy,phi,theta,
+
+            earea = polyarea3(x, y, dxx, dyy, phi, theta,
+                              exact=(ring || zipper)
+                              ) 
+            #earea = polyarea3(rad, chi, dxx, dyy, phi, theta,
             #                  exact=(ring || zipper)
             #                  ) 
-
+            #earea *= rad
             
             Phis_dense[j,i] = phi
             Thetas_dense[j,i] = theta
@@ -394,7 +417,9 @@ for j = 1:Ny_dense
             
             #chess board
             img[j,i] = painter(phi, theta)
-                    
+            #TODO with rad and chi
+            #img[j,i] = chi
+            
             #mu = sqrt(1-sini^2)*cos(theta) + sini*sin(theta)*cos(phi)
             #img2[j,i] = mu
 
@@ -501,9 +526,7 @@ for j = 1:Ny_dense
             end #if false/true for cosa
 
             #img3[j,i] = time    
-            #img3[j,i] = earea * rad
-            img3[j,i] = rad
-            
+            img3[j,i] = earea
             #if earea == 0
             #    println("x=$x y=$y")
             #end
@@ -520,8 +543,8 @@ for j = 1:Ny_dense
             dF, dE = radiation(Ir,
                                x,y,
                                phi, theta, cosa,
-                               #X, Xob, Osb, sini, earea)
-                               X, Xob, Osb, sini, 1.0)
+                               X, Xob, Osb, sini, earea)
+                               #X, Xob, Osb, sini, 1.0)
 
             #if 0.79 < dE < 0.81
             #if dE < 0.79 || dE > 0.81
@@ -535,46 +558,46 @@ end
 
 #mad h4xs to smoothen the flux
 ##############################
-Nsmooth = 3
-for j = 1:Ny_dense
-    y = y_grid_d[j]
+#Nsmooth = 3
+#for j = 1:Ny_dense
+#    y = y_grid_d[j]
     #if !(ymin_edge < y < ymax_edge)
     #    continue
     #end
     #for i = 1:Nx_dense
-    for i = (round(Int, Nx_dense/2)-10):(round(Int, Nx_dense/2)+10)
-        x = x_grid_d[i]
+#    for i = (round(Int, Nx_dense/2)-10):(round(Int, Nx_dense/2)+10)
+#        x = x_grid_d[i]
         #if !(xmin_edge < x < xmax_edge)
         #    continue
         #end
 
-        rad = hypot(x,y)
-        chi = atan2(y,x)
+#        rad = hypot(x,y)
+#        chi = atan2(y,x)
 
         #Flux[j,i:i+Nsmooth] = toolbox.smooth(vec(Flux[j,i:i+Nsmooth]))
         #zipper = abs(x) < 0.2 && y > 4.67
-        phi = phi_interp_atan(rad,chi)
-        theta = theta_interp[rad,chi]
+#        phi = phi_interp_atan(rad,chi)
+#        theta = theta_interp[rad,chi]
 
-        hit = hits_interp[rad,chi]
-        hiti = round(Int,hit - 0.49)
+#        hit = hits_interp[rad,chi]
+#        hiti = round(Int,hit - 0.49)
 
-        x2
-        x2 = x_grid_d[i+1]
-        phi2 = phi_interp_atan(rad,chi)
+#        x2 = x_grid_d[i+1]
+#        phi2 = phi_interp_atan(rad,chi)
         
-        if hiti > 0
-            if phi/phi2 < 0
-                Flux[j, (i-Nsmooth):(i+Nsmooth)] = ones(2*Nsmooth+1)*mean([Flux[j,i-Nsmooth],
-                                                                       Flux[j,i-Nsmooth+1],
-                                                                       Flux[j,i+Nsmooth-1],
-                                                                       Flux[j,i+Nsmooth]])
-                continue
-            end
-        end
-    end
-end
-            
+#        if hiti > 0
+#            if phi/phi2 < 0
+#                Flux[j, (i-Nsmooth):(i+Nsmooth)] = ones(2*Nsmooth+1)*mean([Flux[j,i-Nsmooth],
+#                                                                       Flux[j,i-Nsmooth+1],
+#                                                                       Flux[j,i+Nsmooth-1],
+#                                                                       Flux[j,i+Nsmooth]])
+#                continue
+#            end
+#        end
+#    end
+#end
+
+
 #Interpolate flux and redshift
 flux_interp    = interpolate((y_grid_d , x_grid_d), Flux, method)
 reds_interp    = interpolate((y_grid_d , x_grid_d), Reds, method)
@@ -589,7 +612,7 @@ p2 = plot2d(Thetas_dense, x_grid_d, y_grid_d)
 p3 = plot2d(img, x_grid_d, y_grid_d)
 
 p4 = plot2d(img2, x_grid_d, y_grid_d, 0, 0, 0, "Blues")
-p5 = plot2d(img3 ./ dxdy, x_grid_d, y_grid_d, 0, 0.0, 2.0, "Blues")
+p5 = plot2d(img3 ./dxdy, x_grid_d, y_grid_d, 0, 0.0, 2.0, "Blues")
 
 p6 = plot(y_grid_d, img2[:, round(Int,Ny_dense/2)+1],"k-", yrange=[-0.1, 1.1])
 p6 = oplot(y_grid_d, img3[:,round(Int,Ny_dense/2)+1], "r--")
@@ -619,7 +642,7 @@ p6e2 = oplot(img2[:,xslice], zeros(length(y_grid_d)), "k",linestyle="dotted")
 
 #p7 = plot2d(Flux, x_grid_d, y_grid_d, 0,0,0, "RdBu")
 #p8 = plot2d(Reds, x_grid_d, y_grid_d, 0,0,0, "RdBu")
-p7 = plot2d(Flux ./ dxdy, x_grid_d, y_grid_d, 0,0,1.0, "Blues")
+p7 = plot2d(Flux ./dxdy, x_grid_d, y_grid_d, 0,0,1.0, "Blues")
 p8 = plot2d(Reds, x_grid_d, y_grid_d, 0,0,1.0, "Blues")
 
 
@@ -724,7 +747,7 @@ for j = 1:Ny_dense
         x = x_grid_d[i]
 
         rad = hypot(x,y)
-        chi = atan2(y,x)
+        chi = mod2pi(pi/2 - atan2(y,x))
 
         hit = hits_interp[rad,chi]
         hiti = round(Int,hit - 0.45)

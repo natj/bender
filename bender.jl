@@ -123,12 +123,11 @@ function bender3p(rad, chi, sini,
                   X, Osb,
                   beta, quad, wp, Rg)
 
-    x = rad*cos(chi)
-    y = rad*sin(chi)
-
+    #x = rad*sin(chi)
+    #y = rad*cos(chi)
     #println("x=$x y=$y")
     
-    bender3(x, y,sini,
+    bender3(rad*sin(chi), rad*cos(chi), sini,
             X, Osb,
             beta, quad, wp, Rg)
 end

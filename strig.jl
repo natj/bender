@@ -161,6 +161,9 @@ function area_sphere_lambert2(phi0, theta0, sinphis, cosphis, thetas, Rarea=1, e
     #for i = 1:N
     #    phis[i] = mod2pi(phis[i])
     #end
+
+    #println()
+    #println("phi0:$phi0 the0:$theta0 $sinphis $cosphis $thetas")
     
     #transform to authalic sphere if we have spheroid
     if ecc != 0.0
@@ -181,6 +184,13 @@ function area_sphere_lambert2(phi0, theta0, sinphis, cosphis, thetas, Rarea=1, e
 
     coslml0 = sin(llambda0)*sinphis .+ cos(llambda0)*cosphis
     sinlml0 = cos(llambda0)*sinphis .- sin(llambda0)*cosphis
+    
+    #sqkprime = 2 ./ (1 .+ sin(lphi0) .* sin(lphis) .+ cos(lphi0) .* cos(lphis) .* coslml0)
+    #println(sqkprime)
+
+    #println("lphi0: $lphi0")
+    #println("lphi: $lphis")
+    #println("acos: $(coslml0)")
     
     kprime = sqrt(2 ./ (1 .+ sin(lphi0) .* sin(lphis) .+ cos(lphi0) .* cos(lphis) .* coslml0))
     xs = kprime .* cos(lphis) .* sinlml0
