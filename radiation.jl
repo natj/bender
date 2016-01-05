@@ -1,4 +1,4 @@
-#Compute image and make plots from raw image grid
+#Compute image in cartesian grid and make plots from raw image grid
 
 #include("bender.jl")
 #include("comp_img.jl")
@@ -42,8 +42,8 @@ img2 = zeros(Ny_dense, Nx_dense) #debug array
 img3 = zeros(Ny_dense, Nx_dense) #debug array
 img4 = zeros(Ny_dense, Nx_dense) #debug array
         
-Flux = zeros(Ny_dense, Nx_dense)
-Reds = zeros(Ny_dense, Nx_dense)
+Flux_cart = zeros(Ny_dense, Nx_dense)
+Reds_cart = zeros(Ny_dense, Nx_dense)
 
 painter = chess_board
 
@@ -526,7 +526,8 @@ for j = 1:Ny_dense
             end #if false/true for cosa
 
             #img3[j,i] = time    
-            img3[j,i] = earea
+            #img3[j,i] = earea
+            img3[j,i] = area_interp[rad,chi]
             #if earea == 0
             #    println("x=$x y=$y")
             #end
@@ -548,8 +549,12 @@ for j = 1:Ny_dense
 
             #if 0.79 < dE < 0.81
             #if dE < 0.79 || dE > 0.81
-            Flux[j, i] = dF
-            Reds[j, i] = dE
+            #Flux[j, i] = dF
+            #Reds[j, i] = dE
+
+            Flux_cart[j, i] = flux_interp[rad,chi]
+            Reds_cart[j, i] = reds_interp[rad,chi]
+
             end#hiti
         #end#cosa
     end
@@ -599,8 +604,10 @@ end
 
 
 #Interpolate flux and redshift
-flux_interp_cart    = interpolate((y_grid_d , x_grid_d), Flux, method)
-reds_interp_cart    = interpolate((y_grid_d , x_grid_d), Reds, method)
+flux_interp_cart    = interpolate((y_grid_d , x_grid_d), Flux_cart, method)
+reds_interp_cart    = interpolate((y_grid_d , x_grid_d), Reds_cart, method)
+#flux_interp = interpolate((y_grid_d , x_grid_d), Flux, method)
+#reds_interp = interpolate((y_grid_d , x_grid_d), Reds, method)
 
 toc()#end of interpolation into dense grid
 
@@ -612,10 +619,10 @@ p2 = plot2d(Thetas_dense, x_grid_d, y_grid_d)
 p3 = plot2d(img, x_grid_d, y_grid_d)
 
 p4 = plot2d(img2, x_grid_d, y_grid_d, 0, 0, 0, "Blues")
-p5 = plot2d(img3 ./dxdy, x_grid_d, y_grid_d, 0, 0.0, 2.0, "Blues")
+p5 = plot2d(img3, x_grid_d, y_grid_d, 0, 0.0, 0, "Blues")
 
 p6 = plot(y_grid_d, img2[:, round(Int,Ny_dense/2)+1],"k-", yrange=[-0.1, 1.1])
-p6 = oplot(y_grid_d, img3[:,round(Int,Ny_dense/2)+1], "r--")
+p6 = oplot(y_grid_d, img3[:,round(Int,Ny_dense/2)+1], "m--")
 p6 = oplot(x_grid_d, img2[round(Int,Nx_dense/2)+1,:], "b-")
 p6 = oplot(x_grid_d, img3[round(Int,Nx_dense/2)+1,:], "r--")
 
@@ -642,25 +649,25 @@ p6e2 = oplot(img2[:,xslice], zeros(length(y_grid_d)), "k",linestyle="dotted")
 
 #p7 = plot2d(Flux, x_grid_d, y_grid_d, 0,0,0, "RdBu")
 #p8 = plot2d(Reds, x_grid_d, y_grid_d, 0,0,0, "RdBu")
-p7 = plot2d(Flux ./dxdy, x_grid_d, y_grid_d, 0,0,1.0, "Blues")
-p8 = plot2d(Reds, x_grid_d, y_grid_d, 0,0,1.0, "Blues")
+p7 = plot2d(Flux_cart, x_grid_d, y_grid_d, 0,0,0, "Blues")
+p8 = plot2d(Reds_cart, x_grid_d, y_grid_d, 0,0,0, "Blues")
 
 
 #####
 # line profile
-function line_prof(Flux, Reds)
+function line_prof(Fluxc, Redsc)
     println("Computing line profile...")
     #for energ = linspace(1-0.01, 1+0.01, 40)
 
     xarr = Float64[]
     yarr = Float64[]
 
-    Ny_dense, Nx_dense = size(Flux)
+    Ny_dense, Nx_dense = size(Fluxc)
     
     energ = 1.0
     for jj = 1:Ny_dense, ii = 1:Nx_dense
-        fy =  Flux[jj, ii]
-        xii = Reds[jj, ii]
+        fy =  Fluxc[jj, ii]
+        xii = Redsc[jj, ii]
         
         if xii > 0
             push!(xarr, xii*energ)
@@ -703,7 +710,7 @@ function line_prof(Flux, Reds)
     return es, yy2
 end
 
-es, yy2 = line_prof(Flux, Reds)
+es, yy2 = line_prof(Flux_cart, Reds_cart)
 p9 = plot(es, yy2, "k-")
           #xlabel="E/E_0",
           #ylabel="Flux (arb)")

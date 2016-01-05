@@ -71,7 +71,7 @@ end
 img4 = zeros(Ny_dense, Nx_dense) #debug array
 
 #Spot image frame size
-N_frame = 200
+N_frame = 300
 
 
 #Beaming function for the radiation
@@ -89,7 +89,7 @@ spot_flux = zeros(Nt)
 
 tic()
 for k = 1:Nt
-#for k = 35:35
+#for k = 26:40
 #for k = 80:80
 #for k = 24:38
 #for k = 20:45
@@ -162,8 +162,12 @@ for k = 1:Nt
                 #                   x,y,
                 #                   phi, theta, cosa,
                 #                   X, Xob, Osb, sini, img3[j,i])
-                dF = flux_interp[y,x]
-                dE = reds_interp[y,x]
+                #dF = flux_interp[y,x]
+                #dE = reds_interp[y,x]
+
+                dF = flux_interp[rad,chi]
+                dE = reds_interp[rad,chi]
+                
                                 
                 #img4[j,i] = painter(phi, theta)
                 img4[j,i] += 3.0*dF /dxdy
@@ -346,9 +350,12 @@ for k = 1:Nt
                     #                   phi, theta, cosa,
                     #                   X, Xob, Osb, sini, earea)
                     
-                    dF = flux_interp[y,x]
-                    dE = reds_interp[y,x]
-                    
+                    #dF = flux_interp[y,x]
+                    #dE = reds_interp[y,x]
+
+                    dF = flux_interp[rad,chi]
+                    dE = reds_interp[rad,chi]
+    
                     
                     #img4[j,i] = painter(phi, theta)
                     

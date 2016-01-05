@@ -3,8 +3,8 @@ include("bender.jl")
 
 
 #grid setup
-Nrad = 200
-Nchi = 300
+Nrad = 50
+Nchi = 50
 
 rmin = 0.0
 rmax = 10.0
@@ -54,14 +54,16 @@ rmax = maximum(rlims)*1.02
 #rad_grid = collect(linspace(rmin, rmax, Nrad))
 
 #weighted
-chi_diffs = 0.8 + sin(collect(linspace(0.0, 2pi, Nchi-1))).^2
+chi_diffs = 0.8 + sin(collect(linspace(0.0, 2pi, Nchi-3))).^2
 unshift!(chi_diffs, 0.0)
 chi_grid = chimin .+ (chimax-chimin)*cumsum(chi_diffs)/sum(chi_diffs)
+
+unshift!(chi_grid, chi_grid[1] - dchi_edge)
+push!(chi_grid, chi_grid[end] + dchi_edge)
 
 rad_diffs = 1 ./ exp(linspace(0.0, 2.0, Nrad-1).^2)
 rad_grid = rmax * cumsum(rad_diffs) / sum(rad_diffs)
 unshift!(rad_grid, 0.0)
-
 
 #differential elements
 drad = diff(rad_grid)
