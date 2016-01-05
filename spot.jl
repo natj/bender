@@ -10,7 +10,7 @@
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(30.0)
+rho = deg2rad(1.0)
 colat = deg2rad(50.0)
 
 
@@ -71,12 +71,12 @@ end
 img4 = zeros(Ny_dense, Nx_dense) #debug array
 
 #Spot image frame size
-N_frame = 50
+N_frame = 200
 
 
 #Beaming function for the radiation
-Ir(cosa) = 1.0 #isotropic beaming
-
+#Ir(cosa) = 1.0 #isotropic beaming
+Ir(cosa) = cosa
 
 #Time parameters
 Nt = 64
@@ -89,7 +89,7 @@ spot_flux = zeros(Nt)
 
 tic()
 for k = 1:Nt
-#for k = 25:25
+#for k = 35:35
 #for k = 80:80
 #for k = 24:38
 #for k = 20:45
@@ -138,16 +138,22 @@ for k = 1:Nt
             #    inf_small = false
                 
                 #track down spot edges
+
+                #println("x = $x y = $y")
                 frame_y2 = frame_y2 < y ? y : frame_y2 #top #max
                 frame_y1 = frame_y1 > y ? y : frame_y1 #bottom #min
                 frame_x1 = frame_x1 > x ? x : frame_x1 #left min
                 frame_x2 = frame_x2 < x ? x : frame_x2 #right max
-                
 
+                #println(frame_x1)
+                #println(frame_x2)
+                #println(frame_y1)
+                #println(frame_y2)
+                #println()
+                 
                 #Time shifts for differnt parts
                 time = time_interp[rad,chi]
                 cosa = cosa_interp[rad,chi]
- 
                 kd = time_lag(time, k, times, Nt, tbin, phi, theta)
     
                 #Xob = Xs_interp[y,x] 
@@ -165,7 +171,8 @@ for k = 1:Nt
 
                 #zipper = abs(x) < 0.18 && y > 4.67
                 #if !zipper
-                spot_flux[kd] += dF
+                #spot_flux[kd] += dF
+                
                 #spot_flux[k] += dF
                 #end
             end #if inside            
@@ -183,8 +190,8 @@ for k = 1:Nt
     
     #expand image a bit
     #########
-    frame_expansion_x = abs(x_grid_d[2] - x_grid_d[1]) #*5.0
-    frame_expansion_y = abs(y_grid_d[2] - y_grid_d[1]) #*5.0
+    frame_expansion_x = abs(x_grid_d[4] - x_grid_d[1])
+    frame_expansion_y = abs(y_grid_d[4] - y_grid_d[1])
     frame_y2 += frame_expansion_y
     frame_y1 -= frame_expansion_y
     frame_x1 -= frame_expansion_x
@@ -192,13 +199,13 @@ for k = 1:Nt
 
     #Exapand image a bit keeping the aspect ratio
     ##########
-    frame_expansion_x = abs(frame_x2 - frame_x1)
-    frame_expansion_y = abs(frame_y2 - frame_y1)
+    #frame_expansion_x = abs(frame_x2 - frame_x1)
+    #frame_expansion_y = abs(frame_y2 - frame_y1)
 
-    frame_y1 -= frame_expansion_y*0.02
-    frame_y2 += frame_expansion_y*0.02
-    frame_x1 -= frame_expansion_x*0.02
-    frame_x2 += frame_expansion_x*0.02
+    #frame_y1 -= frame_expansion_y*0.02
+    #frame_y2 += frame_expansion_y*0.02
+    #frame_x1 -= frame_expansion_x*0.02
+    #frame_x2 += frame_expansion_x*0.02
 
     frame_xs = abs(frame_x2 - frame_x1)/N_frame
     frame_ys = abs(frame_y2 - frame_y1)/N_frame
@@ -207,13 +214,24 @@ for k = 1:Nt
     println("x1: $frame_x1  x2: $frame_x2  y1: $frame_y1 y2: $frame_y2")  
     println("x = $frame_xs y = $frame_ys")
 
-    if frame_xs > frame_ys
+    #pick smaller
+    #if frame_xs > frame_ys
+    #    Nx_frame = N_frame
+    #    Ny_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
+    #else
+    #    Ny_frame = N_frame
+    #    Nx_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
+    #end
+
+    if frame_xs < frame_ys
         Nx_frame = N_frame
         Ny_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
     else
         Ny_frame = N_frame
         Nx_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
     end
+
+    
 
     println("Nx= $Nx_frame Ny = $Ny_frame")
     
@@ -250,7 +268,10 @@ for k = 1:Nt
         y = frame_ygrid[j]
         for i = 1:Nx_frame
             x = frame_xgrid[i]
-            
+
+            rad = hypot(x,y)
+            chi = mod2pi(pi/2 - atan2(y,x))
+
             #interpolate if we are not on the edge or near the zipper
             #ring = rstar_min*0.98 < sqrt(x^2 + y^2) < 1.01*rstar_max
             #zipper = abs(x) < 0.1 && y > 3.0
@@ -266,14 +287,14 @@ for k = 1:Nt
                                                            beta, quad, wp, Rg)
             else
                 # phi & theta
-                phi = phi_interp_atan(y,x)
-                theta = theta_interp[y,x]
-                Xob = Xs_interp[y,x]
-                time = time_interp[y,x]
-                cosa = cosa_interp[y,x]
-        
+                phi = phi_interp_atan(rad,chi)
+                theta = theta_interp[rad,chi]
+                Xob = Xs_interp[rad,chi]
+                time = time_interp[rad,chi]
+                cosa = cosa_interp[rad,chi]
+                
                 #test if we hit the surface
-                hit = hits_interp[y,x]
+                hit = hits_interp[rad,chi]
             end
 
             #time, phi, theta, Xob, hit, cosa = bender3(x, y, sini,
@@ -330,13 +351,18 @@ for k = 1:Nt
                     
                     
                     #img4[j,i] = painter(phi, theta)
-                    img5[j,i] += 3.0*dF / frame_dxdy
-
+                    
+                    #img5[j,i] += 1.0e9*dF * frame_dxdy
+                    #println(dF)
+                    img5[j,i] += 1.0e5 * dF
+                    
                     #img5[j,i] = 5.0
                     #spot_flux[kd] += dF * frame_dxdy
                     #spot_flux[kd] += frame_dxdy
-                    #spot_flux[k] += dF * frame_dxdy
+                    spot_flux[k] += dF * frame_dxdy
                 end #inside spot
+
+                
             end#hiti
         end #x
     end#y

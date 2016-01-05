@@ -3,8 +3,8 @@ include("bender.jl")
 
 
 #grid setup
-Nrad = 100
-Nchi = 100
+Nrad = 200
+Nchi = 300
 
 rmin = 0.0
 rmax = 10.0
@@ -47,9 +47,23 @@ end
 #set new maximum rad limit
 rmax = maximum(rlims)*1.02
 
-chi_grid = collect(linspace(chimin, chimax, Nchi))
-rad_grid = collect(linspace(rmin, rmax, Nrad))
+#rad & chi grids
 
+#equidistant
+#chi_grid = collect(linspace(chimin, chimax, Nchi))
+#rad_grid = collect(linspace(rmin, rmax, Nrad))
+
+#weighted
+chi_diffs = 0.8 + sin(collect(linspace(0.0, 2pi, Nchi-1))).^2
+unshift!(chi_diffs, 0.0)
+chi_grid = chimin .+ (chimax-chimin)*cumsum(chi_diffs)/sum(chi_diffs)
+
+rad_diffs = 1 ./ exp(linspace(0.0, 2.0, Nrad-1).^2)
+rad_grid = rmax * cumsum(rad_diffs) / sum(rad_diffs)
+unshift!(rad_grid, 0.0)
+
+
+#differential elements
 drad = diff(rad_grid)
 dchi = diff(chi_grid)
 

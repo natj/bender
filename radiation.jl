@@ -142,8 +142,8 @@ end
 
 #dxx = drad[1]
 #dyy = dchi[1]
-dxx = 0.01
-dyy = 0.01
+dxx = 0.001
+dyy = 0.001
 
 dxdy = dxx*dyy #*X^2
 
@@ -548,8 +548,8 @@ for j = 1:Ny_dense
 
             #if 0.79 < dE < 0.81
             #if dE < 0.79 || dE > 0.81
-            Flux[j,i] = dF
-            Reds[j,i] = dE
+            Flux[j, i] = dF
+            Reds[j, i] = dE
             end#hiti
         #end#cosa
     end
@@ -599,8 +599,8 @@ end
 
 
 #Interpolate flux and redshift
-flux_interp    = interpolate((y_grid_d , x_grid_d), Flux, method)
-reds_interp    = interpolate((y_grid_d , x_grid_d), Reds, method)
+flux_interp_cart    = interpolate((y_grid_d , x_grid_d), Flux, method)
+reds_interp_cart    = interpolate((y_grid_d , x_grid_d), Reds, method)
 
 toc()#end of interpolation into dense grid
 
