@@ -10,7 +10,7 @@
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(1.0)
+rho = deg2rad(30.0)
 colat = deg2rad(50.0)
 
 
@@ -44,21 +44,25 @@ function time_lag(t, k, times, Nt, tbin, phi, theta)
     cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
     y = 1 - cospsi
 
-    #dt0 = y*R/c
-    dt = y*(1.0 + (U*y/8.0)*(1+ y*(1.0/3.0 - U/14.0)))*R/c
-    #println("dt: $dt  dt0: $dt0  dt: $dt01 ")
+    dt0 = y*R/c
+    dt2 = y*(1.0 + (U*y/8.0)*(1+ y*(1.0/3.0 - U/14.0)))*R/c
+    #println("dt: $dt  dt0: $dt0  dt2: $dt2 ")
     #println(" $(dt01/dt) ")
 
     #get new timebin index
     kd = 1
-    while dt > (2kd - 1)*tbin
+    while dt2 > (2kd - 1)*tbin
         kd += 1
     end
     kd -= 1
 
     kindx = k + kd
     if kindx > Nt; kindx -= Nt; end
-        
+    #while kindx > Nt
+    #    kindx -= Nt
+    #end
+
+    
     #println("k: $k kd: $kd kindx: $kindx")
     #println()
     
@@ -71,7 +75,7 @@ end
 img4 = zeros(Ny_dense, Nx_dense) #debug array
 
 #Spot image frame size
-N_frame = 300
+N_frame = 50
 
 
 #Beaming function for the radiation
@@ -85,11 +89,156 @@ tbin = abs(times[2] - times[1])/2.0
 phase = collect(times .* fs)
 
 spot_flux = zeros(Nt)
+spot_flux2 = zeros(Nt)
 
+sdelta = zeros(Nt)
+sdelta2 = zeros(Nt)
+
+sfluxE = zeros(Nt, 3)
+sfluxNE = zeros(Nt, 3)
+
+sfluxB = zeros(Nt)
+sfluxNB = zeros(Nt)
+
+#Polar integration
+
+#create thick radius grid
+Nrad_frame = 1000
+rad_diffs = 1 ./ exp(linspace(0.0, 1.5, Nrad_frame-1).^2)
+rad_grid_d = rmax * cumsum(rad_diffs) / sum(rad_diffs)
+unshift!(rad_grid_d, 0.0)
 
 tic()
+#for k = 1:Nt
+for k = 2:1
+    t = times[k]
+
+    radmin = 0.0
+    radmax = 10.0
+    chimin = 0.0
+    chimax = 2pi
+    
+    for i = 2:Nchi-1
+        chi = chi_grid[i]
+
+        #avoid double integrating angle edges
+        if chi < 0; continue; end
+        if chi > 2pi; continue; end
+        
+        #if mod(i,10) == 0; println("chi: $(round(chi/2pi,2))"); end
+    
+        for j = 2:Nrad-1
+            rad = rad_grid[j]
+
+            if hits[j, i] < 1; break; end
+
+    
+            #Ray traced photons
+            ####
+            phi = Phis[j, i]
+            theta = Thetas[j, i]
+
+            #rotate star
+            phi = phi - t*fs*2*pi
+            phi = mod2pi(phi)
+
+            inside = spot(0.0, phi, theta,
+                          stheta = colat,
+                          delta = rho
+                          )
+
+            if inside
+                #println("inside")
+                radmin = rad > radmin ? rad : radmin
+                radmax = rad < radmax ? rad : radmax
+                                 
+                #time = Times[j, i]
+                #Xob = Xs[j, i]
+                #cosa = cosas[j, i]
+                #dF = dFlux[j, i]
+                #dE = Reds[j, i]
+
+                #kd = time_lag(time, k, times, Nt, tbin, phi, theta)
+
+                #drdchi = abs(rad_grid[j+1] - rad_grid[j-1])*abs(chi_grid[i+1] - chi_grid[i-1])*rad_grid[j]
+                #spot_flux2[kd] += dF * drdchi
+            end#inside
+        end#rad
+    end#chi
+
+
+    #Integrate in thick interpolated grid
+    println("radmin: $radmin radmax: $radmax")
+
+       
+    for i = 2:Nchi-1
+        chi = chi_grid[i]
+
+        #avoid double integrating angle edges
+        if chi < 0; continue; end
+        if chi > 2pi; continue; end
+        
+        for j = 2:Nrad_frame-1
+        #j = 2
+        #while j <= Nrad_frame-1    
+            rad = rad_grid_d[j]
+
+            #if rad < radmin; continue; end
+            #if rad > radmax; j = Nrad_frame; end
+            
+            
+            if hits_interp[rad, chi] < 1; break; end
+
+            phi = phi_interp_atan(rad, chi)
+            theta = theta_interp[rad, chi]
+            
+            #rotate star
+            phi = phi - t*fs*2*pi
+            phi = mod2pi(phi)
+            
+            inside = spot(0.0, phi, theta,
+                          stheta = colat,
+                          delta = rho
+                          )
+
+            #println("spot")
+            
+            if inside
+                #println("inside")
+                time = time_interp[rad, chi]
+                Xob = Xs_interp[rad, chi]
+                cosa = cosa_interp[rad, chi]
+                dF = flux_interp[rad, chi]
+                dE = reds_interp[rad, chi]
+
+                kd = time_lag(time, k, times, Nt, tbin, phi, theta)
+
+                drdchi = abs(rad_grid_d[j+1] - rad_grid_d[j-1])*abs(chi_grid[i+1] - chi_grid[i-1])*rad_grid_d[j]
+                spot_flux2[kd] += dF * drdchi
+            end#inside
+
+            #j += 1
+        end
+    end
+
+    
+    println("time = $t")
+    p10polar = plot(phase, spot_flux2, "k-")
+    p10polar = oplot([phase[k]], [spot_flux2[k]], "ko")
+    display(p10polar)
+    
+end#time
+toc()
+
+
+#Cartesian integration
+#########
+
+tic()
+
 for k = 1:Nt
-#for k = 26:40
+#for k = 20:20
+#for k = 27:26
 #for k = 80:80
 #for k = 24:38
 #for k = 20:45
@@ -97,6 +246,7 @@ for k = 1:Nt
     img4[:,:] = 0.0
     
     t = times[k]
+    println()
     println("t: $t k: $k")
     
     #set whole image as starting frame
@@ -164,13 +314,26 @@ for k = 1:Nt
                 #                   X, Xob, Osb, sini, img3[j,i])
                 #dF = flux_interp[y,x]
                 #dE = reds_interp[y,x]
-
-                dF = flux_interp[rad,chi]
-                dE = reds_interp[rad,chi]
-                
-                                
+                delta = delta_interp[rad,chi]
+                EEd = reds_interp[rad,chi]
+                    
+                dfluxE, dfluxNE, dfluxNB, dfluxB = bbfluxes(EEd, delta, cosa)
+                    
                 #img4[j,i] = painter(phi, theta)
-                img4[j,i] += 3.0*dF /dxdy
+                    
+                #img5[j,i] += 1.0e9*dF * frame_dxdy
+                #println(dF)
+
+                #println(dfluxB)
+                #img4[j,i] += dfluxB * dxdy * imgscale*1.0e7
+                img4[j,i] += EEd * dxdy * imgscale /1.0e5
+                
+                #println(img4[j,i])
+                #dF = flux_interp[rad,chi]
+                #dE = reds_interp[rad,chi]
+                                                
+                #img4[j,i] = painter(phi, theta)
+                #img4[j,i] += 3.0*dF*dxdy
                 #img4[j,i] = 5.0
 
                 #zipper = abs(x) < 0.18 && y > 4.67
@@ -227,11 +390,21 @@ for k = 1:Nt
     #    Nx_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
     #end
 
+    #select larger
+    #if frame_xs < frame_ys
+    #    Nx_frame = N_frame
+    #    Ny_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
+    #else
+    #    Ny_frame = N_frame
+    #    Nx_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
+    #end
+
+    #keep aspect ratio
     if frame_xs < frame_ys
-        Nx_frame = N_frame
+        Nx_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
         Ny_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
     else
-        Ny_frame = N_frame
+        Ny_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
         Nx_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
     end
 
@@ -249,7 +422,7 @@ for k = 1:Nt
     ##########
     
     #Plot large image with bounding box for the spot
-    p10a = plot2d(img4, x_grid_d, y_grid_d, 0, 0, 5, "Blues")
+    p10a = plot2d(img4, x_grid_d, y_grid_d, 0, 0, 2, "Blues")
     Winston.add(p10a, Curve([frame_x1, frame_x2, frame_x2, frame_x1, frame_x1],
                            [frame_y1, frame_y1, frame_y2, frame_y2, frame_y1],
                            linestyle="solid"))
@@ -267,7 +440,9 @@ for k = 1:Nt
     
     #img5[:,:] = 0.0
     img5 = zeros(Ny_frame, Nx_frame) #debug array
-    
+
+    Ndelta = 0
+
     for j = 1:Ny_frame
         y = frame_ygrid[j]
         for i = 1:Nx_frame
@@ -341,8 +516,12 @@ for k = 1:Nt
                     #                 #exact=false
                     #                 )
 
-                    #kd = time_lag(time, k, times, Nt, tbin, phi, theta)
+                    kd = time_lag(time, k, times, Nt, tbin, phi, theta)
 
+                    if kd != k
+                        println("time shift")
+                    end
+                    
                     #Xob = Xs_interp[y,x] 
                     #cosa = cosa_interp[y,x]
                     #dF, dE = radiation(Ir,
@@ -353,28 +532,47 @@ for k = 1:Nt
                     #dF = flux_interp[y,x]
                     #dE = reds_interp[y,x]
 
-                    dF = flux_interp[rad,chi]
-                    dE = reds_interp[rad,chi]
-    
+                    #dF = flux_interp[rad,chi]
+
+                    delta = delta_interp[rad,chi]
+                    EEd = reds_interp[rad,chi]
+                    
+                    dfluxE, dfluxNE, dfluxNB, dfluxB = bbfluxes(EEd, delta, cosa)
                     
                     #img4[j,i] = painter(phi, theta)
                     
                     #img5[j,i] += 1.0e9*dF * frame_dxdy
                     #println(dF)
-                    img5[j,i] += 1.0e5 * dF
+
+                    #println(dfluxB)
+                    sdelta[k] += delta
+                    sdelta2[k] += EEd
+                    Ndelta += 1
+                    
+                    img5[j,i] += dfluxB * frame_dxdy * imgscale * 1.0e3
                     
                     #img5[j,i] = 5.0
-                    #spot_flux[kd] += dF * frame_dxdy
+                    #if kd != k
+                    #    println("dF: $dF $k $kd")
+                    #end
+                    #spot_flux[kd] += dF / frame_dxdy
                     #spot_flux[kd] += frame_dxdy
-                    spot_flux[k] += dF * frame_dxdy
-                end #inside spot
+                    #spot_flux[k] += dF * frame_dxdy
 
-                
+                    for ie = 1:3
+                        sfluxE[kd, ie] += dfluxE[ie] * frame_dxdy * imgscale
+                        sfluxNE[kd, ie] += dfluxNE[ie] * frame_dxdy * imgscale
+                    end
+                    sfluxNB[kd] += dfluxNB * frame_dxdy * imgscale
+                    sfluxB[kd] += dfluxB * frame_dxdy * imgscale
+                end #inside spot
             end#hiti
         end #x
     end#y
 
-    p10b = plot2d(img5, frame_xgrid, frame_ygrid, 0, 0, 5, "Blues")
+    println("bol flux: $(sfluxB[k]) | num flux $(sfluxNB[k])")
+
+    p10b = plot2d(img5, frame_xgrid, frame_ygrid, 0, 0, 2, "Blues")
 
     #add time stamp
     xs = frame_xgrid[1] + 0.84*(frame_xgrid[end]-frame_xgrid[1])
@@ -382,13 +580,24 @@ for k = 1:Nt
     Winston.add(p10b, Winston.DataLabel(xs, ys, "$(k)"))
     #display(p10)
 
-    p10c = plot(phase, spot_flux, "k-")
-    p10c = oplot([phase[k]], [spot_flux[k]], "ko")
+    #bol flux
+    p10c = plot(phase, sfluxB, "k-")
+    p10c = oplot([phase[k]], [sfluxB[k]], "ko")
 
-    tt = Table(3,1)
-    tt[1,1] = p10a
-    tt[2,1] = p10b
-    tt[3,1] = p10c
+    #doppler factor
+    #p10c = plot(phase, (sdelta./Ndelta).^5, "b-")
+    #p10c = oplot(phase, (sdelta2./Ndelta).^5, "r-")
+    #p10c = plot(phase, (sdelta2./sdelta), "r-")
+    #p10c = oplot([phase[k]], [sfluxB[k]], "ko")
+
+
+    tt1 = Table(1,2)
+    tt1[1,1] = p10a
+    tt1[1,2] = p10b
+
+    tt = Table(2,1)
+    tt[1,1] = tt1
+    tt[2,1] = p10c
     display(tt)
 
     #readline(STDIN)
@@ -401,9 +610,14 @@ toc()
 opath = "out/"
 mkpath(opath)
 
-#fname = "f$(fs)_lamb_bb_R$(round(R/1e5,1))_M$(round(M/Msun,1))_rho30.csv"
+
 fname = "f$(round(Int,fs))_lamb_bb_R$(round(R/1e5,1))_M$(round(M/Msun,1))_rho$(round(Int,rad2deg(rho))).csv"
-wmatr = zeros(Nt, 2)
+wmatr = zeros(Nt, 6)
 wmatr[:,1] = phase
-wmatr[:,2] = spot_flux
+wmatr[:,2] = sfluxNE[:, 1] #2 kev
+wmatr[:,3] = sfluxNE[:, 2] #6 kev
+wmatr[:,4] = sfluxNE[:, 3] #12 kev
+wmatr[:,5] = sfluxNB #bol number flux
+wmatr[:,6] = sfluxB #bol energy flux
+
 writecsv(opath*fname, wmatr)

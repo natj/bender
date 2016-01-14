@@ -45,6 +45,7 @@ for i = 1:length(chis)
 end
 
 #set new maximum rad limit
+#rscale = maximum(rlims)
 rmax = maximum(rlims)*1.02
 
 #rad & chi grids

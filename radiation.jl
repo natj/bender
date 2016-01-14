@@ -1,6 +1,6 @@
 #Compute image in cartesian grid and make plots from raw image grid
 
-#include("bender.jl")
+include("bender.jl")
 #include("comp_img.jl")
 
 
@@ -42,7 +42,8 @@ img2 = zeros(Ny_dense, Nx_dense) #debug array
 img3 = zeros(Ny_dense, Nx_dense) #debug array
 img4 = zeros(Ny_dense, Nx_dense) #debug array
         
-Flux_cart = zeros(Ny_dense, Nx_dense)
+#Flux_cart = zeros(Ny_dense, Nx_dense)
+Delta_cart = zeros(Ny_dense, Nx_dense)
 Reds_cart = zeros(Ny_dense, Nx_dense)
 
 painter = chess_board
@@ -435,7 +436,6 @@ for j = 1:Ny_dense
             Rgm, dR = Rgmf(theta, X, Osb)
             #cosa = cosalpha(x, y, sini, Rgm, dR,
             #                X/Rgm, nu2, B2, zeta2, wp, theta, Rg)
-
                 
             img2[j,i] = cosa
 
@@ -525,9 +525,9 @@ for j = 1:Ny_dense
                 #img3[j,i] = cosz*bp
             end #if false/true for cosa
 
-            #img3[j,i] = time    
+            img3[j,i] = time    
             #img3[j,i] = earea
-            img3[j,i] = area_interp[rad,chi]
+            #img3[j,i] = area_interp[rad,chi]
             #if earea == 0
             #    println("x=$x y=$y")
             #end
@@ -539,20 +539,18 @@ for j = 1:Ny_dense
 
             #Radiation
             #Ir(cosa) = 1.0 #isotropic beaming
-            Ir(cosa) = cosa
-            
-            dF, dE = radiation(Ir,
-                               x,y,
-                               phi, theta, cosa,
-                               X, Xob, Osb, sini, earea)
-                               #X, Xob, Osb, sini, 1.0)
-
+            #Ir(cosa) = cosa
+            #dF, dE = radiation(Ir,
+            #                   x,y,
+            #                   phi, theta, cosa,
+            #                   X, Xob, Osb, sini, earea)
+            #                   #X, Xob, Osb, sini, 1.0)
             #if 0.79 < dE < 0.81
             #if dE < 0.79 || dE > 0.81
             #Flux[j, i] = dF
             #Reds[j, i] = dE
 
-            Flux_cart[j, i] = flux_interp[rad,chi]
+            Delta_cart[j, i] = delta_interp[rad,chi]
             Reds_cart[j, i] = reds_interp[rad,chi]
 
             end#hiti
@@ -604,7 +602,8 @@ end
 
 
 #Interpolate flux and redshift
-flux_interp_cart    = interpolate((y_grid_d , x_grid_d), Flux_cart, method)
+#flux_interp_cart    = interpolate((y_grid_d , x_grid_d), Flux_cart, method)
+delta_interp_cart    = interpolate((y_grid_d , x_grid_d), Delta_cart, method)
 reds_interp_cart    = interpolate((y_grid_d , x_grid_d), Reds_cart, method)
 #flux_interp = interpolate((y_grid_d , x_grid_d), Flux, method)
 #reds_interp = interpolate((y_grid_d , x_grid_d), Reds, method)
@@ -649,7 +648,7 @@ p6e2 = oplot(img2[:,xslice], zeros(length(y_grid_d)), "k",linestyle="dotted")
 
 #p7 = plot2d(Flux, x_grid_d, y_grid_d, 0,0,0, "RdBu")
 #p8 = plot2d(Reds, x_grid_d, y_grid_d, 0,0,0, "RdBu")
-p7 = plot2d(Flux_cart, x_grid_d, y_grid_d, 0,0,0, "Blues")
+p7 = plot2d(Delta_cart, x_grid_d, y_grid_d, 0,0,0, "Blues")
 p8 = plot2d(Reds_cart, x_grid_d, y_grid_d, 0,0,0, "Blues")
 
 
@@ -710,18 +709,18 @@ function line_prof(Fluxc, Redsc)
     return es, yy2
 end
 
-es, yy2 = line_prof(Flux_cart, Reds_cart)
-p9 = plot(es, yy2, "k-")
-          #xlabel="E/E_0",
-          #ylabel="Flux (arb)")
-          #xrange=[0.7, 0.9])
+#es, yy2 = line_prof(Flux_cart, Reds_cart)
+#p9 = plot(es, yy2, "k-")
+#          #xlabel="E/E_0",
+#          #ylabel="Flux (arb)")
+#          #xrange=[0.7, 0.9])
 
 
 #collect into table
 tY = 3
 tX = 4
 table = Table(tY,tX)
-images = [p0,p1,p2,p3,p4,p5,p6,p7,p8,p9]
+images = [p0,p1,p2,p3,p4,p5,p6,p7,p8]
 imc = 1
 for tty = 1:tY
     for ttx = 1:tX

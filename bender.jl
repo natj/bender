@@ -10,13 +10,16 @@ const G = 6.67259e-8
 const c = 2.99792458e10
 const Msun = 1.99e33
 const km = 1.0e5
+const ergkev = 6.2415e8 # erg/keV 
+const cm_parsec = 3.2404e-23 #1cm/10kpc
 
 #initial parameters in physical units
 incl = pi/3
 M    = 1.6Msun
 R    = 12km
-fs   = 1.0
-#increase level around ptheta zero
+fs   = 400
+#Dist = 1.0*cm_parsec
+
 
 #derived dimensionless values
 const sini = sin(incl)
@@ -25,6 +28,8 @@ const Rg = 1.0
 const X = G*M/(R*c^2)
 const Osb = (2pi*fs)*sqrt(R^3/(G*M))
 const U = 2*G*M/(R*c^2)
+const imgscale = (G*M/c^2)^2
+
 println("x=$X ($U) and Osb=$Osb incl=$incl")
 
 #Hartle-Thorne parameters
@@ -147,7 +152,7 @@ function bender3(x, y, sini,
     ######################
     #leapfrog tracing
     const h = 0.002
-    const tol = 1.0e-6 #relative tol
+    const tol = 5.0e-7 #relative tol
     
     hit = true
     rr = 0.0
@@ -308,7 +313,7 @@ function bender3(x, y, sini,
         #Break down if we are close to the star;
         #helps with surface detection and with 1/r^3 functions
         if rr > Xob*0.95
-            level = 2.0^6
+            level = 128.0
         end
     end
 
