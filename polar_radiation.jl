@@ -33,6 +33,8 @@ function bbfluxes(EEd, delta, cosa)
     
     const Energs = [2.0, 6.0, 12.0]
     const Teff = 2.0
+
+    #one extra delta from solid angle transformation
     
     #Collect flux for different energies
     fluxE = (EEd)^3 .* BE(Teff, Energs ./ EEd) .* Beam(cosa*delta) *delta #energy flux
@@ -70,36 +72,68 @@ function radiation(rad, chi,
     sing = fa*cosg
 
 
-    #if false
+    #ifs false
     #########################
+    #vphi = Rgm*(B/enu^2)*sin(theta)*(2pi*fs - w) #isotropic zamo
     vphi = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
     b = R*vphi/c
-    vw = Rgm*(1/enu)*sin(theta)*w #isoradial space vel
-    bp = R*vw/c
+    #vw = Rgm*(1/enu)*sin(theta)*w #isoradial space vel
+    #bp = R*vw/c
     gamma = 1/sqrt(1 - b^2)
+    
+    #dtaudt = (enu^2)/gamma
+    # for ijk = 1:10
+    #     vphi = Rgm*(1/enu)*sin(theta)*(2pi*fs/dtaudt - w) #isoradial zamo
+    #     b = R*vphi/c
+    #     vw = Rgm*(1/enu)*sin(theta)*w #isoradial space vel
+    #     bp = R*vw/c
+    #     gamma = 1/sqrt(1 - b^2)
+    #     dtaudt = (enu^2)/gamma
+    # end        
+    
     cosi = sqrt(1-sini^2)
     sina = sqrt(1-cosa^2)
     cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
     cosz = -sina*sini*sin(phi)/sqrt(1-cospsi^2)
-    delta = (1/gamma)/(1 - b*cosz)
+    eta =  1/(1 - b*cosz)
+    delta = (eta/gamma)
+     #for ijk = 1:10
+     #    sina = sqrt(1-cosa^2)/delta
+     #    cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
+     #    cosz = -sina*sini*sin(phi)/sqrt(1-cospsi^2)
+     #    eta =  1/(1 - b*cosz)
+     #    delta = (eta/gamma)
+     #end
+
     EEd = delta*enu #*(1 + cosz*bp)
-    delta2 = delta
+    #delta2 = delta
     #else
 
 
     #########################
-    ##vz = Rgm*(1/enu)*sin(theta)*(2pi*fs) #isoradial velo (wrong)
-    vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo 
-    bz = R*vz/c
+    #vz = Rgm*(B/enu^2)*sin(theta)*(2pi*fs - w) #isotropic zamo
+    #vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
+    #bz = R*vz/c
+    #gamma = 1/sqrt(1 - bz^2)
+    #dtaudt = (enu^2)/gamma
 
-    gamma = 1/sqrt(1 - bz^2)
-    dtaudt = (enu^2)/gamma
-    delta = (1/gamma)/(1 + Lz*(2pi*fs)/(G*M/c^2)/dtaudt)
-    EEd = delta*enu
+    #iterate correct local time on the surface
+    # for ijk = 1:10
+    #     #vz = Rgm*(B/enu^2)*sin(theta)*(2pi*fs/dtaudt - w) #isoradial zamo 
+    #     vz = Rgm*(1/enu)*sin(theta)*(2pi*fs/dtaudt - w) #isoradial zamo 
+    #     bz = R*vz/c
+    #     gamma = 1/sqrt(1 - bz^2)
+    #     dtaudt = (enu^2)/gamma
+    # end        
+
+    #eta =  1/(1 + Lz*(2pi*fs)/(G*M/c^2))
+    #tmp = Lz*(2pi*fs)/(G*M/c^2)
+    #delta = (eta/gamma)
+    #EEd = delta*enu
 
 
+    ##################
     #end
-    
     #dS = (Rgm)^2*sin(theta)*sqrt(1 + fa^2)
     #cosap = cosa * delta #abberration
     #dOmega = dS*cosap
@@ -109,9 +143,14 @@ function radiation(rad, chi,
     #dF = (EEd^3)*dOmega*Ir(cosap)
     #dF = (EEd^3)*dOmega*delta
 
+    #return EEd, 1.0
+    #return EEd, -b*cosz/tmp
     #return delta2, delta
+    #return EEd, delta
+    #return EEd, gamma
     return EEd, delta
-
+    #return EEd, 1.0
+    
     #return dF, EEd
     #return gamma, gamma2
     #return dS, dOmega

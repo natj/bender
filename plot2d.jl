@@ -21,9 +21,10 @@ function plot2d(sdata, xx_grid, yy_grid,
     clims = (hmin, hmax)
 
     #colormap
-    #cm = Uint32[Color.convert(Color.RGB24,c) for c in flipud(Color.colormap(colmap))]
-    #cm = Uint32[Color.convert(Color.RGB24,c) for c in flipud(Color.colormap("Blues"))]
-    cm = UInt32[Colors.convert(Colors.RGB24,c) for c in Colors.colormap(colmap)]
+    #cm = Uint32[Color.convert(Color.RGB24,c) for c in flipud(Colors.colormap(colmap))]
+    #cm = Uint32[Color.convert(Color.RGB24,c) for c in flipud(Colors.colormap("Blues"))]
+    #cm = UInt32[Colors.convert(Colors.RGB24,c) for c in Colors.colormap(colmap)]
+    cm = UInt32[Colors.convert(Colors.RGB24,c) for c in flipdim(Colors.colormap(colmap),1)]
     unshift!(cm, 0x00ffffff)
     #push!(cm, 0x00ffffff)
 

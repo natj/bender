@@ -251,11 +251,11 @@ function bender3(x, y, sini,
             zp1 = zn + hi*(0.5*k1z + 0.5*k2z)
 
             #Error
-            errt = abs(tp1 - tp1_o)
+            errt = abs(tp1 - tp1_o) #*1.0e-4
             erry = abs(yp1 - yp1_o)
             errz = abs(zp1 - zp1_o)
 
-            err = max(abs(erry/yp1), abs(errz/zp1), abs(errt/tp1)) #rel err
+            err = max(abs(erry/yp1), abs(errz/zp1), 10*abs(errt/tp1)) #rel err
             #err = max(abs(erry), abs(errz)) #abs err
         end
 

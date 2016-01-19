@@ -3,8 +3,8 @@ using toolbox
 
 
 #read file1
-fname1 = "f400_lamb_bb_R12.0_M1.6_rho30.csv"
-#fname1 = "f400_lamb_bb_R12.0_M1.6_rho1.csv"
+#fname1 = "f400_lamb_bb_R12.0_M1.6_rho30.csv"
+fname1 = "f400_lamb_bb_R12.0_M1.6_rho1.csv"
 #fname1 = "f1_lamb_bb_R12.0_M1.6_rho1.csv"
 #fname1 = "f1_lamb_bb_R12.0_M1.6_rho30.csv"
 
@@ -18,8 +18,8 @@ bflux1 = da1[:,6] #Bolom flux keV/cm^2/s
 
 
 #read file2
-fname2 = "nu400Hz_blackbody_rho30deg.dat"
-#fname2 = "nu400Hz_blackbody_rho1deg.dat"
+#fname2 = "nu400Hz_blackbody_rho30deg.dat"
+fname2 = "nu400Hz_blackbody_rho1deg.dat"
 #fname2 = "nu1Hz_blackbody_rho1deg.dat"
 #fname2 = "nu1Hz_blackbody_rho30deg.dat"
 
@@ -63,7 +63,7 @@ function comp_plot(phase1, flux1, phase2, flux2)
 
     pe = plot(phase2[1:Np], err,
               xrange = [0.0, 1.0],
-              #yrange = [-0.1, 0.1],
+              yrange = [-0.1, 0.1],
               xlabel = "Phase",
               ylabel = "Relative error"
               )
@@ -96,7 +96,23 @@ for i = 1:5
         p5, pe5 = comp_plot(phase1, bflux1, phase2, bflux2)
         t[3,2] = p5
         t[4,2] = pe5
-    end        
+    #end
+    elseif i == 6
+        #interpolate ratio
+        Np = 129
+        ratio = zeros(Np)
+        for i = 1:Np
+            iphase = phase2[i]
+            val = toolbox.interp(phase1, bflux1, iphase, method=:cubic)
+            ratio[i] = (val)/bflux2[i]
+        end
+        pe6 = plot(phase2, ratio, "b-",
+                   xlabel = "Phase",
+                   ylabel = "ratio")
+        pe6 = oplot([phase2[1], phase2[Np]], [1.0, 1.0], "k--")
+        t[4,3] = pe6
+    end
+    
 end
 
 #t[1,1] = p1

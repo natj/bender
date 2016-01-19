@@ -119,6 +119,8 @@ print("interpolating into dense grid...")
 method = Gridded(Linear())
 #method = Gridded(Constant())
 
+Times = Times .- Times[1,1]
+
 time_interp    = interpolate((rad_grid, chi_grid), Times     ,method)
 phi_interp_sin = interpolate((rad_grid, chi_grid), sin(Phis) ,method)
 phi_interp_cos = interpolate((rad_grid, chi_grid), cos(Phis) ,method)
