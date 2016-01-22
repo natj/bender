@@ -11,8 +11,8 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(1.0)
-colat = deg2rad(50.0)
+rho = deg2rad(10.0)
+colat = deg2rad(90.0)
 
 
 ########
@@ -43,9 +43,7 @@ end
 function time_lag(t, k, times, Nt, tbin, phi, theta)
 
     #exact from raytracing
-    #dt = t/c
     dt = t*G*M/c^3
-    #dt = t
     
     #approximative
     #cosi = sqrt(1-sini^2)
@@ -59,7 +57,7 @@ function time_lag(t, k, times, Nt, tbin, phi, theta)
 
     #get new timebin index
     kd = 1
-    while dt > (2kd - 1)*tbin
+    while dt >= (2kd - 1)*tbin
         kd += 1
     end
     kd -= 1
@@ -69,15 +67,12 @@ function time_lag(t, k, times, Nt, tbin, phi, theta)
     #while kindx > Nt
     #    kindx -= Nt
     #end
-
     
     #println("k: $k kd: $kd kindx: $kindx")
     #println()
     
     return kindx
 end
-
-
 
 
 img4 = zeros(Ny_dense, Nx_dense) #debug array
@@ -99,7 +94,7 @@ phase = collect(times .* fs)
 spot_flux = zeros(Nt)
 spot_flux2 = zeros(Nt)
 
-sdelta = ones(Nt)
+sdelta = zeros(Nt)
 sdelta2 = zeros(Nt)
 
 sfluxE = zeros(Nt, 3)
@@ -246,6 +241,7 @@ toc()
 tic()
 
 for k = 1:Nt
+#for k = 12:16
 #for k = 40:40
 #for k = 27:26
 #for k = 80:80
@@ -441,7 +437,7 @@ for k = 1:Nt
     xs = x_grid_d[1] + 0.84*(x_grid_d[end] - x_grid_d[1])
     ys = y_grid_d[1] + 0.93*(y_grid_d[end] - y_grid_d[1])
     Winston.add(p10a, Winston.DataLabel(xs, ys, "$(k) ($(round(times[k]*fs,3)))"))
-    #display(p10)
+    #display(p10a)
 
     #println("dx = $(frame_dxx) dy = $(frame_dyy)")
 
@@ -530,7 +526,7 @@ for k = 1:Nt
                     kd = time_lag(time, k, times, Nt, tbin, phi, theta)
 
                     #if kd != k
-                    #    println("time shift")
+                    #    println("   $x $y $k $kd")
                     #end
                     
                     #Xob = Xs_interp[y,x] 
@@ -560,8 +556,7 @@ for k = 1:Nt
                     sdelta2[k] += EEd * frame_dxdy #* imgscale
                     Ndelta += frame_dxdy
                     
-                    img5[j,i] += dfluxB * frame_dxdy * imgscale * 1.0e3
-                    
+                    img5[j,i] += dfluxB * frame_dxdy * imgscale * 1.0e5
                     #img5[j,i] = 5.0
                     #if kd != k
                     #    println("dF: $dF $k $kd")
@@ -569,7 +564,8 @@ for k = 1:Nt
                     #spot_flux[kd] += dF / frame_dxdy
                     #spot_flux[kd] += frame_dxdy
                     #spot_flux[k] += dF * frame_dxdy
-
+                    kd = k
+                    
                     for ie = 1:3
                         sfluxE[kd, ie] += dfluxE[ie] * frame_dxdy * imgscale
                         sfluxNE[kd, ie] += dfluxNE[ie] * frame_dxdy * imgscale
@@ -631,7 +627,10 @@ toc()
 
 
 #write to file
-opath = "out/"
+#opath = "out/"
+opath = "out2/f700/r16/"
+#opath = "out2/cadeau+morsink/"
+
 mkpath(opath)
 
 

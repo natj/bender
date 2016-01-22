@@ -14,10 +14,10 @@ const ergkev = 6.2415e8 # erg/keV
 const cm_parsec = 3.2404e-23 #1cm/10kpc
 
 #initial parameters in physical units
-incl = pi/3
-M    = 1.6Msun
-R    = 12km
-fs   = 400
+incl = deg2rad(45.0)
+M    = 1.4Msun
+R    = 12.0km
+fs   = 700
 #Dist = 1.0*cm_parsec
 
 
@@ -251,11 +251,11 @@ function bender3(x, y, sini,
             zp1 = zn + hi*(0.5*k1z + 0.5*k2z)
 
             #Error
-            errt = abs(tp1 - tp1_o) #*1.0e-4
+            errt = abs(tp1 - tp1_o)
             erry = abs(yp1 - yp1_o)
             errz = abs(zp1 - zp1_o)
 
-            err = max(abs(erry/yp1), abs(errz/zp1), 10*abs(errt/tp1)) #rel err
+            err = max(abs(erry/yp1), abs(errz/zp1), 100*abs(errt/tp1)) #rel err
             #err = max(abs(erry), abs(errz)) #abs err
         end
 

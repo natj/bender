@@ -1,8 +1,8 @@
 ######################
 ######################
 #Radial function by AlGendy & Morsink 2014
-#Circumferential radius
-function Rgmf(theta, X, Osb)
+#Circumferential (isoradial) radius
+function Rgmf2(theta, X, Osb)
     const o20 = -0.788
     const o21 = 1.030
 
@@ -14,8 +14,46 @@ function Rgmf(theta, X, Osb)
     #derivative dR/dtheta
     dtR = -2*Osb^2*(o20+o21*X)*cos(theta)*sin(theta) #from AlGendy & Morsink 2014
 
-    return 1.0, 0.0
-    #return Rgm, dtR
+    #return 1.0, 0.0
+    return Rgm, dtR
+end
+
+
+######################
+######################
+#Radial function by Cadeau 2007
+#Circumferential radius
+function Rgmf(theta, X, Osb)
+    
+    angvel = 2*pi*fs
+    zeta = G*M/(R*c^2)
+    eps = (angvel^2 * R^2)/(zeta*c^2)
+    #eps2 = (angvel^2 * R^3)/(G*M)
+    
+    a0 = -0.18*eps + 0.23*zeta*eps - 0.05*eps^2
+    a2 = -0.39*eps + 0.29*zeta*eps + 0.13*eps^2
+    a4 =  0.04*eps - 0.15*zeta*eps + 0.07*eps^2
+
+    #CFL Quark Star
+    #    a0 = -0.26*eps+0.50*zeta*eps-0.04*eps*eps 
+    #    a2 = -0.53*eps+0.85*zeta*eps+0.06*eps*eps
+    #    a4 = 0.02*eps-0.14*zeta*eps+0.09*eps*eps
+    #end
+    
+    #Legendre polynomials
+    p0 = 1.0
+    p2 = 0.25*(1.0 + 3.0*cos(2.0*theta))
+    p4 = 0.015625*(9.0 + 20.0*cos(2.0*theta) + 35.0*cos(4.0*theta))
+    
+    sradius = (1.0 + a0*p0 + a2*p2 + a4*p4)
+
+    #derivative
+    dp2 = -3.0*sin(theta)*cos(theta)
+    dp4 = -5/16*(2*sin(2*theta) + 7*sin(4*theta))
+    dtR = a2*dp2 + a4*dp4
+
+    #return 1.0, 0.0
+    return sradius, dtR
 end
 
 

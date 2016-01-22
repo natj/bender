@@ -76,10 +76,12 @@ function radiation(rad, chi,
     #########################
     #vphi = Rgm*(B/enu^2)*sin(theta)*(2pi*fs - w) #isotropic zamo
     vphi = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
+    #vphi = Rgm*(1/enu)*sin(theta)*(2pi*fs) #isoradial zamo
+    
     b = R*vphi/c
     #vw = Rgm*(1/enu)*sin(theta)*w #isoradial space vel
     #bp = R*vw/c
-    gamma = 1/sqrt(1 - b^2)
+    gamma2 = 1/sqrt(1 - b^2)
     
     #dtaudt = (enu^2)/gamma
     # for ijk = 1:10
@@ -95,8 +97,8 @@ function radiation(rad, chi,
     sina = sqrt(1-cosa^2)
     cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
     cosz = -sina*sini*sin(phi)/sqrt(1-cospsi^2)
-    eta =  1/(1 - b*cosz)
-    delta = (eta/gamma)
+    eta2 =  1/(1 - b*cosz)
+    delta2 = (eta2/gamma2)
      #for ijk = 1:10
      #    sina = sqrt(1-cosa^2)/delta
      #    cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
@@ -105,16 +107,16 @@ function radiation(rad, chi,
      #    delta = (eta/gamma)
      #end
 
-    EEd = delta*enu #*(1 + cosz*bp)
+    EEd2 = delta2*enu #*(1 + cosz*bp)
     #delta2 = delta
     #else
 
 
     #########################
     #vz = Rgm*(B/enu^2)*sin(theta)*(2pi*fs - w) #isotropic zamo
-    #vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
-    #bz = R*vz/c
-    #gamma = 1/sqrt(1 - bz^2)
+    vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
+    bz = R*vz/c
+    gamma = 1/sqrt(1 - bz^2)
     #dtaudt = (enu^2)/gamma
 
     #iterate correct local time on the surface
@@ -126,10 +128,9 @@ function radiation(rad, chi,
     #     dtaudt = (enu^2)/gamma
     # end        
 
-    #eta =  1/(1 + Lz*(2pi*fs)/(G*M/c^2))
-    #tmp = Lz*(2pi*fs)/(G*M/c^2)
-    #delta = (eta/gamma)
-    #EEd = delta*enu
+    eta =  1/(1 + Lz*(2pi*fs)/(G*M/c^2))
+    delta = (eta/gamma)
+    EEd = delta*enu
 
 
     ##################
@@ -146,10 +147,15 @@ function radiation(rad, chi,
     #return EEd, 1.0
     #return EEd, -b*cosz/tmp
     #return delta2, delta
-    #return EEd, delta
+    #return EEd, enu
     #return EEd, gamma
-    return EEd, delta
+    #return EEd, delta
+    #return EEd, eta/eta2
+    #return EEd, Lz*(2pi*fs)/(G*M/c^2)/(-cosz*b)
+    #return EEd, -Lz/(cosz)
+    #return EEd, Lz
     #return EEd, 1.0
+    return EEd, delta
     
     #return dF, EEd
     #return gamma, gamma2
