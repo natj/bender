@@ -2,13 +2,14 @@ using Winston
 using toolbox
 
 
-#read file1
-fname1 = "f400_lamb_bb_R12.0_M1.6_rho30.csv"
-#fname1 = "f400_lamb_bb_R12.0_M1.6_rho1.csv"
-#fname1 = "f1_lamb_bb_R12.0_M1.6_rho1.csv"
-#fname1 = "f1_lamb_bb_R12.0_M1.6_rho30.csv"
+#folder = "cadeau+morsink/"
+folder = "f700/r12/"
 
-da1 = readcsv(fname1)
+#read file1
+#fname1 = "f600_lamb_bb_R16.4_M1.4_rho1.csv"
+fname1 = "f700_lamb_bb_R12.0_M1.4_rho10.csv"
+
+da1 = readcsv(folder*fname1)
 phase1 = da1[:,1]
 flux1_kev_2 = da1[:,2] #Photon number flux at E (keV)
 flux1_kev_6 = da1[:,3] #
@@ -18,12 +19,11 @@ bflux1 = da1[:,6] #Bolom flux keV/cm^2/s
 
 
 #read file2
-fname2 = "nu400Hz_blackbody_rho30deg.dat"
-#fname2 = "nu400Hz_blackbody_rho1deg.dat"
-#fname2 = "nu1Hz_blackbody_rho1deg.dat"
-#fname2 = "nu1Hz_blackbody_rho30deg.dat"
+#fname2 = "resultcadfig3.dat"
+#fname2 = "r16x10d90i45.dat"
+fname2 = "r12x10d90i45.dat"
 
-da2 = readdlm(fname2)
+da2 = readdlm(folder*fname2)
 phase2 = da2[:,1]
 flux2_kev_2 = da2[:,2] #Photon number flux at E (keV)
 flux2_kev_6 = da2[:,3] #
@@ -53,7 +53,7 @@ function comp_plot(phase1, flux1, phase2, flux2)
 
 
     #interpolate abs. error
-    Np = 129
+    Np = 128
     err = zeros(Np)
     for i = 1:Np
         iphase = phase2[i]

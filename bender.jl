@@ -10,13 +10,16 @@ const G = 6.67259e-8
 const c = 2.99792458e10
 const Msun = 1.99e33
 const km = 1.0e5
+const ergkev = 6.2415e8 # erg/keV 
+const cm_parsec = 3.2404e-23 #1cm/10kpc
 
 #initial parameters in physical units
-incl = pi/3
-M    = 1.6Msun
-R    = 12km
-fs   = 1.0
-#increase level around ptheta zero
+incl = deg2rad(45.0)
+M    = 1.4Msun
+R    = 12.0km
+fs   = 700
+#Dist = 1.0*cm_parsec
+
 
 #derived dimensionless values
 const sini = sin(incl)
@@ -25,6 +28,8 @@ const Rg = 1.0
 const X = G*M/(R*c^2)
 const Osb = (2pi*fs)*sqrt(R^3/(G*M))
 const U = 2*G*M/(R*c^2)
+const imgscale = (G*M/c^2)^2
+
 println("x=$X ($U) and Osb=$Osb incl=$incl")
 
 #Hartle-Thorne parameters
@@ -51,13 +56,15 @@ include("strig.jl")
 ####################################
 ####################################
 #Moments
+
+
 function ptim(a, b, sini,
               x, nu2, B2, zeta2, wp, theta, Rg)
 
     return exp(-2*x^3*nu2)*(2+x)^2*(-1 + a*x^3*(-1 + 3*x)*wp*sini)/(-2 + x)^2
 end
 
-#Radial moment pr
+#Radial moment p^r
 function prad(a, b, sini,
               x, nu2, B2, zeta2, wp, theta, Rg)
     
@@ -116,6 +123,19 @@ function rk_step(rri, yni,
     return dt, dy, dz, tturn, rturn
 end
 
+#polar coordinate wrapper
+function bender3p(rad, chi, sini,
+                  X, Osb,
+                  beta, quad, wp, Rg)
+
+    #x = rad*sin(chi)
+    #y = rad*cos(chi)
+    #println("x=$x y=$y")
+    
+    bender3(rad*sin(chi), rad*cos(chi), sini,
+            X, Osb,
+            beta, quad, wp, Rg)
+end
 
 ######################
 function bender3(x, y, sini,
@@ -132,7 +152,7 @@ function bender3(x, y, sini,
     ######################
     #leapfrog tracing
     const h = 0.002
-    const tol = 1.0e-6 #relative tol
+    const tol = 5.0e-7 #relative tol
     
     hit = true
     rr = 0.0
@@ -235,7 +255,7 @@ function bender3(x, y, sini,
             erry = abs(yp1 - yp1_o)
             errz = abs(zp1 - zp1_o)
 
-            err = max(abs(erry/yp1), abs(errz/zp1), abs(errt/tp1)) #rel err
+            err = max(abs(erry/yp1), abs(errz/zp1), 100*abs(errt/tp1)) #rel err
             #err = max(abs(erry), abs(errz)) #abs err
         end
 
@@ -293,7 +313,7 @@ function bender3(x, y, sini,
         #Break down if we are close to the star;
         #helps with surface detection and with 1/r^3 functions
         if rr > Xob*0.95
-            level = 2.0^6
+            level = 128.0
         end
     end
 

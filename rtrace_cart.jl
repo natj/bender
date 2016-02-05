@@ -8,8 +8,8 @@ xmax = -xmin +0.005
 ymin = -10
 ymax = -ymin +0.005
 
-Ny = 1000
-Nx = 1000
+Ny = 100
+Nx = 100
 
 xmid = round(Int,Nx/2)
 ymid = round(Int,Ny/2)

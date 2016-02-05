@@ -62,6 +62,8 @@
 \newcommand{\Bb}{\ensuremath{\bar{B}}}
 \newcommand{\mub}{\ensuremath{\bar{\mu}}}
 
+\newcommand{\vz}{\ensuremath{v_{\mathrm{Z}}}}
+
 %%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -364,7 +366,7 @@ b = \frac{\Ca^{1/2}}{E}
 \ee
 and
 \be
-\cos \chi = \frac{1}{\sin i} \frac{L_z}{\Ca^{1/2}}.
+\sin \chi = \frac{1}{\sin i} \frac{L_z}{\Ca^{1/2}}.
 \ee
 
 The constants of motion, combined with the geodesic null condition $p^\mu p_\mu = 0$, allow us to solve $p^\theta$ and $p^\phi$ in terms of $r$.
@@ -379,28 +381,30 @@ Now as a final step we can substitute the four-momentum components and image-pla
 %\int_{\mathrm{R_e}}^{\infty} \frac{p^{\phi}}{p^r} dr =
  \Delta \phi &= 
  \int_{\mathrm{\bar{R}_e}}^{\infty} \frac{ \frac{L_z}{\sin^2\theta} - e^{-2\nub}r^2\wb(E-L_z \omega)}{r^2 \sqrt{(E-L_z\omega)^2-\frac{\mathcal{C}}{e^{-2\nub}r^2}}} dr \\
- &= \int_{\mathrm{\bar{R}_e}}^{\infty} \frac{dr}{r^2} \frac{\frac{\cos\chi \sin i}{\sin^2\theta} - e^{-2\nub}r^2\wb \left(\frac{1}{b} + \wb \cos\chi \sin i \right)}{\sqrt{\left(\frac{1}{b} + \wb \cos\chi \sin i \right)^2 - \frac{1}{e^{-2\nub} r^2}}}
+ &= \int_{\mathrm{\bar{R}_e}}^{\infty} \frac{dr}{r^2} \frac{\frac{\sin\chi \sin i}{\sin^2\theta} - e^{-2\nub}r^2\wb \left(\frac{1}{b} + \wb \sin\chi \sin i \right)}{\sqrt{\left(\frac{1}{b} + \wb \sin\chi \sin i \right)^2 - \frac{1}{e^{-2\nub} r^2}}}
 \end{split}\end{align}
 and
 \begin{align}\begin{split}
 %\int_{\mathrm{R_e}}^{\infty} \frac{p^{\theta}}{p^r} dr =
     \Delta \theta &=
     \int_{\mathrm{\bar{R}_e}}^{\infty} \frac{e^{-\mu}\sqrt{\mathcal{C} - \frac{L_z^2}{\sin^2\theta}}}{r^2\sqrt{(E-L_z\omega)^2-\frac{\mathcal{C}}{e^{-2\nub}r^2}}} dr \\
-    &= \int_{\mathrm{\bar{R}_e}}^{\infty} \frac{dr}{r^2} \frac{e^{-\mu} \sqrt{1-\left(\frac{\cos\chi \sin i}{\sin\theta}\right)^2}}{\sqrt{\left(\frac{1}{b} + \wb \cos\chi \sin i \right)^2 - \frac{1}{e^{-2\nub} r^2}}}.
+    &= \int_{\mathrm{\bar{R}_e}}^{\infty} \frac{dr}{r^2} \frac{e^{-\mu} \sqrt{1-\left(\frac{\sin\chi \sin i}{\sin\theta}\right)^2}}{\sqrt{\left(\frac{1}{b} + \wb \sin\chi \sin i \right)^2 - \frac{1}{e^{-2\nub} r^2}}}.
 \end{split}\end{align}
-Both expression reduce back to familiar bending equations in (isoradial) Schwarzschild metric when $\wb=0$, $\sin i = 1$ and $\cos\chi = 0$ for $\Delta\theta$ expression or $\cos\chi = 1$ for $\Delta\phi$.
+Both expression reduce back to familiar bending equations in (isoradial) Schwarzschild metric when $\wb=0$, $\sin i = 1$ and $\sin\chi = 0$ for $\Delta\theta$ expression or $\sin\chi = 1$ for $\Delta\phi$.
 However, with oblate stars it suffices to notice that the previous equations are further complicated by the fact that $\bar{R}_e = \bar{R}_e(\theta)$ and $\wb = \wb(\rb, \theta)$.
 
-\subsubsection{Emission angle $\alpha$}
-The general coordinates of a photon are defined as $x^{\alpha} = (x^{t}, x^{r}, x^{\theta}, x^{\phi})$ and the four-velocity is obtained from $dx^{\alpha}/d\lambda$ through affine parameter $\lambda$.
+
+\subsection{Emission angle and redshift}
+The general coordinates of a photon are defined as $x^{\alpha} = (x^{t}, x^{r}, x^{\theta}, x^{\phi})$ and the four-velocity is obtained from $u^{\alpha} = dx^{\alpha}/d\lambda$ through affine parameter $\lambda$.
 This general photon can then be compared to a photon moving along the surface normal $\vec{n}$ to obtain the emission angle $\alpha$ in some radial distance $R$.
-Four-velocity of this photon is then $w_{\alpha} = (-e^{2\nub-\zetab}, \cos\gamma, \sin\gamma, 0 )$ obtained from the standard normalization $w^{\alpha}w_{\alpha} = 0$.
+Four-velocity of this reference photon is then $w_{\alpha} = (-e^{2\nub-\zetab}, \cos\gamma, \sin\gamma, 0 )$ obtained from the standard normalization $w^{\alpha}w_{\alpha} = 0$.
 The angle between the two photons also depends on the observer.
 The four-velocity of a stationary distant observer is at rest compared to the object so it must move along the time-like Killing vector.
 By setting this four-velocity to be $v^{\alpha}=(t_0,0,0,0)$ and using the the time-like geodesic condition $v^{\alpha} v_{\alpha} = -1$ we obtain 
 \be
 t_0 = \frac{e^{-\nub}}{\sqrt{1 - \Bb^2 e^{-2\nub} \rb^2 \omega^2}}.
 \ee
+
 The angle between the two photons $u^{\alpha}$ and $w^{\alpha}$ is then \citep{PFC83}
 \be
 \cos \alpha = 1 + \frac{u^{\alpha}w_{\alpha}}{(v^{\beta} u_{\beta})(v^{\gamma} w_{\gamma})},
@@ -412,11 +416,67 @@ The aforementioned generalized vector product for photons can be obtained by con
 The emission angle is then
 \begin{align}\begin{split}
 &\cos \alpha = 1 + (1-\Bb^2 e^{-2\nub} \rb^2\wb^2\sin^2\theta) \times \\
-&\{ (E-L_z \wb) + e^{2\nub-\zetab} (\cos\gamma p_{\rb} + \sin\gamma B^2 \rb p_{\theta}) \}.
+&\{ -(E-L_z \wb) + e^{2\nub-\zetab} (\cos\gamma p_{\rb} + \sin\gamma B^2 \rb p_{\theta}) \}.
 %&[ (E-L_z \wb) + \cos\gamma \sqrt{(E-L_z \wb)^2 - \frac{\Ca}{\Bb^2 e^{-4\nub} \rb^2}} \\
 %&+\Bb e^{2\nub} \rb \sin\gamma \sqrt{\Ca - \frac{L_z}{\sin^2\theta}} ]
 \end{split}\end{align}
 Here it suffices to notice that we are only interested in the emission angle value at the surface of the star i.e. $\rb = R(\theta)$.
+
+
+The total redshift as measured by an observed at inifinity is given by another inner-product between a general photon $u^{\alpha}$ and the 4-velocity of the star's fluid $s^{\alpha} = (t^{\alpha}/N,0,0,\Omega \phi^{\alpha}/N)$ where the normalization factor is defined as $N^2 = e^{2\nub} (1 - \vz^2)$ with
+\be
+\vz = (\Omega - \wb) \Bb e^{-2\nub} \rb \sin\theta.
+\ee
+This is the so called zero angular momentum velocity as observed by non-rotating spectator at infinity.
+With these definitions the redshift is
+\be
+1 + z = -s_{\alpha} u^{\alpha} = e^{-\nub} ~\delta^{-1}
+\ee
+consisting of the gravitational part $e^{-\nub}$ and of the second Doppler-like term
+\be
+\delta = \frac{\sqrt{1-\vz^2}}{1 - \Omega L_Z}.
+\ee
+
+
+\subsection{Emission}
+Observed flux from a small area on the surface of the star with photon energy $E$ is
+\be
+dF_E = I_E d\Omega_o,
+\ee
+where $I_E$ is the specific intensity of the radiation at inifnity and $d\Omega_o$ is the solid angle subtended by the area as measured by the observer.
+The relation between the emergent energy $E'$ to the observed energy $E$ is $E/E' = (1 + z)^{-1}$.
+The connection between the monochromatic observed and local intensity is then \citep[see e.g.,][]{MTW73, RL79}
+\be
+I_E = \left( \frac{E}{E'} \right)^3 ~I'_{E'}(\alpha),
+\ee
+where $I'_{E'}(\alpha)$ is the intensity computed in the frame comoving with the emitting area.
+The radiation here is emitted to the direction of the emission angle $\alpha$.
+For the bolometric intensity one gets
+\be
+I = \left(\frac{E}{E'} \right)^4 ~I'(\alpha).
+\ee
+
+The motion of the area also causes aberration in the angles between the normal to the surface and the initial photon direction as measured in the rest frame of area.
+Because of this, the solid angle measured at inifnity $d\Omega_o$ is transformed with one extra Doppler-factor as compared to the static solid angle $d\Omega_s$ as
+\be
+d\Omega_o = \delta d\Omega_s.
+\ee
+The total flux $F$ can then be obtained by integrating over the whole image plate i.e. summing over the $dF$ elements.
+
+%%%%%%%%%%%%
+
+%\section{Conclusions}
+\section*{Acknowledgments}
+
+\bibliographystyle{apj}
+\bibliography{allbib}
+
+%\begin{thebibliography}
+%\end{thebibliography}
+
+
+\clearpage
+\appendix
 
 \subsection{Method of solution}
 There are two fundamentally different ways to make the ray tracing:
@@ -438,20 +498,6 @@ I have tried couple of different expansions and it is at least possible to get e
 This is not, however, very cool because according to Arizona group it is the quadropole moments that affect the image most.
 }
 
-%%%%%%%%%%%%
-
-%\section{Conclusions}
-\section*{Acknowledgments}
-
-\bibliographystyle{apj}
-\bibliography{allbib}
-
-%\begin{thebibliography}
-%\end{thebibliography}
-
-\end{document}
-
-\appendix
 
 \section{Additional stuff about elliptic integrals and so on}
 
@@ -507,3 +553,4 @@ on the limit of no rotation $\omega \rightarrow 0$ that corresponds to the solut
 
 
 
+\end{document}
