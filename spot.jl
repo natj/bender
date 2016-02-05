@@ -6,7 +6,7 @@ include("plot2d.jl")
 #include("bender.jl")
 
 #Compute raw image
-#include("comp_img.jl")
+#include("rtrace.jl")
 
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
