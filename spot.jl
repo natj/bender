@@ -11,7 +11,7 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(1.0)
+rho = deg2rad(30.0)
 colat = deg2rad(50.0)
 
 
@@ -86,7 +86,7 @@ N_frame = 100
 #Ir(cosa) = cosa
 
 #Time parameters
-Nt = 128
+Nt = 64
 times = collect(linspace(0, 1/fs, Nt))
 tbin = abs(times[2] - times[1])/2.0 
 phase = collect(times .* fs)
@@ -276,9 +276,12 @@ for k = 1:Nt
             #trace back to star
             phi = phi_interp_atan(rad,chi)
             theta = theta_interp[rad,chi]
-                        
+            time = time_interp[rad,chi]
+            
             #rotate star
-            phi = phi - t*fs*2*pi
+            dt = time*G*M/c^3 #time shift
+            
+            phi = phi - (t -dt)*fs*2*pi
             phi = mod2pi(phi)
       
             #img4[j,i] = -4.0*painter(phi, theta)/2.0
@@ -373,13 +376,17 @@ for k = 1:Nt
 
     #Exapand image a bit keeping the aspect ratio
     ##########
-    #frame_expansion_x = abs(frame_x2 - frame_x1)
-    #frame_expansion_y = abs(frame_y2 - frame_y1)
+    frame_expansion_x2 = abs(frame_x2 - frame_x1)
+    frame_expansion_y2 = abs(frame_y2 - frame_y1)
 
-    #frame_y1 -= frame_expansion_y*0.02
-    #frame_y2 += frame_expansion_y*0.02
-    #frame_x1 -= frame_expansion_x*0.02
-    #frame_x2 += frame_expansion_x*0.02
+    #frame_y1 -= frame_expansion_y2*0.15
+    #frame_y2 += frame_expansion_y2*0.15
+    #frame_x1 -= frame_expansion_x2*0.15
+    #frame_x2 += frame_expansion_x2*0.15
+    #frame_y1 *= 0.95 
+    #frame_y2 *= 1.05
+    #frame_x1 *= 0.95
+    #frame_x2 *= 1.05
 
     frame_xs = abs(frame_x2 - frame_x1)/N_frame
     frame_ys = abs(frame_y2 - frame_y1)/N_frame
@@ -458,53 +465,27 @@ for k = 1:Nt
             rad = hypot(x,y)
             chi = mod2pi(pi/2 - atan2(y,x))
 
-            #interpolate if we are not on the edge or near the zipper
-            #ring = rstar_min*0.98 < sqrt(x^2 + y^2) < 1.01*rstar_max
-            #zipper = abs(x) < 0.1 && y > 3.0
-            ring = false
-            zipper = false
-            #ring = true
-            #zipper = true
-
-            
-            if ring || zipper
-                time, phi, theta, Xob, hit, cosa = bender3(x, y, sini,
-                                                           X, Osb,
-                                                           beta, quad, wp, Rg)
-            else
-                # phi & theta
-                phi = phi_interp_atan(rad,chi)
-                theta = theta_interp[rad,chi]
-                Xob = Xs_interp[rad,chi]
-                time = time_interp[rad,chi]
-                cosa = cosa_interp[rad,chi]
+            phi = phi_interp_atan(rad,chi)
+            theta = theta_interp[rad,chi]
+            Xob = Xs_interp[rad,chi]
+            time = time_interp[rad,chi]
+            cosa = cosa_interp[rad,chi]
                 
-                #test if we hit the surface
-                hit = hits_interp[rad,chi]
-            end
-
-            #time, phi, theta, Xob, hit, cosa = bender3(x, y, sini,
-            #                                           X, Osb,
-            #                                           beta, quad, wp, Rg)
-
             #test if we hit the surface
-            #hit = hits_interp[y,x]
-            #hiti = round(Int,hit - 0.49)
+            hit = hits_interp[rad,chi]
+            
             hiti = round(Int, hit)
             
             if hiti > 0
-                #phi = phi_interp_atan(y,x)
-                #theta = theta_interp[y,x]
 
+                dt = time*G*M/c^3
+                
                 #rotatate star
-                phi = phi - t*fs*2*pi
+                #println("t: $t dt: $dt $(dt/t)")
+                phi = phi - (t - dt)*fs*2*pi
                 phi = mod2pi(phi)
                 
                 img5[j,i] = painter(phi, theta)/2.0
-                #if (ring || zipper)
-                #    img5[j,i] = painter(phi, theta)/2.0
-                #end
-
                 
                 inside = spot(0.0, phi, theta,
                               stheta = colat,
@@ -512,59 +493,20 @@ for k = 1:Nt
                               )
 
                 if inside
-                    #time = time_interp[y,x]
-
-                    #compute 
-                    #earea = polyarea(x, y,
-                    #                 frame_dxx, frame_dyy,
-                    #                 phi, theta,
-                    #                 exact=(ring || zipper)
-                    #                 #exact=true
-                    #                 #exact=false
-                    #                 )
-
-                    kd = time_lag(time, k, times, Nt, tbin, phi, theta)
-
-                    #if kd != k
-                    #    println("   $x $y $k $kd")
-                    #end
                     
-                    #Xob = Xs_interp[y,x] 
-                    #cosa = cosa_interp[y,x]
-                    #dF, dE = radiation(Ir,
-                    #                   x,y,
-                    #                   phi, theta, cosa,
-                    #                   X, Xob, Osb, sini, earea)
-                    
-                    #dF = flux_interp[y,x]
-                    #dE = reds_interp[y,x]
-
-                    #dF = flux_interp[rad,chi]
-
                     delta = delta_interp[rad,chi]
                     EEd = reds_interp[rad,chi]
                     
                     dfluxE, dfluxNE, dfluxNB, dfluxB = bbfluxes(EEd, delta, cosa)
                     
-                    #img4[j,i] = painter(phi, theta)
-                    
-                    #img5[j,i] += 1.0e9*dF * frame_dxdy
-                    #println(dF)
-
-                    #println(dfluxB)
                     sdelta[k] += delta * frame_dxdy #* imgscale
                     sdelta2[k] += EEd * frame_dxdy #* imgscale
                     Ndelta += frame_dxdy
                     
                     img5[j,i] += dfluxB * frame_dxdy * imgscale * 1.0e5
-                    #img5[j,i] = 5.0
-                    #if kd != k
-                    #    println("dF: $dF $k $kd")
-                    #end
-                    #spot_flux[kd] += dF / frame_dxdy
-                    #spot_flux[kd] += frame_dxdy
-                    #spot_flux[k] += dF * frame_dxdy
-                    #kd = k
+
+                    #skip timelag
+                    kd = k
                     
                     for ie = 1:3
                         sfluxE[kd, ie] += dfluxE[ie] * frame_dxdy * imgscale

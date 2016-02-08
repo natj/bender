@@ -3,8 +3,8 @@ using toolbox
 
 
 #read file1
-#fname1 = "f400_lamb_bb_R12.0_M1.6_rho30.csv"
-fname1 = "f400_lamb_bb_R12.0_M1.6_rho1.csv"
+fname1 = "f400_lamb_bb_R12.0_M1.6_rho30.csv"
+#fname1 = "f400_lamb_bb_R12.0_M1.6_rho1.csv"
 #fname1 = "f1_lamb_bb_R12.0_M1.6_rho1.csv"
 #fname1 = "f1_lamb_bb_R12.0_M1.6_rho30.csv"
 
@@ -20,8 +20,8 @@ bflux1 = da1[:,6] #Bolom flux keV/cm^2/s
 
 
 #read file2
-#fname2 = "nu400Hz_blackbody_rho30deg.dat"
-fname2 = "nu400Hz_blackbody_rho1deg.dat"
+fname2 = "nu400Hz_blackbody_rho30deg.dat"
+#fname2 = "nu400Hz_blackbody_rho1deg.dat"
 #fname2 = "nu1Hz_blackbody_rho1deg.dat"
 #fname2 = "nu1Hz_blackbody_rho30deg.dat"
 
@@ -65,7 +65,7 @@ function comp_plot(phase1, flux1, phase2, flux2)
 
     pe = plot(phase2[1:Np], err,
               xrange = [0.0, 1.0],
-              yrange = [-0.1, 0.1],
+              #yrange = [-0.1, 0.1],
               xlabel = "Phase",
               ylabel = "Relative error"
               )
