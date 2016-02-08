@@ -155,7 +155,8 @@ function radiation(rad, chi,
     #return EEd, -Lz/(cosz)
     #return EEd, Lz
     #return EEd, 1.0
-    return EEd, delta
+    #return EEd, delta
+    return EEd2, delta2
     
     #return dF, EEd
     #return gamma, gamma2

@@ -3,10 +3,12 @@ using toolbox
 
 
 #read file1
-fname1 = "f400_lamb_bb_R12.0_M1.6_rho30.csv"
-#fname1 = "f400_lamb_bb_R12.0_M1.6_rho1.csv"
+#fname1 = "f400_lamb_bb_R12.0_M1.6_rho30.csv"
+fname1 = "f400_lamb_bb_R12.0_M1.6_rho1.csv"
 #fname1 = "f1_lamb_bb_R12.0_M1.6_rho1.csv"
 #fname1 = "f1_lamb_bb_R12.0_M1.6_rho30.csv"
+
+println("last modified:", mtime(fname1))
 
 da1 = readcsv(fname1)
 phase1 = da1[:,1]
@@ -18,8 +20,8 @@ bflux1 = da1[:,6] #Bolom flux keV/cm^2/s
 
 
 #read file2
-fname2 = "nu400Hz_blackbody_rho30deg.dat"
-#fname2 = "nu400Hz_blackbody_rho1deg.dat"
+#fname2 = "nu400Hz_blackbody_rho30deg.dat"
+fname2 = "nu400Hz_blackbody_rho1deg.dat"
 #fname2 = "nu1Hz_blackbody_rho1deg.dat"
 #fname2 = "nu1Hz_blackbody_rho30deg.dat"
 

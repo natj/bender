@@ -9,6 +9,7 @@ folder = "f700/r12/"
 #fname1 = "f600_lamb_bb_R16.4_M1.4_rho1.csv"
 fname1 = "f700_lamb_bb_R12.0_M1.4_rho10.csv"
 
+
 da1 = readcsv(folder*fname1)
 phase1 = da1[:,1]
 flux1_kev_2 = da1[:,2] #Photon number flux at E (keV)
@@ -21,7 +22,9 @@ bflux1 = da1[:,6] #Bolom flux keV/cm^2/s
 #read file2
 #fname2 = "resultcadfig3.dat"
 #fname2 = "r16x10d90i45.dat"
-fname2 = "r12x10d90i45.dat"
+#fname2 = "r12x10d90i45.dat"
+fname2 = "r12x10d90i90.dat"
+
 
 da2 = readdlm(folder*fname2)
 phase2 = da2[:,1]
@@ -118,4 +121,4 @@ end
 #t[1,1] = p1
 #t[2,1] = p2
 
-savefig(t, fname1[1:end-3]*".eps")
+savefig(t, folder*fname1[1:end-3]*".eps")

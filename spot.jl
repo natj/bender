@@ -11,8 +11,8 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(10.0)
-colat = deg2rad(90.0)
+rho = deg2rad(1.0)
+colat = deg2rad(50.0)
 
 
 ########
@@ -50,8 +50,8 @@ function time_lag(t, k, times, Nt, tbin, phi, theta)
     #cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
     #y = 1 - cospsi
 
-    #dt0 = y*R/c
-    #dt2 = y*(1.0 + (U*y/8.0)*(1+ y*(1.0/3.0 - U/14.0)))*R/c
+    #dt = y*R/c
+    #dt = y*(1.0 + (U*y/8.0)*(1+ y*(1.0/3.0 - U/14.0)))*R/c
     #println("dt: $dt  dt0: $dt0  dt2: $dt2 ")
     #println(" $(dt01/dt) ")
 
@@ -86,7 +86,7 @@ N_frame = 100
 #Ir(cosa) = cosa
 
 #Time parameters
-Nt = 64
+Nt = 128
 times = collect(linspace(0, 1/fs, Nt))
 tbin = abs(times[2] - times[1])/2.0 
 phase = collect(times .* fs)
@@ -564,7 +564,7 @@ for k = 1:Nt
                     #spot_flux[kd] += dF / frame_dxdy
                     #spot_flux[kd] += frame_dxdy
                     #spot_flux[k] += dF * frame_dxdy
-                    kd = k
+                    #kd = k
                     
                     for ie = 1:3
                         sfluxE[kd, ie] += dfluxE[ie] * frame_dxdy * imgscale
@@ -627,8 +627,8 @@ toc()
 
 
 #write to file
-#opath = "out/"
-opath = "out2/f700/r16/"
+opath = "out/"
+#opath = "out2/f700/r12/"
 #opath = "out2/cadeau+morsink/"
 
 mkpath(opath)
