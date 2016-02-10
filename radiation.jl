@@ -14,7 +14,7 @@ NBE(T, Ener) = 5.039617e22 * (Ener .^3.0)./expm1(Ener ./ T) ./ Ener * ergkev
 
 #Number of black body photons N(T) = \int dE B_E(T)/E(keV) * ergkev
 #\int dE E^2 /(exp(E/T)-1) = Gamma(3)Zeta(3) T^3 
-NB(T) = 5.039617e22*6.2415e8*2.404*T.^3.0
+NB(T) = 5.039617e22*ergkev*2.404*T.^3.0
 
 #Energy of black body photons E(T) = \int dE B_E(T)
 #\int dE E^3 /(exp(E/T)-1) = Gamma(4)Zeta(4) T^4 = 6 * pi^4/90  * T^4
@@ -28,21 +28,19 @@ Beam(mu) = 1.0 #Lambertian
 #Compute blackbody flux elements
 function bbfluxes(EEd, delta, cosa)
 
-    dist = 1.0 / cm_parsec #10 kpc
+    dist = 1.0 / cm_parsec #10 kpc; source distance
     d2 = dist^2
     
-    const Energs = [2.0, 6.0, 12.0]
-    const Teff = 2.0
+    const Energs = [2.0, 6.0, 12.0] #energies for which to calculate flux
+    const Teff = 2.0 #blackbody effective temperature
 
-    #one extra delta from solid angle transformation
-    
     #Collect flux for different energies
-    fluxE = (EEd)^3 .* BE(Teff, Energs ./ EEd) .* Beam(cosa*delta) *delta #energy flux
-    fluxNE = (EEd)^2 .* NBE(Teff, Energs ./ EEd) .* Beam(cosa*delta) *delta #photon flux
+    fluxE = (EEd)^3 .* BE(Teff, Energs ./ EEd) .* Beam(cosa*delta) # energy flux
+    fluxNE = (EEd)^2 .* NBE(Teff, Energs ./ EEd) .* Beam(cosa*delta) # photon flux
     
     #Bolometric fluxes
-    fluxNB = (EEd)^3 * NB(Teff) * Beam(cosa*delta) *delta #photon bol flux
-    fluxB = (EEd)^4 * EB(Teff) * Beam(cosa*delta) *delta #energy bol flux
+    fluxNB = (EEd)^3 * NB(Teff) * Beam(cosa*delta) # photon bol flux
+    fluxB = (EEd)^4 * EB(Teff) * Beam(cosa*delta) # energy bol flux
 
     return fluxE ./ d2, fluxNE ./ d2, fluxNB/d2, fluxB/d2
 end
@@ -114,21 +112,17 @@ function radiation(rad, chi,
 
     #########################
     #vz = Rgm*(B/enu^2)*sin(theta)*(2pi*fs - w) #isotropic zamo
+
+    #wp = 2*I*(2pi*fs)/X^2 / (G*M/c^2)
+    #w = wp*Xob^3*(1-3*Xob)
     vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
+
     bz = R*vz/c
     gamma = 1/sqrt(1 - bz^2)
     #dtaudt = (enu^2)/gamma
 
-    #iterate correct local time on the surface
-    # for ijk = 1:10
-    #     #vz = Rgm*(B/enu^2)*sin(theta)*(2pi*fs/dtaudt - w) #isoradial zamo 
-    #     vz = Rgm*(1/enu)*sin(theta)*(2pi*fs/dtaudt - w) #isoradial zamo 
-    #     bz = R*vz/c
-    #     gamma = 1/sqrt(1 - bz^2)
-    #     dtaudt = (enu^2)/gamma
-    # end        
-
-    eta =  1/(1 + Lz*(2pi*fs)/(G*M/c^2))
+    #what is this mystery factor 0.7282...?
+    eta =  1/(1 + (0.728194*(M/Msun)^2)*Lz*(2pi*fs)/(G*M/c^2))
     delta = (eta/gamma)
     EEd = delta*enu
 
@@ -154,10 +148,11 @@ function radiation(rad, chi,
     #return EEd, Lz*(2pi*fs)/(G*M/c^2)/(-cosz*b)
     #return EEd, -Lz/(cosz)
     #return EEd, Lz
-    #return EEd, 1.0
-    #return EEd, delta
+    #return EEd, (1/eta2 -1) / (1/eta -1)
+    return EEd, delta
     #return EEd2, delta2
-    return EEd2, 1.0
+    #return EEd2, 1.0
+    #return EEd, delta
     
     #return dF, EEd
     #return gamma, gamma2

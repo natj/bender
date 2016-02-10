@@ -11,8 +11,8 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(30.0)
-colat = deg2rad(50.0)
+rho = deg2rad(5.0)
+colat = deg2rad(45.0)
 
 
 ########
@@ -569,14 +569,15 @@ toc()
 
 
 #write to file
-opath = "out/"
-#opath = "out2/f700/r12/"
+#opath = "out/"
+
 #opath = "out2/cadeau+morsink/"
+opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))/"
 
 mkpath(opath)
 
+fname = "f$(round(Int,fs))phopfr$(round(Int,R/1e5))m$(round(M/Msun,1))d$(round(Int,rad2deg(colat)))i$(int((rad2deg(incl))))x$(round(Int,rad2deg(rho))).csv"
 
-fname = "f$(round(Int,fs))_lamb_bb_R$(round(R/1e5,1))_M$(round(M/Msun,1))_rho$(round(Int,rad2deg(rho))).csv"
 wmatr = zeros(Nt, 6)
 wmatr[:,1] = phase
 wmatr[:,2] = sfluxNE[:, 1] #2 kev

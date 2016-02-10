@@ -1,5 +1,11 @@
 ######################
 ######################
+
+#Spherical radial function
+function Rgmf3(theta, X, Osb)
+    return 1.0, 0.0
+end
+
 #Radial function by AlGendy & Morsink 2014
 #Circumferential (isoradial) radius
 function Rgmf(theta, X, Osb)
@@ -14,8 +20,8 @@ function Rgmf(theta, X, Osb)
     #derivative dR/dtheta
     dtR = -2*Osb^2*(o20+o21*X)*cos(theta)*sin(theta) #from AlGendy & Morsink 2014
 
-    return 1.0, 0.0
-    #return Rgm, dtR
+    #return 1.0, 0.0
+    return Rgm, dtR
 end
 
 
@@ -23,7 +29,7 @@ end
 ######################
 #Radial function by Cadeau 2007
 #Circumferential radius
-function Rgmf2(theta, X, Osb)
+function Rgmf3(theta, X, Osb)
     
     angvel = 2*pi*fs
     zeta = G*M/(R*c^2)

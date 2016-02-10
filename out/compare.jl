@@ -3,12 +3,18 @@ using toolbox
 
 
 #read file1
-fname1 = "f400_lamb_bb_R12.0_M1.6_rho30.csv"
-#fname1 = "f400_lamb_bb_R12.0_M1.6_rho1.csv"
-#fname1 = "f1_lamb_bb_R12.0_M1.6_rho1.csv"
-#fname1 = "f1_lamb_bb_R12.0_M1.6_rho30.csv"
+mass = 1.6 #mass
+rad = 12 #radius
+fs = 400 #frequency
+incl = 60 #inclination
+rho = 30 #spot radius
+tx = 50 #spot colatitude
+#prof = "bb"  #beaming profile
+prof = "hopf"  #beaming profile
 
+fname1 = "f$(round(Int,fs))p"*prof*"r$(round(Int,rad))m$(round(mass,1))d$(round(Int,tx))i$(round(Int,incl))x$(round(Int,rho)).csv"
 println("last modified:", mtime(fname1))
+
 
 da1 = readcsv(fname1)
 phase1 = da1[:,1]
@@ -18,12 +24,18 @@ flux1_kev_12 = da1[:,4] #
 bNflux1 = da1[:,5] #Bolometric number flux ph/cm^2/s
 bflux1 = da1[:,6] #Bolom flux keV/cm^2/s
 
+#phase1 = phase1 .- 0.001
 
 #read file2
-fname2 = "nu400Hz_blackbody_rho30deg.dat"
+#fname2 = "nu400Hz_blackbody_rho30deg.dat"
 #fname2 = "nu400Hz_blackbody_rho1deg.dat"
 #fname2 = "nu1Hz_blackbody_rho1deg.dat"
 #fname2 = "nu1Hz_blackbody_rho30deg.dat"
+if prof == "bb"
+    fname2 = "nu$(round(Int,fs))Hz_blackbody_rho$(round(Int,rho))deg.dat"
+elseif prof == "hopf"
+    fname2 = "nu$(round(Int,fs))Hz_hopf_rho$(round(Int,rho))deg.dat"
+end
 
 da2 = readdlm(fname2)
 phase2 = da2[:,1]
@@ -35,7 +47,7 @@ bflux2 = da2[:,6] #Bolom flux keV/cm^2/s
 
 
 
-function comp_plot(phase1, flux1, phase2, flux2)
+function comp_plot(phase1, flux1, phase2, flux2, stitle)
     
     #normalize
     println()
@@ -49,7 +61,7 @@ function comp_plot(phase1, flux1, phase2, flux2)
              xrange=[0.0, 1.0],
              #yrange=[0.0, 1.0],
              xlabel="Phase",
-             ylabel="Flux (arb)"
+             ylabel=stitle
              )
     p = oplot(phase2, flux2, "r.-")
 
@@ -79,23 +91,23 @@ t = Table(4,3)
 
 for i = 1:5
     if i == 1
-        p1, pe1 = comp_plot(phase1, flux1_kev_2, phase2, flux2_kev_2)
+        p1, pe1 = comp_plot(phase1, flux1_kev_2, phase2, flux2_kev_2, "N (2 keV) [ph/cm^2/s/keV]")
         t[1,1] = p1
         t[2,1] = pe1
     elseif i == 2
-        p2, pe2 = comp_plot(phase1, flux1_kev_6, phase2, flux2_kev_6)
+        p2, pe2 = comp_plot(phase1, flux1_kev_6, phase2, flux2_kev_6, "N (6 keV) [ph/cm^2/s/keV]")
         t[1,2] = p2
         t[2,2] = pe2
     elseif i == 3
-        p3, pe3 = comp_plot(phase1, flux1_kev_12, phase2, flux2_kev_12)
+        p3, pe3 = comp_plot(phase1, flux1_kev_12, phase2, flux2_kev_12, "N (12 keV) [ph/cm^2/s/keV]")
         t[1,3] = p3
         t[2,3] = pe3
     elseif i == 4
-        p4, pe4 = comp_plot(phase1, bNflux1, phase2, bNflux2)
+        p4, pe4 = comp_plot(phase1, bNflux1, phase2, bNflux2, "Bolometric N [ph/cm^2/s]")
         t[3,1] = p4
         t[4,1] = pe4
     elseif i == 5
-        p5, pe5 = comp_plot(phase1, bflux1, phase2, bflux2)
+        p5, pe5 = comp_plot(phase1, bflux1, phase2, bflux2, "Bolometric E [erg/cm^2/s]")
         t[3,2] = p5
         t[4,2] = pe5
     #end
