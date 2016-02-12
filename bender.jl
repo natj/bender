@@ -14,10 +14,10 @@ const ergkev = 6.2415e8 # erg/keV
 const cm_parsec = 3.2404e-23 #1cm/10kpc
 
 #initial parameters in physical units
-incl = deg2rad(45.0)
-M    = 1.4Msun
-R    = 12.0km
-fs   = 700
+incl = deg2rad(30.0)
+M    = 1.8Msun
+R    = 15.0km
+fs   = 600
 #Dist = 1.0*cm_parsec
 
 
@@ -33,14 +33,14 @@ const imgscale = (G*M/c^2)^2
 println("x=$X ($U) and Osb=$Osb incl=$incl")
 
 #Hartle-Thorne parameters
-#const beta = 0.4454*Osb^2*X #Matter quadrupole moment; Morsink 2014
-#const quad = -0.11*(Osb/X)^2 #Energy quadrupole moment; Morsink 2014
+const beta = 0.4454*Osb^2*X #Matter quadrupole moment; Morsink 2014
+const quad = -0.11*(Osb/X)^2 #Energy quadrupole moment; Morsink 2014
 I = sqrt(X)*(1.136-2.53*X+5.6*X^2) #Moment of inertia; Morsink 2014
-#const wp = 2*I*(2pi*fs)/X^2 / (G*M/c^2)
+const wp = 2*I*(2pi*fs)/X^2 / (G*M/c^2)
 
-const beta = 0.0
-const quad = 0.0
-const wp = 0.0
+#const beta = 0.0
+#const quad = 0.0
+#const wp = 0.0
 println("beta=$beta q=$quad wp=$wp")
 
 #
@@ -286,15 +286,15 @@ function bender3(x, y, sini,
         enu = (1-rr/2)/(1+rr/2)*exp(nu2*rr^3)
         B = (1-rr/2)*(1+rr/2) + B2*rr^2
 
-        #old radius (isoradial)
-        Rgm, dtR = Rgmf(yn, X, Osb) #isoradial
-        Xobi = X/Rgm #isoradial coordinate
-        Xob = Xobi*B/enu #isotropic x to be referenced with rr
-
-        #new radius (isotropic)
-        #Rgm, dtR = Rgmf(yn, X, Osb) #isoradial
+        #Radius (isoradial)
+        #Rgm, dtR = Rgmf(yn, X, Osb)
         #Xobi = X/Rgm
-        #Xob = Xobi*enu/B
+        #Xob = Xobi*B/enu #isotropic x to be referenced with rr
+
+        #Radius (isotropic)
+        Rgm, dtR = Rgmf(yn, X, Osb)
+        Xobi = X/Rgm
+        Xob = Xobi*enu/B #isotropic x; assuming spherical star, i.e. no conversion
 
         
         #Keep track of photon U-turns

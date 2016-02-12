@@ -11,8 +11,8 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(5.0)
-colat = deg2rad(45.0)
+rho = deg2rad(10.0)
+colat = deg2rad(40.0)
 
 
 ########
@@ -86,7 +86,7 @@ N_frame = 100
 #Ir(cosa) = cosa
 
 #Time parameters
-Nt = 64
+Nt = 32
 times = collect(linspace(0, 1/fs, Nt))
 tbin = abs(times[2] - times[1])/2.0 
 phase = collect(times .* fs)
@@ -280,6 +280,7 @@ for k = 1:Nt
             
             #rotate star
             dt = time*G*M/c^3 #time shift
+            #dt = 0.0
             
             phi = phi - (t -dt)*fs*2*pi
             phi = mod2pi(phi)
@@ -479,6 +480,7 @@ for k = 1:Nt
             if hiti > 0
 
                 dt = time*G*M/c^3
+                #dt = 0.0
                 
                 #rotatate star
                 #println("t: $t dt: $dt $(dt/t)")
@@ -572,18 +574,23 @@ toc()
 #opath = "out/"
 
 #opath = "out2/cadeau+morsink/"
-opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))/"
+#opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))/"
+
+opath = "out3/my/"
 
 mkpath(opath)
 
-fname = "f$(round(Int,fs))phopfr$(round(Int,R/1e5))m$(round(M/Msun,1))d$(round(Int,rad2deg(colat)))i$(int((rad2deg(incl))))x$(round(Int,rad2deg(rho))).csv"
+fname = "f$(round(Int,fs))pbbr$(round(Int,R/1e5))m$(round(M/Msun,1))d$(round(Int,rad2deg(colat)))i$(int((rad2deg(incl))))x$(round(Int,rad2deg(rho))).csv"
 
-wmatr = zeros(Nt, 6)
+wmatr = zeros(Nt, 9)
 wmatr[:,1] = phase
 wmatr[:,2] = sfluxNE[:, 1] #2 kev
 wmatr[:,3] = sfluxNE[:, 2] #6 kev
 wmatr[:,4] = sfluxNE[:, 3] #12 kev
 wmatr[:,5] = sfluxNB #bol number flux
 wmatr[:,6] = sfluxB #bol energy flux
+wmatr[:,7] = sfluxE[:, 1] #2 kev
+wmatr[:,8] = sfluxE[:, 2] #6 kev
+wmatr[:,9] = sfluxE[:, 3] #12 kev
 
 writecsv(opath*fname, wmatr)

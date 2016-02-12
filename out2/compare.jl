@@ -29,7 +29,7 @@ flux1_kev_12 = da1[:,4] #
 bNflux1 = da1[:,5] #Bolometric number flux ph/cm^2/s
 bflux1 = da1[:,6] #Bolom flux keV/cm^2/s
 
-phase1 = phase1 .+ 0.0079
+#phase1 = phase1 .+ 0.0079
 #bflux1 = bflux1 .* 0.979
 
 #read file2

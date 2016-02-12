@@ -377,18 +377,28 @@ We can then substitute these back into equations \eqref{eq:thetacond} and \eqref
 \end{align}
 
 Now as a final step we can substitute the four-momentum components and image-plane coordinates into \eqref{eq:deltatheta} and \eqref{eq:deltaphi} to obtain (in isoradial form and setting $E=1$ in the final expressions)
-\begin{align}\begin{split}
-%\int_{\mathrm{R_e}}^{\infty} \frac{p^{\phi}}{p^r} dr =
- \Delta \phi &= 
- \int_{\mathrm{\bar{R}_e}}^{\infty} \frac{ \frac{L_z}{\sin^2\theta} - e^{-2\nub}r^2\wb(E-L_z \omega)}{r^2 \sqrt{(E-L_z\omega)^2-\frac{\mathcal{C}}{e^{-2\nub}r^2}}} dr \\
- &= \int_{\mathrm{\bar{R}_e}}^{\infty} \frac{dr}{r^2} \frac{\frac{\sin\chi \sin i}{\sin^2\theta} - e^{-2\nub}r^2\wb \left(\frac{1}{b} + \wb \sin\chi \sin i \right)}{\sqrt{\left(\frac{1}{b} + \wb \sin\chi \sin i \right)^2 - \frac{1}{e^{-2\nub} r^2}}}
+%% \begin{align}\begin{split}
+%% %\int_{\mathrm{R_e}}^{\infty} \frac{p^{\phi}}{p^r} dr =
+%%  \Delta \phi &= 
+%%  \int_{\mathrm{\bar{R}_e}}^{\infty} \frac{ \frac{L_z}{\sin^2\theta} - e^{-2\nub}r^2\wb(E-L_z \omega)}{r^2 \sqrt{(E-L_z\omega)^2-\frac{\mathcal{C}}{e^{-2\nub}r^2}}} dr \\
+%%  &= \int_{\mathrm{\bar{R}_e}}^{\infty} \frac{dr}{r^2} \frac{\frac{\sin\chi \sin i}{\sin^2\theta} - e^{-2\nub}r^2\wb \left(\frac{1}{b} + \wb \sin\chi \sin i \right)}{\sqrt{\left(\frac{1}{b} + \wb \sin\chi \sin i \right)^2 - \frac{1}{e^{-2\nub} r^2}}}
+%% \end{split}\end{align}
+\begin{align}\begin{split}\label{eq:dphi}
+ d\phi &= 
+ \frac{ \frac{L_z}{\sin^2\theta} - e^{-2\nub}r^2\wb(E-L_z \omega)}{r^2 \sqrt{(E-L_z\omega)^2-\frac{\mathcal{C}}{e^{-2\nub}r^2}}} dr \\
+ &=  \frac{\frac{\sin\chi \sin i}{\sin^2\theta} - e^{-2\nub}r^2\wb \left(\frac{1}{b} + \wb \sin\chi \sin i \right)}{\sqrt{\left(\frac{1}{b} + \wb \sin\chi \sin i \right)^2 - \frac{1}{e^{-2\nub} r^2}}} \frac{dr}{r^2}
 \end{split}\end{align}
 and
-\begin{align}\begin{split}
-%\int_{\mathrm{R_e}}^{\infty} \frac{p^{\theta}}{p^r} dr =
-    \Delta \theta &=
-    \int_{\mathrm{\bar{R}_e}}^{\infty} \frac{e^{-\mu}\sqrt{\mathcal{C} - \frac{L_z^2}{\sin^2\theta}}}{r^2\sqrt{(E-L_z\omega)^2-\frac{\mathcal{C}}{e^{-2\nub}r^2}}} dr \\
-    &= \int_{\mathrm{\bar{R}_e}}^{\infty} \frac{dr}{r^2} \frac{e^{-\mu} \sqrt{1-\left(\frac{\sin\chi \sin i}{\sin\theta}\right)^2}}{\sqrt{\left(\frac{1}{b} + \wb \sin\chi \sin i \right)^2 - \frac{1}{e^{-2\nub} r^2}}}.
+%% \begin{align}\begin{split}
+%% %\int_{\mathrm{R_e}}^{\infty} \frac{p^{\theta}}{p^r} dr =
+%%     \Delta \theta &=
+%%     \int_{\mathrm{\bar{R}_e}}^{\infty} \frac{e^{-\mu}\sqrt{\mathcal{C} - \frac{L_z^2}{\sin^2\theta}}}{r^2\sqrt{(E-L_z\omega)^2-\frac{\mathcal{C}}{e^{-2\nub}r^2}}} dr \\
+%%     &= \int_{\mathrm{\bar{R}_e}}^{\infty} \frac{dr}{r^2} \frac{e^{-\mu} \sqrt{1-\left(\frac{\sin\chi \sin i}{\sin\theta}\right)^2}}{\sqrt{\left(\frac{1}{b} + \wb \sin\chi \sin i \right)^2 - \frac{1}{e^{-2\nub} r^2}}}.
+%% \end{split}\end{align}
+\begin{align}\begin{split}\label{eq:dtheta}
+    d\theta &=
+    \frac{e^{-\mu}\sqrt{\mathcal{C} - \frac{L_z^2}{\sin^2\theta}}}{r^2\sqrt{(E-L_z\omega)^2-\frac{\mathcal{C}}{e^{-2\nub}r^2}}} dr \\
+    &= \frac{e^{-\mu} \sqrt{1-\left(\frac{\sin\chi \sin i}{\sin\theta}\right)^2}}{\sqrt{\left(\frac{1}{b} + \wb \sin\chi \sin i \right)^2 - \frac{1}{e^{-2\nub} r^2}}} \frac{dr}{r^2}.
 \end{split}\end{align}
 Both expression reduce back to familiar bending equations in (isoradial) Schwarzschild metric when $\wb=0$, $\sin i = 1$ and $\sin\chi = 0$ for $\Delta\theta$ expression or $\sin\chi = 1$ for $\Delta\phi$.
 However, with oblate stars it suffices to notice that the previous equations are further complicated by the fact that $\bar{R}_e = \bar{R}_e(\theta)$ and $\wb = \wb(\rb, \theta)$.
@@ -427,7 +437,7 @@ The total redshift as measured by an observed at inifinity is given by another i
 \be
 \vz = (\Omega - \wb) \Bb e^{-2\nub} \rb \sin\theta.
 \ee
-This is the so called zero angular momentum velocity as observed by non-rotating spectator at infinity.
+This is the so called zero angular momentum velocity as observed by a non-rotating spectator at infinity.
 With these definitions the redshift is
 \be
 1 + z = -s_{\alpha} u^{\alpha} = e^{-\nub} ~\delta^{-1}
@@ -447,23 +457,81 @@ where $I_E$ is the specific intensity of the radiation at inifnity and $d\Omega_
 The relation between the emergent energy $E'$ to the observed energy $E$ is $E/E' = (1 + z)^{-1}$.
 The connection between the monochromatic observed and local intensity is then \citep[see e.g.,][]{MTW73, RL79}
 \be
-I_E = \left( \frac{E}{E'} \right)^3 ~I'_{E'}(\alpha),
+I_E = \left( \frac{E}{E'} \right)^3 ~I'_{E'}(\delta \alpha),
 \ee
-where $I'_{E'}(\alpha)$ is the intensity computed in the frame comoving with the emitting area.
+where $I'_{E'}(\delta \alpha)$ is the intensity computed in the frame comoving with the emitting area.
+Because of the special relativistic effects, the abberration needs also to be taken into account when considering the emitting angle $\alpha$.
 The radiation here is emitted to the direction of the emission angle $\alpha$.
 For the bolometric intensity one gets
 \be
-I = \left(\frac{E}{E'} \right)^4 ~I'(\alpha).
-\ee
-
-The motion of the area also causes aberration in the angles between the normal to the surface and the initial photon direction as measured in the rest frame of area.
-Because of this, the solid angle measured at inifnity $d\Omega_o$ is transformed with one extra Doppler-factor as compared to the static solid angle $d\Omega_s$ as
-\be
-d\Omega_o = \delta d\Omega_s.
+I = \left(\frac{E}{E'} \right)^4 ~I'(\delta \alpha).
 \ee
 The total flux $F$ can then be obtained by integrating over the whole image plate i.e. summing over the $dF$ elements.
 
+\subsection{Angular distribution of radiation}
+\subsubsection{Isotropic radiation}
+
+In practise for the pulse profile calculations we consider blackbody emission described by the specific intensity
+\begin{equation}
+  B_{\mathrm{E}}(T) = 5.04 \times 10^{22} \frac{E^3}{\mathrm{exp}(E/T) -1}~\mathrm{erg}\,\mathrm{s}^{-1}\,\mathrm{cm}^{-2}\,\mathrm{keV}^{-1}\,\mathrm{str}^{-1},
+\end{equation}
+where $T$ and $E$ are given in keV.
+Here the radiation is isotropic and hence there is no angle $\mu = \cos\alpha$ dependency in our intensity function where $\mu$ is the cosine of the angle relative to the surface normal.
+
+\subsubsection{Electron scattering dominated atmosphere}
+
+We assume that the spectral distribution is still given by the Planck function, but the angular distribution is produced in coherent electron scattering dominated plane-parallel semi-infinite ($\tau \rightarrow \infty$) atmosphere as
+\begin{equation}
+  I_{\mathrm{E}}(\mu) = B_{\mathrm{E}}(T) \frac{H(\mu)}{2\alpha_1},
+\end{equation}
+where
+\begin{equation}
+  a_n = \int_0^1 H(\mu) \mu^n d\mu
+\end{equation}
+are the moments of the function $H(\mu)$, which is a solution of the Ambartsumian-Chandrasekhar integral equation \citep[see e.g.][]{Cha60,Sob63}
+\begin{equation}\label{eq:hmu}
+  H(\mu) = 1 + \mu H(\mu) \int_0^1 \frac{\Psi(\eta)}{\mu + \eta} H(\eta) d\eta.
+\end{equation}
+Here $\Psi(\mu)$ is the characteristic function, which depends on the scattering law considered.
+For Rayleigh (Thomson) scattering it given as
+\begin{equation}
+  \Psi(\mu) = \frac{3}{16}(3-\mu^2).
+\end{equation}
+Equation \eqref{eq:hmu} can then be approximated with an accuracy better than $<2\%$ by a simple polynomial expansion
+\begin{equation}
+  H(\mu) = 1 + 2.3\mu - 0.3\mu^2
+\end{equation}
+with $\alpha_1 = 1.19736$.
+
+
+
+
+\subsection{Method of solution}
+
+In practise we trace the photons from the image plate at infinity all the way to the surface of the star by solving the first order differential equations \eqref{eq:dphi} - \eqref{eq:dtheta} backwards in time.
+In addition, we make a change of variable $r \rightarrow 1/\tilde{x}$ that will help us by stretching the step when far from the star and shortening it when coming close to the star surface.
+Here a 2nd order Heun's Runge-Kutta integrator is used with adaptive stepsize with forward Euler's method as predictor and trapezoidal method as corrector.
+All photons that travel more than $0.95\tilde{x}$ away from the star after a U-turn are terminated and considered to be missed.
+
+Our image plate is defined by using a polar coordinate system with radial parameter $b$ (i.e. the impact parameter) and angle parameter $\chi$.
+We also employ a non-equidistant grid in both parameters to accommodate the extra resolution needed around the edges of the star.
+Radial parameter $b$ is defined using a Gauss-Laguerre abscissae (i.e. $e^{-b}$ weighted) and the angle coordinate is weighted with a simple sinusoidal function so that the resolution is increased around the top and bottom parts where $\chi = 0$ or $\pi$ that is near where the poles are located.
+For pulse profile calculations where only a small part of the star is emitting we first search a crude location of the spot on the image plane and then impose a fine subgrid around it in order to accurately calculate the flux from this small patch.
+
+
 %%%%%%%%%%%%
+\section{Comparison \& accuracy}
+
+\subsection{Pulse profile comparisons}
+
+To validate the accuracy of the code we did several comparisons against previously made pulse profile calculations.
+First a general comparison of the ray tracing algorithms was made against the so-called Schwarzchild $+$ Doppler approximation (\red{ref i.e. Poutanen \& Beloborodov}) by setting the first and second order spacetime effects to zero.
+In addition, only spherical star was considered here.
+All of the other codes here propage photons forward in time from the surface to the observed so it is a great validation tool for many of the underlying methods because in our case the photons were propagated backwards in time.
+
+
+
+
 
 %\section{Conclusions}
 \section*{Acknowledgments}

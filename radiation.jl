@@ -31,7 +31,7 @@ function bbfluxes(EEd, delta, cosa)
     dist = 1.0 / cm_parsec #10 kpc; source distance
     d2 = dist^2
     
-    const Energs = [2.0, 6.0, 12.0] #energies for which to calculate flux
+    const Energs = [2.0, 6.0, 10.0] #energies for which to calculate flux
     const Teff = 2.0 #blackbody effective temperature
 
     #Collect flux for different energies
@@ -74,7 +74,7 @@ function radiation(rad, chi,
     #########################
     #vphi = Rgm*(B/enu^2)*sin(theta)*(2pi*fs - w) #isotropic zamo
     vphi = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
-    #vphi = Rgm*(1/enu)*sin(theta)*(2pi*fs) #isoradial zamo
+    #vphi = Rgm*(1/enu)*sin(theta)*(2pi*fs) #isoradial velo
     
     b = R*vphi/c
     #vw = Rgm*(1/enu)*sin(theta)*w #isoradial space vel
@@ -115,8 +115,9 @@ function radiation(rad, chi,
 
     #wp = 2*I*(2pi*fs)/X^2 / (G*M/c^2)
     #w = wp*Xob^3*(1-3*Xob)
-    vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
-
+    #vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
+    vz = Rgm*(B/enu^2)*sin(theta)*(2pi*fs - w) #isotropic zamo
+    
     bz = R*vz/c
     gamma = 1/sqrt(1 - bz^2)
     #dtaudt = (enu^2)/gamma
