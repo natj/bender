@@ -64,6 +64,7 @@
 
 \newcommand{\vz}{\ensuremath{v_{\mathrm{Z}}}}
 
+\newcommand{\Msun}{\ensuremath{M_{\odot}}}
 %%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -76,11 +77,15 @@
 \begin{document}
 \title{Radiation from rotating oblate neutron stars}
 
-\author{Joonas N\"attil\"a\altaffilmark{1}\thanks{nattila.joonas@gmail.com}
-and Pauli Pihajoki\altaffilmark{1}}
+\author{J. N\"attil\"a\altaffilmark{1,2}\thanks{nattila.joonas@gmail.com},
+  P. Pihajoki\altaffilmark{3} and
+  J. Poutanen\altaffilmark{1,2}}
 
 \affil{}
 \altaffiltext{1}{Tuorla Observatory, University of Turku}
+\altaffiltext{2}{NORDITA, Stockholm}
+\altaffiltext{3}{University of Helsinki}
+
 
 \begin{abstract}
 Formulas are to be derived for gravitational bending near rotating compact objects.
@@ -426,7 +431,7 @@ The aforementioned generalized vector product for photons can be obtained by con
 The emission angle is then
 \begin{align}\begin{split}
 &\cos \alpha = 1 + (1-\Bb^2 e^{-2\nub} \rb^2\wb^2\sin^2\theta) \times \\
-&\{ -(E-L_z \wb) + e^{2\nub-\zetab} (\cos\gamma p_{\rb} + \sin\gamma B^2 \rb p_{\theta}) \}.
+&\{ -(E-L_z \wb) + e^{2\nub-\zetab} (\cos\gamma p_{\rb} + \sin\gamma \Bb^2 \rb p_{\theta}) \}.
 %&[ (E-L_z \wb) + \cos\gamma \sqrt{(E-L_z \wb)^2 - \frac{\Ca}{\Bb^2 e^{-4\nub} \rb^2}} \\
 %&+\Bb e^{2\nub} \rb \sin\gamma \sqrt{\Ca - \frac{L_z}{\sin^2\theta}} ]
 \end{split}\end{align}
@@ -471,7 +476,8 @@ The total flux $F$ can then be obtained by integrating over the whole image plat
 \subsection{Angular distribution of radiation}
 \subsubsection{Isotropic radiation}
 
-In practise for the pulse profile calculations we consider blackbody emission described by the specific intensity
+In practise for the pulse profile calculations the simplest angular distribution of radiation is given by the Lambert law.
+Here we consider blackbody emission described by the specific intensity
 \begin{equation}
   B_{\mathrm{E}}(T) = 5.04 \times 10^{22} \frac{E^3}{\mathrm{exp}(E/T) -1}~\mathrm{erg}\,\mathrm{s}^{-1}\,\mathrm{cm}^{-2}\,\mathrm{keV}^{-1}\,\mathrm{str}^{-1},
 \end{equation}
@@ -480,6 +486,7 @@ Here the radiation is isotropic and hence there is no angle $\mu = \cos\alpha$ d
 
 \subsubsection{Electron scattering dominated atmosphere}
 
+As a second case we consider the so-called ``Hopf profile'' that is no longer isotropic.
 We assume that the spectral distribution is still given by the Planck function, but the angular distribution is produced in coherent electron scattering dominated plane-parallel semi-infinite ($\tau \rightarrow \infty$) atmosphere as
 \begin{equation}
   I_{\mathrm{E}}(\mu) = B_{\mathrm{E}}(T) \frac{H(\mu)}{2\alpha_1},
@@ -493,7 +500,7 @@ are the moments of the function $H(\mu)$, which is a solution of the Ambartsumia
   H(\mu) = 1 + \mu H(\mu) \int_0^1 \frac{\Psi(\eta)}{\mu + \eta} H(\eta) d\eta.
 \end{equation}
 Here $\Psi(\mu)$ is the characteristic function, which depends on the scattering law considered.
-For Rayleigh (Thomson) scattering it given as
+For Rayleigh (Thomson) scattering it is given as
 \begin{equation}
   \Psi(\mu) = \frac{3}{16}(3-\mu^2).
 \end{equation}
@@ -502,8 +509,6 @@ Equation \eqref{eq:hmu} can then be approximated with an accuracy better than $<
   H(\mu) = 1 + 2.3\mu - 0.3\mu^2
 \end{equation}
 with $\alpha_1 = 1.19736$.
-
-
 
 
 \subsection{Method of solution}
@@ -522,15 +527,60 @@ For pulse profile calculations where only a small part of the star is emitting w
 %%%%%%%%%%%%
 \section{Comparison \& accuracy}
 
-\subsection{Pulse profile comparisons}
+\subsection{Schwarzchild $+$ Doppler}
 
 To validate the accuracy of the code we did several comparisons against previously made pulse profile calculations.
-First a general comparison of the ray tracing algorithms was made against the so-called Schwarzchild $+$ Doppler approximation (\red{ref i.e. Poutanen \& Beloborodov}) by setting the first and second order spacetime effects to zero.
+First a general comparison of the ray tracing algorithms was made against the so-called Schwarzchild $+$ Doppler approximation \citep[see e.g.][]{PB06}.
 In addition, only spherical star was considered here.
 All of the other codes here propage photons forward in time from the surface to the observed so it is a great validation tool for many of the underlying methods because in our case the photons were propagated backwards in time.
 
+Main parameters are: stellar mass $M = 1.6~\Msun$, stellar radius $R = 12~\mathrm{km}$, the observer inclination $i = 60^{\circ}$, colatitude of the spot $\theta_{\mathrm{d}} = 50^{\circ}$.
+The effective temperature of the radiation is taken to be $T_{\mathrm{eff}} = 2~\mathrm{keV}$. 
+The distance to the source is assumed to be $D = 10~\mathrm{kpc}$.
+The spot is circular with angular radius $\rho$ either $1$ or $30$ degree.
+Angular distribution of radiation either corresponds to Lambert law (isotropic blackbody) with constant intensity or electron scattering dominated atmosphere, i.e. Hopf profile.
+
+The light curves are computed on 128 time bins.
+Zero time $t = 0$ corresponds to the moment, when the spot center crosses the plane defined by the spin axis and the direction to the observer.
+Following 5 light curves are computed: monochromatic photon flux ($\mathrm{ph}\,\mathrm{cm}^{-2}\,\mathrm{s}^{-1}\,\mathrm{keV}^{-1}$) at the observer energies $E = 2,~6$ and $12~\mathrm{keV}$, bolometric photon flux ($\mathrm{ph}\,\mathrm{cm}^{-2}\,\mathrm{s}^{-1}$), and the bolometric energy flux ($\mathrm{erg}\,\mathrm{cm}^{-2}\,\mathrm{s}^{-1}$).
 
 
+\begin{figure*}
+\centering
+\includegraphics[width=18cm]{figs/fig2a.pdf}
+\caption{\label{fig:sch_comp1}
+  Light curve comparisons for Schwarzchild spacetime with slowly rotating spherical star ($R = 12~\mathrm{km}$, $M = 1.6~\Msun$, $\nu = 1~\mathrm{Hz}$, $i = 60^{\circ}$, $\theta_s = 50^{\circ}$, $\rho = 1^{\circ}$, and $T_{\mathrm{eff}} = 2~\mathrm{keV}$) emitting according to Lambert law or Hopf profile with spot size either $1$ or $30$ degrees.
+  Black solid line shows the pulse profiles computed using the forward-in-time code by J. Poutanen and red dashed line is a profile computed with the code presented here.
+  The lower panel shows the residuals as $\Delta = (\mathrm{model_{JP}}/\mathrm{model} -1) \times 100\%$.
+}
+\end{figure*}
+
+\begin{figure*}
+\centering
+\includegraphics[width=18cm]{figs/fig2b.pdf}
+\caption{\label{fig:sch_comp400}
+  Light curve comparisons for Schwarzchild spacetime with rapidly rotating spherical star ($\nu = 400~\mathrm{Hz}$).
+  Otherwise the parameters and symbols are the same is in Fig.~\ref{fig:sch_comp1}.
+}
+\end{figure*}
+
+
+\subsection{Oblate Schwarzchild $+$ Doppler}
+
+\begin{figure*}
+\centering
+\includegraphics[width=16cm]{figs/fig3.pdf}
+\caption{\label{fig:sch_obl}
+  Bolometric energy flux comparisons for oblate Schwarzchild approximation with rapidly rotating star ($R_{\mathrm{eq}} = 16.4~\mathrm{km}$, $M = 1.4~\Msun$, $\nu = 600~\mathrm{Hz}$, and $\rho = 1^{\circ}$).
+  Left panel shows a pulse profile as compared to fig. 3 in \cite{MLCB07} with $i = 70^{\circ}$ and $\theta_s = 49^{\circ}$.
+  The spherical star is taken to have $R(49^{\circ}) = 15.1~\mathrm{km}$.
+  Right panel can be compared against fig. 4 in \cite{MLCB07} with $i = 20^{\circ}$ and $\theta_s = 41^{\circ}$
+  In this case, the spherical star has $R(41^{\circ}) = 14.8~\mathrm{km}$.
+}
+\end{figure*}
+
+
+\subsection{Hartle-Thorne -like spacetimes}
 
 
 %\section{Conclusions}
@@ -545,27 +595,6 @@ All of the other codes here propage photons forward in time from the surface to 
 
 \clearpage
 \appendix
-
-\subsection{Method of solution}
-There are two fundamentally different ways to make the ray tracing:
-\begin{enumerate}
-\item We can either follow photons from the image plate to the star i.e. define $(b,\chi)$ (and so also get $\cos\alpha$ immediately for flux calculation) and obtain ($\theta_e,\phi_e$).
-\item or we can follow the null geodesics from the surface of the star to the image plate i.e. define ($\theta_e,\phi_e$) and obtain $(b, \chi)$ and $\cos\alpha$.
-\end{enumerate}
-
-\red{
-First method should be doable already by evaluating the integrals of $\Delta\theta$ and $\Delta\phi$ with some initial guess of $\theta_e$ and then iterating for solution.
-This is not however, very elegant solution and it turns the problem back into numerical nuisance so why not use full numerical ray-tracing at the first place.
-}
-
-\red{
-I like the second method more because then it could serve as a good analytic approximation for many not so exact ray-tracing needs (like getting a picture and lightcurve of some hotspot).
-Also many real-world applications have coordinates defined on the surface of the star and then one is interested on how the photons trajectories will bend when coming to observer.
-This however means that one should somehow be able to solve the integrals explicitly and solving for $(b, \chi)$.
-I have tried couple of different expansions and it is at least possible to get expressions for the first order in rotation ($\Ob^1$).
-This is not, however, very cool because according to Arizona group it is the quadropole moments that affect the image most.
-}
-
 
 \section{Additional stuff about elliptic integrals and so on}
 

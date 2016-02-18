@@ -58,9 +58,9 @@ rmax = maximum(rlims)*1.02
 chi_diffs = 0.8 + sin(collect(linspace(0.0, 2pi, Nchi-3))).^2
 unshift!(chi_diffs, 0.0)
 chi_grid = chimin .+ (chimax-chimin)*cumsum(chi_diffs)/sum(chi_diffs)
-
 unshift!(chi_grid, chi_grid[1] - dchi_edge)
 push!(chi_grid, chi_grid[end] + dchi_edge)
+#chi_grid = collect(linspace(chimin, chimax, Nchi))
 
 rad_diffs = 1 ./ exp(linspace(0.0, 2.0, Nrad-1).^2)
 rad_grid = rmax * cumsum(rad_diffs) / sum(rad_diffs)
@@ -119,7 +119,8 @@ print("interpolating into dense grid...")
 method = Gridded(Linear())
 #method = Gridded(Constant())
 
-Times = Times .- Times[1,1]
+time0 = Times[1,1]
+Times = Times .- time0
 
 time_interp    = interpolate((rad_grid, chi_grid), Times     ,method)
 phi_interp_sin = interpolate((rad_grid, chi_grid), sin(Phis) ,method)

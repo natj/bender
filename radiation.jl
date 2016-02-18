@@ -23,7 +23,7 @@ EB(T) = 5.039617e22*(pi^4/15.0)*T.^4 * ergkev
 #Beaming function
 Beam(mu) = 1.0 #Lambertian
 #Beam(mu) = 0.42822 + 0.92236*mu - 0.085751*mu^2 #approx Hopf
-
+#Beam(mu) = (1.0 + 2.3*mu - 0.3*mu^2)/(2*1.194)
 
 #Compute blackbody flux elements
 function bbfluxes(EEd, delta, cosa)
@@ -31,7 +31,7 @@ function bbfluxes(EEd, delta, cosa)
     dist = 1.0 / cm_parsec #10 kpc; source distance
     d2 = dist^2
     
-    const Energs = [2.0, 6.0, 10.0] #energies for which to calculate flux
+    const Energs = [2.0, 6.0, 12.0] #energies for which to calculate flux
     const Teff = 2.0 #blackbody effective temperature
 
     #Collect flux for different energies
@@ -42,7 +42,7 @@ function bbfluxes(EEd, delta, cosa)
     fluxNB = (EEd)^3 * NB(Teff) * Beam(cosa*delta) # photon bol flux
     fluxB = (EEd)^4 * EB(Teff) * Beam(cosa*delta) # energy bol flux
 
-    return fluxE ./ d2, fluxNE ./ d2, fluxNB/d2, fluxB/d2
+    return fluxE ./ d2, fluxNE ./ d2, fluxNB ./ d2, fluxB ./ d2
 end
 
 
@@ -73,13 +73,13 @@ function radiation(rad, chi,
     #ifs false
     #########################
     #vphi = Rgm*(B/enu^2)*sin(theta)*(2pi*fs - w) #isotropic zamo
-    vphi = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
+    #vphi = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
     #vphi = Rgm*(1/enu)*sin(theta)*(2pi*fs) #isoradial velo
     
-    b = R*vphi/c
+    #bp = R*vphi/c
     #vw = Rgm*(1/enu)*sin(theta)*w #isoradial space vel
-    #bp = R*vw/c
-    gamma2 = 1/sqrt(1 - b^2)
+    #bz = R*vw/c
+    #gamma2 = 1/sqrt(1 - bz^2))
     
     #dtaudt = (enu^2)/gamma
     # for ijk = 1:10
@@ -91,12 +91,12 @@ function radiation(rad, chi,
     #     dtaudt = (enu^2)/gamma
     # end        
     
-    cosi = sqrt(1-sini^2)
-    sina = sqrt(1-cosa^2)
-    cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
-    cosz = -sina*sini*sin(phi)/sqrt(1-cospsi^2)
-    eta2 =  1/(1 - b*cosz)
-    delta2 = (eta2/gamma2)
+    #cosi = sqrt(1-sini^2)
+    #sina = sqrt(1-cosa^2)
+    #cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
+    #cosz = -sina*sini*sin(phi)/sqrt(1-cospsi^2)
+    #eta2 =  1/(1 - b*cosz)
+    #delta2 = (eta2/gamma2)
      #for ijk = 1:10
      #    sina = sqrt(1-cosa^2)/delta
      #    cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
@@ -104,8 +104,7 @@ function radiation(rad, chi,
      #    eta =  1/(1 - b*cosz)
      #    delta = (eta/gamma)
      #end
-
-    EEd2 = delta2*enu #*(1 + cosz*bp)
+    #EEd2 = delta2*enu #*(1 + cosz*bp)
     #delta2 = delta
     #else
 
@@ -115,10 +114,12 @@ function radiation(rad, chi,
 
     #wp = 2*I*(2pi*fs)/X^2 / (G*M/c^2)
     #w = wp*Xob^3*(1-3*Xob)
-    #vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
-    vz = Rgm*(B/enu^2)*sin(theta)*(2pi*fs - w) #isotropic zamo
+    vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
+    #vz = Rgm*(B/enu^2)*sin(theta)*(2pi*fs - w) #isotropic zamo
     
     bz = R*vz/c
+
+    #println(bz)
     gamma = 1/sqrt(1 - bz^2)
     #dtaudt = (enu^2)/gamma
 
@@ -150,7 +151,10 @@ function radiation(rad, chi,
     #return EEd, -Lz/(cosz)
     #return EEd, Lz
     #return EEd, (1/eta2 -1) / (1/eta -1)
+    
     return EEd, delta
+    #return EEd, 1.0
+
     #return EEd2, delta2
     #return EEd2, 1.0
     #return EEd, delta

@@ -11,9 +11,11 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(10.0)
-colat = deg2rad(40.0)
+rho = deg2rad(2.0)
+colat = deg2rad(49.0)
 
+
+interp = false
 
 ########
 function spot(t, phi, theta;
@@ -78,7 +80,7 @@ end
 img4 = zeros(Ny_dense, Nx_dense) #debug array
 
 #Spot image frame size
-N_frame = 100
+N_frame = 10
 
 
 #Beaming function for the radiation
@@ -87,6 +89,7 @@ N_frame = 100
 
 #Time parameters
 Nt = 32
+
 times = collect(linspace(0, 1/fs, Nt))
 tbin = abs(times[2] - times[1])/2.0 
 phase = collect(times .* fs)
@@ -237,11 +240,18 @@ toc()
 
 #Cartesian integration
 #########
+old_subframe = [y_grid_d[1],
+                y_grid_d[end],
+                x_grid_d[end],
+                x_grid_d[1]
+                ]
+
 
 tic()
 
-for k = 1:Nt
-#for k = 12:16
+#for k = 1:Nt
+#for k = 55:90
+for k = 12:23
 #for k = 40:40
 #for k = 27:26
 #for k = 80:80
@@ -260,6 +270,7 @@ for k = 1:Nt
     frame_x1 = x_grid_d[end]
     frame_x2 = x_grid_d[1]
 
+    located_spot = false
     #inf_small = true
     
     for j = y1s:y2s
@@ -274,9 +285,16 @@ for k = 1:Nt
             chi = mod2pi(pi/2 - atan2(y,x))
             
             #trace back to star
-            phi = phi_interp_atan(rad,chi)
-            theta = theta_interp[rad,chi]
-            time = time_interp[rad,chi]
+            #if interp
+                phi = phi_interp_atan(rad,chi)
+                theta = theta_interp[rad,chi]
+                time = time_interp[rad,chi]
+            #else
+            #    time, phi, theta, Xob, hit, cosa = bender3p(rad, chi, sini,
+            #                                                X, Osb, beta, quad, wp, Rg)
+            #end
+
+
             
             #rotate star
             dt = time*G*M/c^3 #time shift
@@ -294,6 +312,7 @@ for k = 1:Nt
                           )
             
             if inside
+                located_spot = true
             #if inside && inf_small
             #    inf_small = false
                 
@@ -364,12 +383,19 @@ for k = 1:Nt
     
     #TODO: deal with hidden spot
     #i.e. skip time bin
-
     
+    if !located_spot
+        println("hidden spot")
+        frame_y2 = old_subframe[1]
+        frame_y1 = old_subframe[2]
+        frame_x1 = old_subframe[3]
+        frame_x2 = old_subframe[4]
+    end
+        
     #expand image a bit
     #########
-    frame_expansion_x = abs(x_grid_d[4] - x_grid_d[1])
-    frame_expansion_y = abs(y_grid_d[4] - y_grid_d[1])
+    frame_expansion_x = abs(x_grid_d[8] - x_grid_d[1])
+    frame_expansion_y = abs(y_grid_d[8] - y_grid_d[1])
     frame_y2 += frame_expansion_y
     frame_y1 -= frame_expansion_y
     frame_x1 -= frame_expansion_x
@@ -458,6 +484,12 @@ for k = 1:Nt
 
     Ndelta = 0.0
 
+    old_subframe = [frame_y2,
+                    frame_y1,
+                    frame_x1,
+                    frame_x2
+                    ]
+
     for j = 1:Ny_frame
         y = frame_ygrid[j]
         for i = 1:Nx_frame
@@ -466,16 +498,26 @@ for k = 1:Nt
             rad = hypot(x,y)
             chi = mod2pi(pi/2 - atan2(y,x))
 
-            phi = phi_interp_atan(rad,chi)
-            theta = theta_interp[rad,chi]
-            Xob = Xs_interp[rad,chi]
-            time = time_interp[rad,chi]
-            cosa = cosa_interp[rad,chi]
-                
-            #test if we hit the surface
-            hit = hits_interp[rad,chi]
+            if interp
+                phi = phi_interp_atan(rad,chi)
+                theta = theta_interp[rad,chi]
+                Xob = Xs_interp[rad,chi]
+                time = time_interp[rad,chi]
+                cosa = cosa_interp[rad,chi]
+                hit = hits_interp[rad,chi] #test if we hit the surface
+
+            #println(phi," ",theta," ",Xob," ",time," ",cosa," ",hit)
+            else
+                time, phi, theta, Xob, hit, cosa = bender3p(rad, chi, sini,
+                                                            X, Osb, beta, quad, wp, Rg)
+                time -= time0
+            #println(phi," ",theta," ",Xob," ",time," ",cosa," ",hit)
+            #println()
+            end
+            
             
             hiti = round(Int, hit)
+            #println(hit, hiti)
             
             if hiti > 0
 
@@ -495,10 +537,29 @@ for k = 1:Nt
                               )
 
                 if inside
+
+                    if interp
+                        delta = delta_interp[rad,chi]
+                        EEd = reds_interp[rad,chi]
+                    #println(EEd, " ", delta)
+                    else
+
+                        # update subimage corners; they might no be up-to-date
+                        # because we trace exactly here instead of interpolating.
+                        old_subframe[1] = frame_y2 < y ? y : frame_y2 #top #max
+                        old_subframe[2] = frame_y1 > y ? y : frame_y1 #bottom #min
+                        old_subframe[3] = frame_x1 > x ? x : frame_x1 #left min
+                        old_subframe[4] = frame_x2 < x ? x : frame_x2 #right max
+
+                        
+                        EEd, delta = radiation(rad, chi,
+                                               phi, theta, cosa,
+                                               X, Xob, Osb, sini)
+                    end
+                    #println(EEd, " ", delta)
+                    #println()
                     
-                    delta = delta_interp[rad,chi]
-                    EEd = reds_interp[rad,chi]
-                    
+                    #println("inside")
                     dfluxE, dfluxNE, dfluxNB, dfluxB = bbfluxes(EEd, delta, cosa)
                     
                     sdelta[k] += delta * frame_dxdy #* imgscale
@@ -573,14 +634,17 @@ toc()
 #write to file
 #opath = "out/"
 
-#opath = "out2/cadeau+morsink/"
+#opath = "out2/"
+opath = "out2/cadeau+morsink/"
 #opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))/"
 
-opath = "out3/my/"
+#opath = "out3/my/"
 
 mkpath(opath)
 
 fname = "f$(round(Int,fs))pbbr$(round(Int,R/1e5))m$(round(M/Msun,1))d$(round(Int,rad2deg(colat)))i$(int((rad2deg(incl))))x$(round(Int,rad2deg(rho))).csv"
+#fname = "f$(round(Int,fs))phopfr$(round(Int,R/1e5))m$(round(M/Msun,1))d$(round(Int,rad2deg(colat)))i$(int((rad2deg(incl))))x$(round(Int,rad2deg(rho))).csv"
+
 
 wmatr = zeros(Nt, 9)
 wmatr[:,1] = phase

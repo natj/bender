@@ -34,7 +34,9 @@ function Rgmf(theta, X, Osb)
     angvel = 2*pi*fs
     zeta = G*M/(R*c^2)
     eps = (angvel^2 * R^2)/(zeta*c^2)
+    #println("zeta: $zeta  eps: $eps")
     #eps2 = (angvel^2 * R^3)/(G*M)
+    #eps = 0.339
     
     a0 = -0.18*eps + 0.23*zeta*eps - 0.05*eps^2
     a2 = -0.39*eps + 0.29*zeta*eps + 0.13*eps^2
