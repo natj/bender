@@ -395,10 +395,7 @@ for j = 1:Ny_dense
         
         #test if we hit the surface
         hit = hits_interp[rad,chi]
-        #end
-
         hiti = round(Int,hit - 0.49)
-
         
         if hiti > 0
             #solid angle

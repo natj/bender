@@ -11,8 +11,8 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(10.0)
-colat = deg2rad(45.0)
+rho = deg2rad(1.0)
+colat = deg2rad(50.0)
 
 
 interp = true
@@ -88,7 +88,7 @@ N_frame = 200
 #Ir(cosa) = cosa
 
 #Time parameters
-Nt = 32
+Nt = 128
 
 times = collect(linspace(0, 1/fs, Nt))
 tbin = abs(times[2] - times[1])/2.0 
@@ -283,18 +283,20 @@ for k = 1:Nt
 
             rad = hypot(x,y)
             chi = mod2pi(pi/2 - atan2(y,x))
+
+            #hit = hits_interp[rad,chi] #test if we hit the surface
+            #hiti = round(Int, hit)
+            #hiti = rad < rmax ? hiti : 0
+            
+            #if (rad > 5) && (pi/3.5 < chi < pi/2)
+            #if hiti > 0
+            if rad <= edge_interp(chi)
             
             #trace back to star
-            #if interp
-                phi = phi_interp_atan(rad,chi)
-                theta = theta_interp[rad,chi]
-                time = time_interp[rad,chi]
-            #else
-            #    time, phi, theta, Xob, hit, cosa = bender3p(rad, chi, sini,
-            #                                                X, Osb, beta, quad, wp, Rg)
-            #end
-
-
+            phi = phi_interp_atan(rad,chi)
+            theta = theta_interp[rad,chi]
+            time = time_interp[rad,chi]
+            
             
             #rotate star
             dt = time*G*M/c^3 #time shift
@@ -375,7 +377,8 @@ for k = 1:Nt
             end #if inside            
 
             
-
+            end #hiti
+            #end #XXX debug
         end# for x
     end#for y
 
@@ -504,7 +507,7 @@ for k = 1:Nt
                 Xob = Xs_interp[rad,chi]
                 time = time_interp[rad,chi]
                 cosa = cosa_interp[rad,chi]
-                hit = hits_interp[rad,chi] #test if we hit the surface
+                #hit = hits_interp[rad,chi] #test if we hit the surface
 
             #println(phi," ",theta," ",Xob," ",time," ",cosa," ",hit)
             else
@@ -516,11 +519,13 @@ for k = 1:Nt
             end
             
             
-            hiti = round(Int, hit)
+            #hiti = round(Int, hit)
+            #hiti = rad < rmax ? hiti : 0
             #println(hit, hiti)
             
-            if hiti > 0
-
+            #if hiti > 0
+            if rad <= edge_interp(chi)
+                
                 dt = time*G*M/c^3
                 #dt = 0.0
                 
@@ -636,9 +641,8 @@ toc()
 
 #opath = "out2/"
 #opath = "out2/cadeau+morsink/"
-opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))n/"
-
-#opath = "out3/my/"
+#opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))n/"
+opath = "out3/obl/"
 
 mkpath(opath)
 

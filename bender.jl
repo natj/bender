@@ -14,10 +14,10 @@ const ergkev = 6.2415e8 # erg/keV
 const cm_parsec = 3.2404e-23 #1cm/10kpc
 
 #initial parameters in physical units
-incl = deg2rad(45.0)
-M    = 1.4Msun
-R    = 12.0km
-fs   = 700
+incl = deg2rad(60.0)
+M    = 1.6Msun
+R    = 15.0km
+fs   = 600
 #Dist = 1.0*cm_parsec
 
 
