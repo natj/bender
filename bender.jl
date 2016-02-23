@@ -14,10 +14,10 @@ const ergkev = 6.2415e8 # erg/keV
 const cm_parsec = 3.2404e-23 #1cm/10kpc
 
 #initial parameters in physical units
-incl = deg2rad(70.0)
+incl = deg2rad(45.0)
 M    = 1.4Msun
-R    = 16.4km
-fs   = 600
+R    = 12.0km
+fs   = 700
 #Dist = 1.0*cm_parsec
 
 
@@ -35,8 +35,8 @@ println("x=$X ($U) and Osb=$Osb incl=$incl")
 #Hartle-Thorne parameters
 #const beta = 0.4454*Osb^2*X #Matter quadrupole moment; Morsink 2014
 #const quad = -0.11*(Osb/X)^2 #Energy quadrupole moment; Morsink 2014
-I = sqrt(X)*(1.136-2.53*X+5.6*X^2) #Moment of inertia; Morsink 2014
-#const wp = 2*I*(2pi*fs)/X^2 / (G*M/c^2)
+I = sqrt(X)*(1.136 - 2.53*X + 5.6*X^2) #Moment of inertia; Morsink 2014
+#const wp = (2*I*(2pi*fs)/X^2) * ((0.728194*(M/Msun)^2)/(G*M/c^2))
 
 const beta = 0.0
 const quad = 0.0

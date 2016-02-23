@@ -73,40 +73,23 @@ function radiation(rad, chi,
     #ifs false
     #########################
     #vphi = Rgm*(B/enu^2)*sin(theta)*(2pi*fs - w) #isotropic zamo
-    #vphi = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
+    vphi = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
     #vphi = Rgm*(1/enu)*sin(theta)*(2pi*fs) #isoradial velo
     
-    #bp = R*vphi/c
+    bz = R*vphi/c
     #vw = Rgm*(1/enu)*sin(theta)*w #isoradial space vel
-    #bz = R*vw/c
-    #gamma2 = 1/sqrt(1 - bz^2))
+    #bp = R*vw/c
+    gamma2 = 1/sqrt(1 - bz^2)
     
-    #dtaudt = (enu^2)/gamma
-    # for ijk = 1:10
-    #     vphi = Rgm*(1/enu)*sin(theta)*(2pi*fs/dtaudt - w) #isoradial zamo
-    #     b = R*vphi/c
-    #     vw = Rgm*(1/enu)*sin(theta)*w #isoradial space vel
-    #     bp = R*vw/c
-    #     gamma = 1/sqrt(1 - b^2)
-    #     dtaudt = (enu^2)/gamma
-    # end        
+    cosi = sqrt(1-sini^2)
+    sina = sqrt(1-cosa^2)
+    cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
+    cosz = -sina*sini*sin(phi)/sqrt(1-cospsi^2)
+
+    eta2 =  1/(1 - bz*cosz)
+    delta2 = (eta2/gamma2)
+    EEd2 = delta2*enu #*(1 + cosz*bp)
     
-    #cosi = sqrt(1-sini^2)
-    #sina = sqrt(1-cosa^2)
-    #cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
-    #cosz = -sina*sini*sin(phi)/sqrt(1-cospsi^2)
-    #eta2 =  1/(1 - b*cosz)
-    #delta2 = (eta2/gamma2)
-     #for ijk = 1:10
-     #    sina = sqrt(1-cosa^2)/delta
-     #    cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
-     #    cosz = -sina*sini*sin(phi)/sqrt(1-cospsi^2)
-     #    eta =  1/(1 - b*cosz)
-     #    delta = (eta/gamma)
-     #end
-    #EEd2 = delta2*enu #*(1 + cosz*bp)
-    #delta2 = delta
-    #else
 
 
     #########################
@@ -125,6 +108,8 @@ function radiation(rad, chi,
 
     #what is this mystery factor 0.7282...?
     eta =  1/(1 + (0.728194*(M/Msun)^2)*Lz*(2pi*fs)/(G*M/c^2))
+    #eta =  1/(1 + ((M/Msun)^2)*Lz*(2pi*fs)/(G*M/c^2))
+    
     delta = (eta/gamma)
     EEd = delta*enu
 
@@ -152,10 +137,10 @@ function radiation(rad, chi,
     #return EEd, Lz
     #return EEd, (1/eta2 -1) / (1/eta -1)
     
-    return EEd, delta
+    #return EEd, delta
     #return EEd, 1.0
 
-    #return EEd2, delta2
+    return EEd2, delta2
     #return EEd2, 1.0
     #return EEd, delta
     

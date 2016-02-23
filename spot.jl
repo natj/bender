@@ -11,11 +11,11 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(2.0)
-colat = deg2rad(49.0)
+rho = deg2rad(10.0)
+colat = deg2rad(45.0)
 
 
-interp = false
+interp = true
 
 ########
 function spot(t, phi, theta;
@@ -80,7 +80,7 @@ end
 img4 = zeros(Ny_dense, Nx_dense) #debug array
 
 #Spot image frame size
-N_frame = 10
+N_frame = 200
 
 
 #Beaming function for the radiation
@@ -249,9 +249,9 @@ old_subframe = [y_grid_d[1],
 
 tic()
 
-#for k = 1:Nt
+for k = 1:Nt
 #for k = 55:90
-for k = 12:23
+#for k = 12:23
 #for k = 40:40
 #for k = 27:26
 #for k = 80:80
@@ -635,8 +635,8 @@ toc()
 #opath = "out/"
 
 #opath = "out2/"
-opath = "out2/cadeau+morsink/"
-#opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))/"
+#opath = "out2/cadeau+morsink/"
+opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))n/"
 
 #opath = "out3/my/"
 
