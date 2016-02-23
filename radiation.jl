@@ -118,7 +118,7 @@ function radiation(rad, chi,
     #vz = Rgm*(B/enu^2)*sin(theta)*(2pi*fs - w) #isotropic zamo
     
     bz = R*vz/c
-
+    #println("R",Rgm," enu",(1/enu)," sint:",sin(theta)," w",(2pi*fs-w))
     #println(bz)
     gamma = 1/sqrt(1 - bz^2)
     #dtaudt = (enu^2)/gamma

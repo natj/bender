@@ -7,7 +7,7 @@ Nrad = 50
 Nchi = 50
 
 rmin = 0.0
-rmax = 10.0
+rmax = 12.0
 
 dchi_edge = 0.01
 chimin = 0.0 - dchi_edge
@@ -17,7 +17,9 @@ chimax = 2.0pi + dchi_edge
 
 
 #get radius limits for the image
-chis = [0.0, pi/2, pi, 3pi/2]
+#chis = [0.0, pi/2, pi, 3pi/2]
+Nedge = 15
+chis = linspace(0.0, 1.0, Nedge)*2pi
 rlims = zeros(length(chis))
 for i = 1:length(chis)
     chii = chis[i]
@@ -47,20 +49,32 @@ end
 #set new maximum rad limit
 #rscale = maximum(rlims)
 rmax = maximum(rlims)*1.02
+println("max edge: $rmax")
+
+#Create edge function to get the exact shape of the outline
+#method = Gridded(Linear())
+#edge_interp    = interpolate((chis), rlims, method)
+edge_interp_raw = interpolate(rlims, BSpline(Quadratic(Periodic())), OnCell())
+edge_interp(x) = edge_interp_raw[(Nedge-1)*x/2pi + 1.0]
+
+#p = plot(chis/2pi, rlims, "rx")
+#p = oplot(linspace(0.0, 1.0, 100), Float64[edge_interp(2pi*x) for x in linspace(0.0, 1.0, 100)], "b-")
+#display(p)
 
 #rad & chi grids
-
 #equidistant
 #chi_grid = collect(linspace(chimin, chimax, Nchi))
 #rad_grid = collect(linspace(rmin, rmax, Nrad))
 
 #weighted
-chi_diffs = 0.8 + sin(collect(linspace(0.0, 2pi, Nchi-3))).^2
-unshift!(chi_diffs, 0.0)
-chi_grid = chimin .+ (chimax-chimin)*cumsum(chi_diffs)/sum(chi_diffs)
+#chi_diffs = 0.8 + sin(collect(linspace(0.0, 2pi, Nchi-3))).^2
+#unshift!(chi_diffs, 0.0)
+#chi_grid = chimin .+ (chimax-chimin)*cumsum(chi_diffs)/sum(chi_diffs)
+
+chi_grid = collect(linspace(chimin, chimax, Nchi-2))
 unshift!(chi_grid, chi_grid[1] - dchi_edge)
 push!(chi_grid, chi_grid[end] + dchi_edge)
-#chi_grid = collect(linspace(chimin, chimax, Nchi))
+
 
 rad_diffs = 1 ./ exp(linspace(0.0, 2.0, Nrad-1).^2)
 rad_grid = rmax * cumsum(rad_diffs) / sum(rad_diffs)
@@ -78,6 +92,8 @@ Thetas = zeros(Nrad, Nchi)
 hits = zeros(Nrad, Nchi)
 cosas = zeros(Nrad, Nchi)
 Xs = zeros(Nrad, Nchi)
+
+#edge = zeros(Nchi)
 
 println()
 println("Computing image...")
@@ -109,7 +125,8 @@ for i = 1:Nchi
         hits[j,i] = float(hit)
         cosas[j,i] = cosa
         #end
-            
+
+        #edge[i] = rad
         if !hit; break; end
     end
 end

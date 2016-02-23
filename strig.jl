@@ -8,7 +8,7 @@ end
 
 #Radial function by AlGendy & Morsink 2014
 #Circumferential (isoradial) radius
-function Rgmf3(theta, X, Osb)
+function Rgmf(theta, X, Osb)
     const o20 = -0.788
     const o21 = 1.030
 
@@ -29,7 +29,7 @@ end
 ######################
 #Radial function by Cadeau 2007
 #Circumferential radius
-function Rgmf(theta, X, Osb)
+function Rgmf3(theta, X, Osb)
     
     angvel = 2*pi*fs
     zeta = G*M/(R*c^2)
