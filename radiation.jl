@@ -35,13 +35,17 @@ function bbfluxes(EEd, delta, cosa)
     const Teff = 2.0 #blackbody effective temperature
 
     #Collect flux for different energies
-    fluxE = (EEd)^3 .* BE(Teff, Energs ./ EEd) .* Beam(cosa*delta) # energy flux
-    fluxNE = (EEd)^2 .* NBE(Teff, Energs ./ EEd) .* Beam(cosa*delta) # photon flux
+    fluxE = (EEd)^3 .* BE(Teff, Energs ./ EEd) .* Beam(cosa*delta) #*delta# energy flux
+    fluxNE = (EEd)^2 .* NBE(Teff, Energs ./ EEd) .* Beam(cosa*delta) #*delta# photon flux CORRECT I_E'/E
+    #fluxNE = (EEd)^3 .* NBE(Teff, Energs ./ EEd) .* Beam(cosa*delta) # photon flux
+    #fluxNE = (EEd)^3 .* BE(Teff, Energs) .* Beam(cosa*delta) ./ Energs * ergkev # photon flux
+
     
     #Bolometric fluxes
-    fluxNB = (EEd)^3 * NB(Teff) * Beam(cosa*delta) # photon bol flux
-    fluxB = (EEd)^4 * EB(Teff) * Beam(cosa*delta) # energy bol flux
+    fluxB = (EEd)^4 * EB(Teff) * Beam(cosa*delta) #*delta # energy bol flux
+    fluxNB = (EEd)^3 * NB(Teff) * Beam(cosa*delta) #*delta# photon bol flux
 
+    
     return fluxE ./ d2, fluxNE ./ d2, fluxNB ./ d2, fluxB ./ d2
 end
 
@@ -62,7 +66,7 @@ function radiation(rad, chi,
 
     C = rad^2
     Lz = sini*sqrt(C)*sin(chi)
-    w = wp*Xob^3*(1-3*Xob)
+    w = -wp*Xob^3*(1-3*Xob) /(G*M/c^3) #into rad/seconds
 
     fa = (B/enu/ezeta)*dR/Rgm
     
@@ -91,13 +95,13 @@ function radiation(rad, chi,
     EEd2 = delta2*enu #*(1 + cosz*bp)
     
 
-
     #########################
     #vz = Rgm*(B/enu^2)*sin(theta)*(2pi*fs - w) #isotropic zamo
 
     #wp = 2*I*(2pi*fs)/X^2 / (G*M/c^2)
     #w = wp*Xob^3*(1-3*Xob)
-    vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
+    #vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
+    vz = Rgm*(1/enu)*sin(theta)*(2pi*fs) #isoradial zamo
     #vz = Rgm*(B/enu^2)*sin(theta)*(2pi*fs - w) #isotropic zamo
     
     bz = R*vz/c
@@ -106,9 +110,7 @@ function radiation(rad, chi,
     gamma = 1/sqrt(1 - bz^2)
     #dtaudt = (enu^2)/gamma
 
-    #what is this mystery factor 0.7282...?
-    eta =  1/(1 + (0.728194*(M/Msun)^2)*Lz*(2pi*fs)/(G*M/c^2))
-    #eta =  1/(1 + ((M/Msun)^2)*Lz*(2pi*fs)/(G*M/c^2))
+    eta =  1/(1 + Lz*(2pi*fs)*(G*M/c^3))
     
     delta = (eta/gamma)
     EEd = delta*enu
@@ -137,10 +139,10 @@ function radiation(rad, chi,
     #return EEd, Lz
     #return EEd, (1/eta2 -1) / (1/eta -1)
     
-    #return EEd, delta
+    return EEd, delta
     #return EEd, 1.0
 
-    return EEd2, delta2
+    #return EEd2, delta2
     #return EEd2, 1.0
     #return EEd, delta
     

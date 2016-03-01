@@ -8,6 +8,9 @@ import matplotlib.ticker as mtick
 from scipy.interpolate import interp1d
 from scipy.interpolate import griddata
 
+def read_JP2_files(fname):
+    da = np.genfromtxt(fname, delimiter="    ", comments='#')
+    return da[:,0], da[:,1], da[:,2], da[:,3],da[:,4],da[:,5]
 
 def read_JP_files(fname):
     da = np.genfromtxt(fname, delimiter="   ")
@@ -86,7 +89,8 @@ for j in range(4):
         fname2 = path3 + 'f400pbbr12m1.6d50i60x30.csv'
     if j == 2:
         fname = path3 + 'large-1-'
-        fname2 = path3 + 'f600pbbr15m1.6d50i60x1.csv'
+        #fname2 = path3 + 'f600pbbr15m1.6d50i60x1.csv'
+        fname2 = path3 + 'r15x1d50i60f600.txt'
     if j == 3:
         fname = path3 + 'large-30-'
         fname2 = path3 + 'f600pbbr15m1.6d50i60x30.csv'
@@ -98,9 +102,13 @@ for j in range(4):
     phasec, N12kev = read_Scott_files(fname+'12')
     
     #read JN data
-    phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JN_files(fname2) 
+    #phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JN_files(fname2) 
 
-    
+    if j == 2:
+        phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JP2_files(fname2)
+    else:
+        phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JN_files(fname2)
+            
     
     for i in range(3):
 
@@ -146,8 +154,17 @@ for j in range(4):
          ax1.plot(phase, flux, 'k-')
 
          #JN data
-         phase2 = phase2 + 0.03
-
+         if j == 0:
+             phase2 = phase2 + 0.028
+         elif j == 1:
+             phase2 = phase2 + 0.028
+         elif j == 2:
+             #phase2 = phase2 + 0.028
+             phase2 = phase2 + 0.035
+         elif j == 3:
+             phase2 = phase2 + 0.028
+             
+             
          ax1.plot(phase2, flux2, 'r--')
          
          #frame for the error panel
@@ -159,9 +176,8 @@ for j in range(4):
          if i == 0:
              ax2.set_ylabel('$\Delta$ %',size=lsize)
 
-             
-         if j != 3:
-            ax2.set_xticklabels([])
+         #if j != 3:
+         #   ax2.set_xticklabels([])
 
          if j == 3:
             ax2.set_xlabel('Phase', size=lsize)
@@ -178,7 +194,7 @@ for j in range(4):
          for pshift in np.linspace(-0.01, 0.01, 10):
              fluxi2 = griddata(phase2+pshift, flux2, (phase), method='cubic')
              err = (fluxi2/flux - 1)*100
-             ax2.plot(phase, err, 'b-', linewidth = 0.4)
+             #ax2.plot(phase, err, 'b-', linewidth = 0.4)
 
 
 

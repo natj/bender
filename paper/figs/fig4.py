@@ -46,7 +46,7 @@ skiph = 30
 
 mfiglim = 0
 
-path_JP = "../../out2/f700/r12n/"
+path_JP = "../../out2/f700/r12nn/"
 
 #labels
 tsize = 10.0
@@ -131,10 +131,13 @@ for j in range(3):
          ax1.plot(phase, flux, 'k-')
 
          #flux2 = flux2 * 0.99
-         #phase2 = phase2 - 0.002
-
+         #phase2 = phase2 - 0.0018
+         phase2 = phase2 - 0.0027
+         #phase = phase - 0.01
+         
          #JN data
-         ax1.plot(phase2, flux2, 'r--')
+         ax1.plot(phase2, flux2, 'r:')
+         #ax1.plot(phase2, flux2, 'r-', linewidth=0.3)
          
          #frame for the error panel
          ax2 = subplot(gs[(mfiglim+panelh):(mfiglim+panelh+epanelh), i])
@@ -165,7 +168,7 @@ for j in range(3):
          #flux2i = interp1d(phase2, flux2, kind='cubic', fill_value='extrapolate')
          #err = (flux/flux2i(phase) - 1)*100
 
-         ax2.plot(phase2, err, 'k-', linewidth = 0.4)
+         ax2.plot(phase, err, 'k-', linewidth = 0.4)
 
 
          for pshift in np.linspace(-0.01, 0.01, 10):

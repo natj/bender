@@ -73,6 +73,8 @@ end
 #Eccentricity for area projections
 eRe, dR = Rgmf(pi/2, X, Osb) #equatorial radius
 eRp, dR = Rgmf(0, X, Osb) #pole radius
+
+const fe = (eRe - eRp)/eRe
 const ecc = sqrt(1 - (eRp/eRe)^2) #eccentricity
 if ecc != 0.0
     const qp = 1 + (1-ecc^2)/(2*ecc)*log((1+ecc)/(1-ecc)) #authalic pole latitude
@@ -81,7 +83,7 @@ else
     const qp = 0.0
     const Rq = 1.0
 end
-println("ecc = $ecc Rq = $Rq")
+println("ecc = $ecc Rq = $Rq fe = $fe")
 
 
 #authalic colatitude 
@@ -106,13 +108,68 @@ function great_circle_dist(lon1, lon2, col1, col2)
     dlon = abs(lon2 - lon1)
     dlat = abs(lat2 - lat1)
 
-    #haversine formula; mmm nice and round
-    return 2.0*asin(sqrt(sin(dlat/2)^2 + cos(lat1)*cos(lat2)*sin(dlon/2)^2))
+    #law of cosines
+    #return acos(sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2)*cos(dlon))
     
-    #xx = (cos(lat1)*sin(dlon))^2 + (cos(lat1)*sin(lat2) - sin(lat1)*cos(lat2)*cos(dlon))^2
-    #yy = sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2)*cos(dlon)
-    #return atan2(sqrt(xx), yy)
+    #haversine formula; mmm nice and round
+    #return 2.0*asin(sqrt(sin(dlat/2)^2 + cos(lat1)*cos(lat2)*sin(dlon/2)^2))
+
+    #vincenty
+    xx = (cos(lat2)*sin(dlon))^2 + (cos(lat1)*sin(lat2) - sin(lat1)*cos(lat2)*cos(dlon))^2
+    yy = sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2)*cos(dlon)
+    return atan2(sqrt(xx), yy)
 end
+
+#great circle distance (on an ellipsoid)
+function great_circle_dist2(lon1, lon2, col1, col2)
+
+    lat1 = pi/2 - col1
+    lat2 = pi/2 - col2
+    #lat1 = col1
+    #lat2 = col2
+    dlon = abs(lon2 - lon1)
+    dlat = abs(lat2 - lat1)
+
+    #Vincencty's formula on an ellipsoid
+    u1 = atan((1-fe)*tan(lat1))
+    u2 = atan((1-fe)*tan(lat2))
+    lambda = dlon
+    err = 1.0
+
+    omega = 1.
+    cospalpha = 1.
+    sinomega = 1.
+    cosomega = 1.
+    costomega = 1.
+    cospomega = 1.
+        
+    while err > 1e-8
+        #println("err = $err l=$lambda")
+        sinomega = sqrt( (cos(u2)*sin(lambda))^2 + (cos(u1)*sin(u2) - sin(u1)*cos(u2)*cos(lambda))^2)
+        cosomega = sin(u1)*sin(u2) + cos(u1)*cos(u2)*cos(lambda)
+        omega = atan2(sinomega, cosomega)
+
+        sinalpha = cos(u1)*cos(u2)*sin(lambda)/sinomega
+        cospalpha = 1 - sinalpha^2
+        costomega = cosomega - 2*sin(u1)*sin(u2)/cospalpha
+
+        Cf = (fe/16)*cospalpha*(4+fe*(4 - 3*cospalpha))
+        lambdan = dlon + (1-Cf)*fe*sinalpha*(omega + Cf*sinomega*(costomega) + Cf*cosomega*(-1 + 2*cospomega))
+
+        err = (lambdan-lambda)/lambdan
+        lambda = lambdan
+    end
+
+    us2 = cospalpha*(eRe^2 - eRp^2)/eRp^2
+    A = 1 + us2/16384*(4096 + us2*(-768 + us2*(320 - 175*us2)))
+    B = us2/1024*(256 + us2*(-128 + us2*(74 - 47*us2)))
+    domega = B*sinomega*(costomega + 0.25*B*(cosomega*(-1 + 2*costomega^2)-(1/6)*B*costomega*(-3 + 4*sinomega^2)*(-3 + 4*costomega^2)))
+
+    s = eRp*A*(omega - domega)
+
+    return s
+end
+
 
 #Area of a polygon on a sphere/spheroid
 function area_sphere(phi0,the0,lons, cols, Rarea=1, ecc=0.0)

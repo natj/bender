@@ -11,8 +11,8 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(1.0)
-colat = deg2rad(50.0)
+rho = deg2rad(10.0)
+colat = deg2rad(18.0)
 
 
 interp = true
@@ -88,7 +88,7 @@ N_frame = 200
 #Ir(cosa) = cosa
 
 #Time parameters
-Nt = 128
+Nt = 64
 
 times = collect(linspace(0, 1/fs, Nt))
 tbin = abs(times[2] - times[1])/2.0 
@@ -639,10 +639,10 @@ toc()
 #write to file
 #opath = "out/"
 
-#opath = "out2/"
+opath = "out2/"
 #opath = "out2/cadeau+morsink/"
 #opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))n/"
-opath = "out3/obl/"
+#opath = "out3/HT/"
 
 mkpath(opath)
 

@@ -148,7 +148,7 @@ Note that from here on, we mark all variables related to the isotropic radial co
 %The relation between these two radial coordinates can be easily seen to be $r = \rb(1+\ub)^2$.
 
 Let us now consider a rotating compact object.
-In addition to the dimensionless compact factor $u(r)$ (or $\ub(\rb)$) we now need dimensionless angular velocity to describe our system
+In addition to the dimensionless compact factor $u(r)$ (or $\ub(\rb)$) we now need dimensionless angular velocity to describe our system \red{rcs:30}
 \be
 \Ob = \Omega \left( \frac{\Req^3}{G M} \right)^{1/2},
 \ee
@@ -162,7 +162,9 @@ ds^2 & = -e^{2\nub}c^2dt^2 +
 \end{split}\end{align}
 %\eea
 where $\wb$ is the angular velocity of the local inertial frame and the functions $\nub$, $\Bb$ and $\zetab$ in the metric coefficients can be expanded in the powers of $\Ob$ and $\ub$ \citep{BI76}.
+\red{rcs:14}
 The zeroth terms of the series expansions ($\Ob = 0$) are the familiar Isotropic \sch metric coefficients (see Table \ref{tab:coeffs}).
+\red{rcs:15}
 %\be
 %e^{\nu_0} = (1-\ub/2)/(1+\ub/2),
 %\ee
@@ -175,7 +177,7 @@ The zeroth terms of the series expansions ($\Ob = 0$) are the familiar Isotropic
 %\ee
 
 The first order expansion in rotation ($\Ob^1$) is formally related to Kerr metric.
-In this case we introduce an angular velocity term of the local inertial frame $\wb$ that accounts for the frame-dragging effects.
+In this case we introduce an angular velocity term of the local inertial frame $\wb$ that accounts for the frame-dragging effects. \red{rcs:13}
 Up to first order, this can be defined as
 \be
 \wb = \frac{2c^4j}{G^2M}\ub^3,
@@ -273,8 +275,8 @@ Geodesic motion in space-time characterized by a metric function $g^{ij}$ is gov
 2\frac{\pd S}{\pd \tau} = g^{ij} \frac{\pd S}{\pd x^i}\frac{\pd S}{\pd x^j},
 \ee
 where S denotes the Hamilton's principal function.
-For the two Killing vectors $k^{\alpha} = (1,0,0,0)$ (asymptotic time symmetry) and $k^{\alpha} = (0,0,0,1)$ (rotation symmetry along azimuthal angles) in the rotating space-time, the Frobenius theorem implies the existence of a family of 2-surfaces orthogonal to them.
-This means that there are surfaces of constant $t$ and $\phi$ in our space-time i.e. constants of motion.
+For the two Killing vectors $k^{\alpha} = (1,0,0,0)$ (asymptotic time symmetry) and $k^{\alpha} = (0,0,0,1)$ (rotation symmetry along azimuthal angles) in the rotating space-time, the Frobenius theorem implies the existence of a family of 2-surfaces orthogonal to them. \red{rcs:11}
+This means that there are surfaces of constant $t$ and $\phi$ in our space-time i.e. constants of motion. \red{rcs:12}
 These constants are named to be $E$ and $L_z$, respectively.
 We then seek a solution in the form
 \be
@@ -302,7 +304,8 @@ After re-organizing the terms and using a simplifying notation $e^{\zetab}/\Bb \
 that already hints towards separability if $\nub = \nub(\rb)$, $\Bb = \Bb(\rb)$, $\zetab = \zetab(\rb)$ and $\mu = \mu(\theta)$.
 For the first order in rotation (i.e. $\mathcal{O}(\Ob)$) this condition is satisfied exactly because $e^{\mub} = 1 + \mathcal{O}(\Ob^2)$.
 In the next order of the expansion, mass and pressure quadrupole moments are presented and so our separation is no more valid.
-\red{TODO: add discussion about the higher order multipolemoments and how the deviations are rather small. for light propagation} 
+\red{TODO: add discussion about the higher order multipolemoments and how the deviations are rather small. for light propagation}
+\red{rcs:66}
 %However, the deviations are rather small and for $\mathcal{O}(\Ob^2)$ pressure(?) quadrupole moment is negliblible after which we are left with  mass quadropole moment only.
 %In this case the dependence of $r$ and $\theta$ are present through $e^{\nub}$ terms but $e^{\mu} \approx 1$ still.
 Notice also that because we only consider null geodesics i.e. light propagation we could happily set $\delta_1 = 0$ but we choose to keep it around a bit longer to favor generality.
@@ -442,7 +445,7 @@ The total redshift as measured by an observed at inifinity is given by another i
 \be
 \vz = (\Omega - \wb) \Bb e^{-2\nub} \rb \sin\theta.
 \ee
-This is the so called zero angular momentum velocity as observed by a non-rotating spectator at infinity.
+This is the so called zero angular momentum velocity as observed by a non-rotating spectator at infinity. \red{rcs:13}
 With these definitions the redshift is
 \be
 1 + z = -s_{\alpha} u^{\alpha} = e^{-\nub} ~\delta^{-1}
@@ -580,7 +583,28 @@ Following 5 light curves are computed: monochromatic photon flux ($\mathrm{ph}\,
 \end{figure*}
 
 
+\begin{figure*}
+\centering
+\includegraphics[width=18cm]{figs/fig4.pdf}
+\caption{\label{fig:sch_comp400}
+  Light curve comparisons for oblate Schwarzchild spacetimes with three different spot colatitudes: $\theta_{\mathrm{c}} = 18^{\circ}$, $45^{\circ}$ and $90^{\circ}$.
+  Parameters of the star, spot and observer are: $R_{\mathrm{eq}} = 12.0~\mathrm{km}$, $M = 1.4~\Msun$, $\nu = 700~\mathrm{Hz}$, $i = 45^{\circ}$ and $\rho = 10^{\circ}$.
+  }
+\end{figure*}
+
+
+
 \subsection{Hartle-Thorne -like spacetimes}
+
+\begin{figure*}
+\centering
+\includegraphics[width=18cm]{figs/fig5.pdf}
+\caption{\label{fig:sch_comp400}
+  Light curve comparisons for Hartle-Thorne spacetime with rapidly rotating oblate stars.
+}
+\end{figure*}
+
+
 
 
 %\section{Conclusions}
