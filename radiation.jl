@@ -36,7 +36,7 @@ function bbfluxes(EEd, delta, cosa)
 
     #Collect flux for different energies
     fluxE = (EEd)^3 .* BE(Teff, Energs ./ EEd) .* Beam(cosa*delta) #*delta# energy flux
-    fluxNE = (EEd)^2 .* NBE(Teff, Energs ./ EEd) .* Beam(cosa*delta) #*delta# photon flux CORRECT I_E'/E
+    fluxNE = (EEd)^2 .* NBE(Teff, Energs ./ EEd) .* Beam(cosa*delta) *delta# photon flux CORRECT I_E'/E
     #fluxNE = (EEd)^3 .* NBE(Teff, Energs ./ EEd) .* Beam(cosa*delta) # photon flux
     #fluxNE = (EEd)^3 .* BE(Teff, Energs) .* Beam(cosa*delta) ./ Energs * ergkev # photon flux
 
@@ -57,16 +57,16 @@ function radiation(rad, chi,
 
     nu2   = beta/3.0 - quad*0.5*(3*cos(theta)^2-1)
     B2    = beta
-    zeta2 = beta*(3*0.5*(3*cos(theta)^2-1)/4-1/3)
+    zeta2 = beta*((4/3)*0.5*(3*cos(theta)^2 - 1) - 1/3)
     Rgm, dR = Rgmf(theta, X, Osb)
 
     enu = (1-Xob/2)/(1+Xob/2)*exp(nu2*Xob^3)
     B = (1-Xob/2)*(1+Xob/2) + B2*Xob^2
-    ezeta = (1-Xob/2)*(1+Xob/2) + zeta2*Xob^2
+    ezeta = (1-Xob/2)*(1+Xob/2)*exp(zeta2*Xob^2)
 
     C = rad^2
     Lz = sini*sqrt(C)*sin(chi)
-    w = -wp*Xob^3*(1-3*Xob) /(G*M/c^3) #into rad/seconds
+    w = wp*Xob^3*(1-3*Xob) /(G*M/c^3) #into rad/seconds
 
     fa = (B/enu/ezeta)*dR/Rgm
     
@@ -138,8 +138,9 @@ function radiation(rad, chi,
     #return EEd, -Lz/(cosz)
     #return EEd, Lz
     #return EEd, (1/eta2 -1) / (1/eta -1)
-    
-    return EEd, delta
+
+    return EEd, cosg
+    #return EEd, delta
     #return EEd, 1.0
 
     #return EEd2, delta2
@@ -182,7 +183,8 @@ for i = 2:Nchi-1
     for j = 2:Nrad-1
         rad = rad_grid[j]
 
-        if hits[j, i] < 1; break; end
+        if rad > edge_interp(chi); break; end
+        #if hits[j, i] < 1; break; end
 
     
         #Ray traced photons

@@ -11,8 +11,8 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(10.0)
-colat = deg2rad(18.0)
+rho = deg2rad(1.0)
+colat = deg2rad(50.0)
 
 
 interp = true
@@ -250,6 +250,7 @@ old_subframe = [y_grid_d[1],
 tic()
 
 for k = 1:Nt
+#for k = 20:32
 #for k = 55:90
 #for k = 12:23
 #for k = 40:40
@@ -435,22 +436,22 @@ for k = 1:Nt
     #end
 
     #select larger
-    #if frame_xs < frame_ys
-    #    Nx_frame = N_frame
-    #    Ny_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
-    #else
-    #    Ny_frame = N_frame
-    #    Nx_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
-    #end
-
-    #keep aspect ratio
     if frame_xs < frame_ys
-        Nx_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
+        Nx_frame = N_frame
         Ny_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
     else
-        Ny_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
+        Ny_frame = N_frame
         Nx_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
     end
+
+    #keep aspect ratio
+    #if frame_xs < frame_ys
+    #    Nx_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
+    #    Ny_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
+    #else
+    #    Ny_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
+    #    Nx_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
+    #end
 
     
 
@@ -525,6 +526,12 @@ for k = 1:Nt
             
             #if hiti > 0
             if rad <= edge_interp(chi)
+
+                #time delay
+                #cosi = sqrt(1-sini^2)
+                #cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
+                #yparam = 1 - cospsi
+                #dt = yparam*(1.0 + (U*yparam/8.0)*(1+ yparam*(1.0/3.0 - U/14.0)))*R/c
                 
                 dt = time*G*M/c^3
                 #dt = 0.0
@@ -639,10 +646,10 @@ toc()
 #write to file
 #opath = "out/"
 
-opath = "out2/"
+#opath = "out2/"
 #opath = "out2/cadeau+morsink/"
 #opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))n/"
-#opath = "out3/HT/"
+opath = "out3/HT/"
 
 mkpath(opath)
 

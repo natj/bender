@@ -85,7 +85,7 @@ for j in range(3):
     #read JN data
     phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2, F2kev2, F6kev2, F12kev2 = read_JN_files(fname2) 
 
-    
+    phasetmp = phase2
     
     for i in range(4):
 
@@ -125,18 +125,36 @@ for j in range(3):
              ax1.set_ylabel('Bolometric [ph cm$^{-2}$ s$^{-1}$]',size=lsize)
              flux = Nbol
              flux2 = Nbol2
+             #flux = Fbol
+             #flux2 = Fbol2
+             
+         indxs = []
+         for q in range(len(flux2)):
+             if not (np.isnan(flux2[q])):
+             #if not (flux2[q] == flux2[q]):
+                 indxs.append(q)
 
+         phase2 = phasetmp[indxs]
+         flux2 = flux2[indxs]
              
          #JP data
          ax1.plot(phase, flux, 'k-')
 
          #flux2 = flux2 * 0.99
          #phase2 = phase2 - 0.0018
-         phase2 = phase2 - 0.0027
+         if j == 0:
+             phase2 = phase2 - 0.01
+         elif j == 1:
+             phase2 = phase2 - 0.006
+         elif j == 2:
+             phase2 = phase2 - 0.0
+                     
+             
          #phase = phase - 0.01
          
          #JN data
-         ax1.plot(phase2, flux2, 'r:')
+         #ax1.plot(phase2, flux2, 'r:')
+         ax1.plot(phase2, flux2, 'r--')
          #ax1.plot(phase2, flux2, 'r-', linewidth=0.3)
          
          #frame for the error panel
@@ -160,20 +178,24 @@ for j in range(3):
 
          #interpolate error
          #fluxi = interp1d(phase, flux, kind='linear')
-         fluxi2 = griddata(phase2, flux2, (phase), method='cubic')
+         #fluxi2 = griddata(phase2, flux2, (phase), method='cubic')
+         fluxi2 = griddata(phase2, flux2, (phase), method='linear')
          
          #fluxi = interp1d(phase, flux, kind='cubic')
-         err = (fluxi2/flux - 1)*100
+         err = (flux/fluxi2 - 1)*100
                   
          #flux2i = interp1d(phase2, flux2, kind='cubic', fill_value='extrapolate')
          #err = (flux/flux2i(phase) - 1)*100
 
+         for q in range(len(phase)):
+             print phase[q], err[q], fluxi2[q], flux[q]
+             
          ax2.plot(phase, err, 'k-', linewidth = 0.4)
 
 
          for pshift in np.linspace(-0.01, 0.01, 10):
              fluxi2 = griddata(phase2+pshift, flux2, (phase), method='cubic')
-             err = (fluxi2/flux - 1)*100
+             err = (flux/fluxi2 - 1)*100
              #ax2.plot(phase, err, 'b-', linewidth = 0.4)
 
          

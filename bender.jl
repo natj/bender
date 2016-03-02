@@ -14,15 +14,15 @@ const ergkev = 6.2415e8 # erg/keV
 const cm_parsec = 3.2404e-23 #1cm/10kpc
 
 #initial parameters in physical units
-incl = deg2rad(45.0)
-M    = 1.4Msun
-R    = 12.0km
-fs   = 700
+#incl = deg2rad(45.0)
+#M    = 1.4Msun
+#R    = 12.0km
+#fs   = 700
 
-#incl = deg2rad(60.0)
-#M    = 1.6Msun
-#R    = 15.0km
-#fs   = 600
+incl = deg2rad(60.0)
+M    = 1.6Msun
+R    = 15.0km
+fs   = 600
 
 
 #Dist = 1.0*cm_parsec
@@ -67,11 +67,11 @@ println("wp0= $wp0 wp1= $wp1 | wpd= $wpd wpd2= $wpd2")
 
 wp2 = 2*jmom*(c^4/M/G^2)
 println("wp2 = $wp2")
-const wp = -2*jmom
+const wp = 2*jmom
 
 const beta = 0.0
 const quad = 0.0
-const wp = 0.0
+#const wp = 0.0
 #println("beta=$beta q=$quad wp=$wp")
 
 #
@@ -90,7 +90,7 @@ include("strig.jl")
 ####################################
 #Moments
 
-
+#time moment p^t
 function ptim(a, b, sini,
               x, nu2, B2, zeta2, wp, theta, Rg)
 
@@ -288,7 +288,7 @@ function bender3(x, y, sini,
             erry = abs(yp1 - yp1_o)
             errz = abs(zp1 - zp1_o)
 
-            err = max(abs(erry/yp1), abs(errz/zp1), 10*abs(errt/tp1)) #rel err
+            err = max(abs(erry/yp1), abs(errz/zp1), 1*abs(errt/tp1)) #rel err
             #err = max(abs(erry), abs(errz)) #abs err
         end
 
@@ -347,6 +347,7 @@ function bender3(x, y, sini,
         #helps with surface detection and with 1/r^3 functions
         if rr > Xob*0.95
             level = 128.0
+            #level = 64.0
         end
     end
 
@@ -381,12 +382,12 @@ function bender3(x, y, sini,
     ##########
     nu2   = beta/3.0 - quad*0.5*(3*cos(theta)^2-1)
     B2    = beta
-    zeta2 = beta*(3*0.5*(3*cos(theta)^2-1)/4-1/3)
+    zeta2 = beta*((4/3)*0.5*(3*cos(theta)^2 - 1) - 1/3)
     Rgm, dR = Rgmf(theta, X, Osb)
     
     enu = (1-Xob/2)/(1+Xob/2)*exp(nu2*Xob^3)
     B = (1-Xob/2)*(1+Xob/2) + B2*Xob^2
-    ezeta = (1-Xob/2)*(1+Xob/2) + zeta2*Xob^2
+    ezeta = (1-Xob/2)*(1+Xob/2)*exp(zeta2*Xob^2)
     C = (x^2 + y^2)
     Lz = x*sini
     w = wp*Xob^3*(1-3*Xob)
@@ -434,6 +435,6 @@ function bender3(x, y, sini,
     end
     cosa = clamp(cosa, 0.0, 1.0)
     
-    #return rns, yns, zns, ers, lvs, hit
+    #return rns, yns, zns, tns, ers, lvs, hit
     return time, phi, theta, Xob, hit, cosa
 end
