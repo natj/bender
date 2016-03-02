@@ -1,5 +1,5 @@
 #Compare path of 2 photons
-
+include("bender.jl")
 
 xpoint = 5.0
 ypoint = -0.4
@@ -25,45 +25,49 @@ ypoint2 = -0.0017
 #xpoint2 = 3.0
 #ypoint2 = 3.0
 
-println("timing bender...")
-tic()
-for i = 1:100
-    rns, yns, zns, ers, lvs, hit = bender3(xpoint, ypoint, sini,X, Osb,
-                                           beta, quad, wp, Rg)
-    rns, yns, zns, ers, lvs, hit = bender3(xpoint2, ypoint2, sini,X, Osb,
-                                           beta, quad, wp, Rg)
-end
-toc()
+# println("timing bender...")
+# tic()
+# for i = 1:100
+#     rns, yns, zns, ers, lvs, hit = bender3(xpoint, ypoint, sini,X, Osb,
+#                                            beta, quad, wp, Rg)
+#     rns, yns, zns, ers, lvs, hit = bender3(xpoint2, ypoint2, sini,X, Osb,
+#                                            beta, quad, wp, Rg)
+# end
+# toc()
 
-rns, yns, zns, ers, lvs, hit = bender3(xpoint, ypoint, sini,X, Osb,
-                                  beta, quad, wp, Rg)
+tcor = G*M/c^3
+
+rns, yns, zns, tns, ers, lvs, hit = bender3(xpoint, ypoint, sini,X, Osb,
+                                       beta, quad, wp, Rg)
+println("x y end $(rns[end]) $(tns[end]*tcor)")
 println(pi/2-yns[end])
 p1 = plot(rns, (pi/2-yns), "b-")#,xrange=[0.0, 0.0001])
-rns, yns, zns, ers, lvs, hit = bender3(xpoint2, ypoint2, sini,X, Osb,
-                                  beta, quad, wp, Rg)
+rns, yns, zns, tns, ers, lvs, hit = bender3(xpoint2, ypoint2, sini,X, Osb,
+                                       beta, quad, wp, Rg)
+println("x y end $(rns[end]) $(tns[end]*tcor)")
 p1 = oplot(rns, (pi/2-yns), "r--")
 println(pi/2-yns[end])
     
-rns, yns, zns, ers, lvs, hit = bender3(xpoint, ypoint, sini,X, Osb,
-                                  beta, quad, wp, Rg)
+rns, yns, zns, tns, ers, lvs, hit = bender3(xpoint, ypoint, sini,X, Osb,
+                                       beta, quad, wp, Rg)
 p2 = plot(rns, zns, "b-")#, xrange=[0.0, 0.0001])
-rns, yns, zns, ers, lvs, hit = bender3(xpoint2, ypoint2, sini,X, Osb,
+rns, yns, zns, tns, ers, lvs, hit = bender3(xpoint2, ypoint2, sini,X, Osb,
                                   beta, quad, wp, Rg)
 p2 = oplot(rns, zns, "r-")
 
     
-rns, yns, zns, ers, lvs, hit = bender3(xpoint, ypoint, sini,X, Osb,
-                                  beta, quad, wp, Rg)
+rns, yns, zns, tns, ers, lvs, hit = bender3(xpoint, ypoint, sini,X, Osb,
+                                       beta, quad, wp, Rg)
 p3 = plot(rns, ers, "b-", yrange=[0.0, 2.0e-5])
-rns, yns, zns, ers, lvs, hit = bender3(xpoint2, ypoint2, sini,X, Osb,
-                                  beta, quad, wp, Rg)
+rns, yns, zns, tns, ers, lvs, hit = bender3(xpoint2, ypoint2, sini,X, Osb,
+                                       beta, quad, wp, Rg)
 p3 = oplot(rns, ers, "r--")
 
-rns, yns, zns, ers, lvs, hit = bender3(xpoint, ypoint, sini,X, Osb,
-                                  beta, quad, wp, Rg)
+rns, yns, zns, tns, ers, lvs, hit = bender3(xpoint, ypoint, sini,X, Osb,
+                                       beta, quad, wp, Rg)
 p4 = plot(rns, lvs, "b-")
-rns, yns, zns, ers, lvs, hit = bender3(xpoint2, ypoint2, sini,X, Osb,
-                                  beta, quad, wp, Rg)
+rns, yns, zns, tns, ers, lvs, hit = bender3(xpoint2, ypoint2, sini,X, Osb,
+                                       beta, quad, wp, Rg)
 p4 = oplot(rns, lvs, "r-")
 
 t = Table(4,1)

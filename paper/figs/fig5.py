@@ -89,12 +89,20 @@ for j in range(4):
         fname2 = path3 + 'f400pbbr12m1.6d50i60x30.csv'
     if j == 2:
         fname = path3 + 'large-1-'
-        #fname2 = path3 + 'f600pbbr15m1.6d50i60x1.csv'
-        fname2 = path3 + 'r15x1d50i60f600.txt'
+        fname2 = path3 + 'f600pbbr15m1.6d50i60x1.csv'
+        #fname2 = path3 + 'f600pbbr15m1.6d50i60x1_HT+q+w+b.csv'
+        #fname2 = path3 + 'r15x1d50i60f600.txt'
+        #fname2 = path3 + 'f600pbbr15m1.6d50i60x1_Kr.csv'
+        #fname2 = path3 + 'f600pbbr15m1.6d50i60x1_sHT.csv'
     if j == 3:
         fname = path3 + 'large-30-'
-        fname2 = path3 + 'f600pbbr15m1.6d50i60x30.csv'
-    
+        #fname2 = path3 + 'f600pbbr15m1.6d50i60x30.csv'
+        #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_HT-q+w+b.csv' #normal
+        #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_HT+q+w+b.csv'
+        #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_HT+q+w-b.csv'
+        #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_HT-q-w+b.csv'
+        fname2 = path3 + 'f600pbbr15m1.6d50i60x30_Kr.csv'
+        #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_-Kr.csv'
 
     #read JP data
     phasea, N2kev = read_Scott_files(fname+'2')
@@ -104,11 +112,12 @@ for j in range(4):
     #read JN data
     #phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JN_files(fname2) 
 
-    if j == 2:
-        phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JP2_files(fname2)
-    else:
-        phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JN_files(fname2)
-            
+    #if j == 2:
+    #    phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JP2_files(fname2)
+    #else:
+    phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JN_files(fname2)
+
+    phasetmp = phase2
     
     for i in range(3):
 
@@ -153,17 +162,57 @@ for j in range(4):
          #Scott data
          ax1.plot(phase, flux, 'k-')
 
+         
          #JN data
-         if j == 0:
-             phase2 = phase2 + 0.028
-         elif j == 1:
-             phase2 = phase2 + 0.028
-         elif j == 2:
-             #phase2 = phase2 + 0.028
-             phase2 = phase2 + 0.035
-         elif j == 3:
-             phase2 = phase2 + 0.028
+         indxs = []
+         for q in range(len(flux2)):
+             if not (np.isnan(flux2[q])):
+                 indxs.append(q)
+
+         phase2 = phasetmp[indxs]
+         flux2 = flux2[indxs]
+
+
+         if i == 0:
+             pshft = 0.0
+             merr = 1.0e6
+             for pshift in np.linspace(-0.1, 0.1, 100):
+                 fluxi2 = griddata(phase2 + pshift, flux2, (phase), method='cubic', fill_value=0.0)
+                 #err = (flux/fluxi2 - 1)*100
+                 err = (fluxi2/flux - 1)*100
+                 #if err[0] < merr:
+
+                 #print "pshift",pshift," err:"
+                 #print err
+                 #print
+
+                 serr = 0.0
+                 for ijk in range(len(err)):
+                     if fluxi2[ijk] != 0:
+                         serr += np.abs(err[ijk])
+
+                 
+                 #if np.sum(np.abs(err)) < merr: 
+                 if serr < merr:
+                     #merr = err[0]
+                     #merr = np.sum(np.abs(err))
+                     merr = serr
+                     pshft = pshift
              
+             print "min shift:", pshft
+
+         if j == 0:
+              phase2 = phase2 + 0.0568 - pshft
+         elif j == 1:
+              phase2 = phase2 + 0.0568 - pshft
+         elif j == 2:
+              #phase2 = phase2 + 0.08
+              phase2 = phase2 + 0.081 - pshft
+         elif j == 3:
+             phase2 = phase2 + 0.0789473684211 - pshft
+
+
+         phase2 = phase2 + pshft    
              
          ax1.plot(phase2, flux2, 'r--')
          
@@ -186,7 +235,7 @@ for j in range(4):
 
          #interpolate error
          fluxi2 = griddata(phase2, flux2, (phase), method='cubic')
-         err = (fluxi2/flux - 1)*100
+         err = (flux/fluxi2 - 1)*100
                   
          ax2.plot(phase, err, 'k-', linewidth = 0.4)
 

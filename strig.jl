@@ -98,7 +98,7 @@ function authalic_lat(colat, ecc, qp)
     return acolat
 end
 
-#great circle distance (on a sphere)
+#Great circle distance (on a sphere)
 function great_circle_dist(lon1, lon2, col1, col2)
 
     lat1 = pi/2 - col1
@@ -111,7 +111,7 @@ function great_circle_dist(lon1, lon2, col1, col2)
     #law of cosines
     #return acos(sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2)*cos(dlon))
     
-    #haversine formula; mmm nice and round
+    #haversine formula
     #return 2.0*asin(sqrt(sin(dlat/2)^2 + cos(lat1)*cos(lat2)*sin(dlon/2)^2))
 
     #vincenty
@@ -120,17 +120,16 @@ function great_circle_dist(lon1, lon2, col1, col2)
     return atan2(sqrt(xx), yy)
 end
 
-#great circle distance (on an ellipsoid)
+#Great circle distance (on an ellipsoid)
+#uses general Vincenty's formula for oblate spheroids
 function great_circle_dist2(lon1, lon2, col1, col2)
 
     lat1 = pi/2 - col1
     lat2 = pi/2 - col2
-    #lat1 = col1
-    #lat2 = col2
     dlon = abs(lon2 - lon1)
     dlat = abs(lat2 - lat1)
 
-    #Vincencty's formula on an ellipsoid
+    #Vincencty's formula on an ellipsoid (wiki)
     u1 = atan((1-fe)*tan(lat1))
     u2 = atan((1-fe)*tan(lat2))
     lambda = dlon
@@ -144,7 +143,6 @@ function great_circle_dist2(lon1, lon2, col1, col2)
     cospomega = 1.
         
     while err > 1e-8
-        #println("err = $err l=$lambda")
         sinomega = sqrt( (cos(u2)*sin(lambda))^2 + (cos(u1)*sin(u2) - sin(u1)*cos(u2)*cos(lambda))^2)
         cosomega = sin(u1)*sin(u2) + cos(u1)*cos(u2)*cos(lambda)
         omega = atan2(sinomega, cosomega)

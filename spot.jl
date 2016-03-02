@@ -250,7 +250,6 @@ old_subframe = [y_grid_d[1],
 tic()
 
 for k = 1:Nt
-#for k = 55:Nt
 #for k = 12:23
 #for k = 40:40
 #for k = 27:26
@@ -525,6 +524,12 @@ for k = 1:Nt
             
             #if hiti > 0
             if rad <= edge_interp(chi)
+
+                #time delay
+                #cosi = sqrt(1-sini^2)
+                #cospsi = cosi*cos(theta) + sini*sin(theta)*cos(phi)
+                #yparam = 1 - cospsi
+                #dt = yparam*(1.0 + (U*yparam/8.0)*(1+ yparam*(1.0/3.0 - U/14.0)))*R/c
                 
                 dt = time*G*M/c^3
                 #dt = 0.0
