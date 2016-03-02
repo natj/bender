@@ -14,15 +14,15 @@ const ergkev = 6.2415e8 # erg/keV
 const cm_parsec = 3.2404e-23 #1cm/10kpc
 
 #initial parameters in physical units
-incl = deg2rad(45.0)
-M    = 1.4Msun
-R    = 12.0km
-fs   = 700
+#incl = deg2rad(45.0)
+#M    = 1.4Msun
+#R    = 12.0km
+#fs   = 700
 
-#incl = deg2rad(60.0)
-#M    = 1.6Msun
-#R    = 15.0km
-#fs   = 600
+incl = deg2rad(60.0)
+M    = 1.6Msun
+R    = 15.0km
+fs   = 600
 
 
 #Dist = 1.0*cm_parsec
@@ -41,7 +41,7 @@ println("x=$X ($U) and Osb=$Osb incl=$incl")
 
 #Hartle-Thorne parameters
 const beta = 0.4454*Osb^2*X #Matter quadrupole moment; AlGendy & Morsink 2014
-const quad = -0.11*(Osb/X)^2 #Energy quadrupole moment; AlGendy & Morsink 2014
+const quad = 0.11*(Osb/X)^2 #Energy quadrupole moment; AlGendy & Morsink 2014
 
 #I = sqrt(X)*(1.136 - 2.53*X + 5.6*X^2) #Moment of inertia; AlGendy & Morsink 2014
 I = sqrt(X)*(1.136 - 2.53*X + 5.6*X^2)*M*R^2 #Moment of inertia; AlGendy & Morsink 2014
@@ -67,11 +67,11 @@ println("wp0= $wp0 wp1= $wp1 | wpd= $wpd wpd2= $wpd2")
 
 wp2 = 2*jmom*(c^4/M/G^2)
 println("wp2 = $wp2")
-const wp = -2*jmom
+const wp = 2*jmom
 
-const beta = 0.0
-const quad = 0.0
-const wp = 0.0
+#const beta = 0.0
+#const quad = 0.0
+#const wp = 0.0
 #println("beta=$beta q=$quad wp=$wp")
 
 #
@@ -143,6 +143,10 @@ function rk_step(rri, yni,
     B2    = beta
     zeta2 = beta*(3*0.5*(3*cos(yni)^2-1)/4-1/3)
 
+    #nu2   = 0.0
+    #B2    = 0.0
+    #zeta2 = 0.0
+    
     pa        = ptim(x, y, sini, rri, nu2, B2, zeta2, wp, yni, Rg)
     pr, rturn = prad(x, y, sini, rri, nu2, B2, zeta2, wp, yni, Rg)
     pt, tturn = pthe(x, y, sini, rri, nu2, B2, zeta2, wp, yni, Rg)
@@ -316,6 +320,8 @@ function bender3(x, y, sini,
 
         nu2   = beta/3.0 - quad*0.5*(3*cos(yn)^2-1)
         B2    = beta
+        #nu2   = 0.0
+        #B2    = 0.0
         enu = (1-rr/2)/(1+rr/2)*exp(nu2*rr^3)
         B = (1-rr/2)*(1+rr/2) + B2*rr^2
 

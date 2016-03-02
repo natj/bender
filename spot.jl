@@ -11,8 +11,8 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(10.0)
-colat = deg2rad(18.0)
+rho = deg2rad(1.0)
+colat = deg2rad(50.0)
 
 
 interp = true
@@ -80,7 +80,7 @@ end
 img4 = zeros(Ny_dense, Nx_dense) #debug array
 
 #Spot image frame size
-N_frame = 200
+N_frame = 500
 
 
 #Beaming function for the radiation
@@ -88,7 +88,7 @@ N_frame = 200
 #Ir(cosa) = cosa
 
 #Time parameters
-Nt = 64
+Nt = 128
 
 times = collect(linspace(0, 1/fs, Nt))
 tbin = abs(times[2] - times[1])/2.0 
@@ -250,7 +250,7 @@ old_subframe = [y_grid_d[1],
 tic()
 
 for k = 1:Nt
-#for k = 55:90
+#for k = 55:Nt
 #for k = 12:23
 #for k = 40:40
 #for k = 27:26
@@ -426,13 +426,13 @@ for k = 1:Nt
     println("x = $frame_xs y = $frame_ys")
 
     #pick smaller
-    #if frame_xs > frame_ys
-    #    Nx_frame = N_frame
-    #    Ny_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
-    #else
-    #    Ny_frame = N_frame
-    #    Nx_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
-    #end
+    if frame_xs > frame_ys
+        Nx_frame = N_frame
+        Ny_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
+    else
+        Ny_frame = N_frame
+        Nx_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
+    end
 
     #select larger
     #if frame_xs < frame_ys
@@ -444,13 +444,13 @@ for k = 1:Nt
     #end
 
     #keep aspect ratio
-    if frame_xs < frame_ys
-        Nx_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
-        Ny_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
-    else
-        Ny_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
-        Nx_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
-    end
+    #if frame_xs < frame_ys
+    #    Nx_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
+    #    Ny_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
+    #else
+    #    Ny_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
+    #    Nx_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
+    #end
 
     
 
@@ -566,6 +566,10 @@ for k = 1:Nt
                     
                     #println("inside")
                     dfluxE, dfluxNE, dfluxNB, dfluxB = bbfluxes(EEd, delta, cosa)
+
+                    #println(dfluxE)
+                    #println("x=$x y=$y r=$rad chi=$chi")
+
                     
                     sdelta[k] += delta * frame_dxdy #* imgscale
                     sdelta2[k] += EEd * frame_dxdy #* imgscale
@@ -582,6 +586,9 @@ for k = 1:Nt
                     end
                     sfluxNB[kd] += dfluxNB * frame_dxdy * imgscale
                     sfluxB[kd] += dfluxB * frame_dxdy * imgscale
+
+                    #catch_NaN(sfluxE)
+                    
                 end #inside spot
             end#hiti
         end #x
@@ -598,8 +605,10 @@ for k = 1:Nt
     #display(p10)
 
     #bol flux
-    p10c = plot(phase, sfluxB, "k-")
-    p10c = oplot([phase[k]], [sfluxB[k]], "ko")
+    #p10c = plot(phase, sfluxB, "k-")
+    #p10c = oplot([phase[k]], [sfluxB[k]], "ko")
+    p10c = plot(phase, sfluxE[:,1], "k-")
+    p10c = oplot([phase[k]], [sfluxE[k,1]], "ko")
 
     #doppler factor
     sdelta[k] = sdelta[k]/Ndelta
@@ -639,10 +648,10 @@ toc()
 #write to file
 #opath = "out/"
 
-opath = "out2/"
+#opath = "out2/"
 #opath = "out2/cadeau+morsink/"
 #opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))n/"
-#opath = "out3/HT/"
+opath = "out3/HT/"
 
 mkpath(opath)
 

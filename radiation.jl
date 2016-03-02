@@ -5,20 +5,30 @@ include("bender.jl")
 #Planck function B_E(T) = erg cm^-2 s^-1 str^-1 keV^-1
 #constbb = hzkeV^4 * 2*h/c^2
 #hzkeV = 2.41789894e17
-BE(T, Ener) = 5.039617e22 * (Ener .^3.0)./expm1(Ener ./ T)
-
+#BE(T, Ener) = 5.039617e22 * (Ener .^3.0)./expm1(Ener ./ T)
+function BE(temp, x)
+    constbb = 5.039617e22
+    ex = exp(-x./ temp)
+    return constbb*(x.^3) .* ex ./ (1.0-ex)
+end
+    
 #Planck function photon flux N_E(T) = ph cm^-2 s^-1 str^-1 keV^-1
 #constbb = hzkeV^4 * 2*h/c^2
 #hzkeV = 2.41789894e17
-NBE(T, Ener) = 5.039617e22 * (Ener .^3.0)./expm1(Ener ./ T) ./ Ener * ergkev
+#NBE(T, Ener) = 5.039617e22 * (Ener .^3.0)./expm1(Ener ./ T) ./ Ener * ergkev
+function NBE(temp, x)
+    constbb = 5.039617e22
+    ex = exp(-x./ temp)
+    return constbb*(x.^3) .* ex ./ (1.0-ex) ./x * ergkev
+end
 
 #Number of black body photons N(T) = \int dE B_E(T)/E(keV) * ergkev
 #\int dE E^2 /(exp(E/T)-1) = Gamma(3)Zeta(3) T^3 
-NB(T) = 5.039617e22*ergkev*2.404*T.^3.0
+NB(temp) = 5.039617e22*ergkev*2.404*temp.^3.0
 
 #Energy of black body photons E(T) = \int dE B_E(T)
 #\int dE E^3 /(exp(E/T)-1) = Gamma(4)Zeta(4) T^4 = 6 * pi^4/90  * T^4
-EB(T) = 5.039617e22*(pi^4/15.0)*T.^4 * ergkev
+EB(temp) = 5.039617e22*(pi^4/15.0)*temp.^4 * ergkev
 
 #Beaming function
 Beam(mu) = 1.0 #Lambertian
@@ -28,6 +38,10 @@ Beam(mu) = 1.0 #Lambertian
 #Compute blackbody flux elements
 function bbfluxes(EEd, delta, cosa)
 
+    if EEd == 0 || delta == 0
+        return zeros(3), zeros(3), 0.0, 0.0
+    end
+    
     dist = 1.0 / cm_parsec #10 kpc; source distance
     d2 = dist^2
     
@@ -66,7 +80,7 @@ function radiation(rad, chi,
 
     C = rad^2
     Lz = sini*sqrt(C)*sin(chi)
-    w = -wp*Xob^3*(1-3*Xob) /(G*M/c^3) #into rad/seconds
+    w = wp*Xob^3*(1-3*Xob) /(G*M/c^3) #into rad/seconds
 
     fa = (B/enu/ezeta)*dR/Rgm
     
