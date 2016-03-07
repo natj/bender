@@ -52,8 +52,8 @@ xmin = -0.04
 xmax = 1.04
 
 
-eymin = -10.0
-eymax = 10.0
+eymin = -20.0
+eymax = 3.0
 
 
 panelh = 45
@@ -89,19 +89,20 @@ for j in range(4):
         fname2 = path3 + 'f400pbbr12m1.6d50i60x30.csv'
     if j == 2:
         fname = path3 + 'large-1-'
-        fname2 = path3 + 'f600pbbr15m1.6d50i60x1.csv'
+        #fname2 = path3 + 'f600pbbr15m1.6d50i60x1.csv'
         #fname2 = path3 + 'f600pbbr15m1.6d50i60x1_HT+q+w+b.csv'
-        #fname2 = path3 + 'r15x1d50i60f600.txt'
+        fname2 = path3 + 'r15x1d50i60f600.txt'
         #fname2 = path3 + 'f600pbbr15m1.6d50i60x1_Kr.csv'
         #fname2 = path3 + 'f600pbbr15m1.6d50i60x1_sHT.csv'
     if j == 3:
         fname = path3 + 'large-30-'
-        #fname2 = path3 + 'f600pbbr15m1.6d50i60x30.csv'
-        #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_HT-q+w+b.csv' #normal
+        #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_HT.csv'
+        fname2 = path3 + 'f600pbbr15m1.6d50i60x30_HT-q+w+b.csv' #normal
         #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_HT+q+w+b.csv'
         #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_HT+q+w-b.csv'
         #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_HT-q-w+b.csv'
-        fname2 = path3 + 'f600pbbr15m1.6d50i60x30_Kr.csv'
+        #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_Kr.csv'
+        #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_exact.csv'
         #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_-Kr.csv'
 
     #read JP data
@@ -112,10 +113,10 @@ for j in range(4):
     #read JN data
     #phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JN_files(fname2) 
 
-    #if j == 2:
-    #    phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JP2_files(fname2)
-    #else:
-    phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JN_files(fname2)
+    if j == 2:
+        phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JP2_files(fname2)
+    else:
+        phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JN_files(fname2)
 
     phasetmp = phase2
     

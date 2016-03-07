@@ -71,7 +71,7 @@ const wp = 2*jmom
 
 const beta = 0.0
 const quad = 0.0
-#const wp = 0.0
+const wp = 0.0
 #println("beta=$beta q=$quad wp=$wp")
 
 #
@@ -288,7 +288,7 @@ function bender3(x, y, sini,
             erry = abs(yp1 - yp1_o)
             errz = abs(zp1 - zp1_o)
 
-            err = max(abs(erry/yp1), abs(errz/zp1), 1*abs(errt/tp1)) #rel err
+            err = max(abs(erry/yp1), abs(errz/zp1), 10*abs(errt/tp1)) #rel err
             #err = max(abs(erry), abs(errz)) #abs err
         end
 

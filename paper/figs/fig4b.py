@@ -50,45 +50,64 @@ skiph = 30
 mfiglim = 0
 
 #path to files
-path_JP = "../../out2/f700/r12nn/"
+path_JP = "../../out2/f600/"
 
 #labels size
 tsize = 10.0
 
 
-nu = '700'
-#nu = '400'
+nu = '600'
 
 
-fig.text(0.5, 0.92, '$\\theta_s = 18^{\\circ}$',  ha='center', va='center', size=tsize)
-fig.text(0.5, 0.72, '$\\theta_s = 45^{\\circ}$',  ha='center', va='center', size=tsize)
-fig.text(0.5, 0.52, '$\\theta_s = 90^{\\circ}$',  ha='center', va='center', size=tsize)
+fig.text(0.5, 0.92, 'All rho1',  ha='center', va='center', size=tsize)
+fig.text(0.5, 0.72, 'All rho30',  ha='center', va='center', size=tsize)
+fig.text(0.5, 0.52, 'equator',  ha='center', va='center', size=tsize)
+fig.text(0.5, 0.32, 'pole',  ha='center', va='center', size=tsize)
 
 #fig.text(0.5, 0.12, 'Phase',ha='center', va='center', size=lsize)
 
 
-for j in range(3):
+for j in range(4):
 
     if j == 0:
-        fname = path_JP + 'r12x10d18i45.txt'
-        #fname2 = path_JP + 'r12x10d18i45_2.txt'
-        fname2 = path_JP + 'f'+nu+'pbbr12m1.4d18i45x10.csv'
-    if j == 1:
-        fname = path_JP + 'r12x10d45i45.txt'
-        #fname2 = path_JP + 'r12x10d45i45_2.txt'
-        fname2 = path_JP + 'f'+nu+'pbbr12m1.4d45i45x10.csv'
-    if j == 2:
-        fname = path_JP + 'r12x10d90i45.txt'
-        #fname2 = path_JP + 'r12x10d90i45_2.txt'
-        fname2 = path_JP + 'f'+nu+'pbbr12m1.4d90i45x10.csv'
-    #if j == 3:
-    #    fname = path_JP + 'nu'+nu+'Hz_hopf_rho30deg.dat'
-    #    fname2 = path_JP + 'f'+nu+'phopfr12m1.6d50i60x30.csv'
-    
+        #fname = path_JP + 'rho1d50obl.txt'
+        fname = path_JP + 'rho1d50sphere.txt'
+        #fname = path_JP + 'rho1d50oblnodel.txt' ###
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x1.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x1nodel.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x1nodel_delta.csv' ###
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x1_delta.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x1_sphere.csv'
+        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x1_sphere_delta.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x1_risti2.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x1_delta_-dt.csv'
+    elif j == 1:
+        #fname = path_JP + 'rho30d50obl.txt'
+        #fname = path_JP + 'rho30d50sphere.txt'
+        fname = path_JP + 'rho30d50oblnodel.txt'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_sphere.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30nodel.csv'
+        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30nodel_delta.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30nodel_delta_hires.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30nodel_isotrop.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_-dt.csv'
+    elif j == 2:
+        #fname = path_JP + 'rho10d90obl.txt'
+        fname = path_JP + 'rho10d90oblnodel.txt'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d90i60x10.csv'
+        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d90i60x10nodel_delta.csv'
+    elif j == 3:
+        #fname = path_JP + 'rho10d0obl.txt'
+        fname = path_JP + 'rho10d0oblnodel.txt'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d0i60x10.csv'
+        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d0i60x10nodel_delta.csv'
 
     #read JP data
+    #if j != 1:
     phase, N2kev, N6kev, N12kev, Nbol, Fbol = read_JP_files(fname)
-
+    #else:
+    #    phase, N2kev, N6kev, N12kev, Nbol, Fbol, F2kev, F6kev, F12kev = read_JN_files(fname) 
     #read JP data
     #phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JP_files(fname2)
 
@@ -146,20 +165,45 @@ for j in range(3):
 
          phase2 = phasetmp[indxs]
          flux2 = flux2[indxs]
-             
+
+         
          #JP data
          ax1.plot(phase, flux, 'k-')
 
+         if i == 0:
+             pshft = 0.0
+             merr = 1.0e6
+             for pshift in np.linspace(-0.1, 0.1, 100):
+                 fluxi2 = griddata(phase2 + pshift, flux2, (phase), method='cubic', fill_value=0.0)
+                 err = (fluxi2/flux - 1)*100
+
+                 serr = 0.0
+                 for ijk in range(len(err)):
+                     if fluxi2[ijk] != 0:
+                         serr += np.abs(err[ijk])
+                 if serr < merr:
+                     merr = serr
+                     pshft = pshift
+             
+             print "min shift:", pshft
+
+
+
+
+         
          #arbitrary phase shifts
          #flux2 = flux2 * 0.99
-         #phase2 = phase2 - 0.0018
+         #phase2 = phase2 + pshft
          if j == 0:
-             phase2 = phase2 - 0.01
-         elif j == 1:
-             phase2 = phase2 - 0.006
-         elif j == 2:
              phase2 = phase2 - 0.0
-                     
+         elif j == 1:
+             phase2 = phase2 - 0.0
+         elif j == 2:
+             phase2 = phase2 + 0.0
+         elif j == 3:
+             phase2 = phase2 + 0.0
+
+             
              
          #phase = phase - 0.01
          
@@ -216,4 +260,4 @@ for j in range(3):
     
 
 
-savefig('fig4.pdf', bbox_inches='tight')
+savefig('fig4b.pdf', bbox_inches='tight')

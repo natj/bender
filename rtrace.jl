@@ -3,8 +3,8 @@ include("bender.jl")
 
 
 #grid setup
-Nrad = 50
-Nchi = 50
+Nrad = 100
+Nchi = 100
 
 rmin = 0.0
 rmax = 12.0
@@ -66,12 +66,14 @@ edge_interp(x) = edge_interp_raw[(Nedge-1)*x/2pi + 1.0]
 #chi_grid = collect(linspace(chimin, chimax, Nchi))
 #rad_grid = collect(linspace(rmin, rmax, Nrad))
 
-#weighted
-#chi_diffs = 0.8 + sin(collect(linspace(0.0, 2pi, Nchi-3))).^2
-#unshift!(chi_diffs, 0.0)
-#chi_grid = chimin .+ (chimax-chimin)*cumsum(chi_diffs)/sum(chi_diffs)
+#equidistant
+#chi_grid = collect(linspace(chimin, chimax, Nchi-2))
 
-chi_grid = collect(linspace(chimin, chimax, Nchi-2))
+#weighted
+chi_diffs = 0.8 + sin(collect(linspace(0.0, 2pi, Nchi-3))).^2
+unshift!(chi_diffs, 0.0)
+chi_grid = chimin .+ (chimax-chimin)*cumsum(chi_diffs)/sum(chi_diffs)
+
 unshift!(chi_grid, chi_grid[1] - dchi_edge)
 push!(chi_grid, chi_grid[end] + dchi_edge)
 

@@ -14,7 +14,6 @@ include("plot2d.jl")
 rho = deg2rad(1.0)
 colat = deg2rad(50.0)
 
-
 interp = true
 
 ########
@@ -23,7 +22,7 @@ function spot(t, phi, theta;
               delta = deg2rad(30.0) #spot half-opening angle
               )
 
-    #Vincenty's formula
+    #Circular spot
     d = great_circle_dist(0.0, phi, stheta, theta)
     if abs(d) < delta
         return true
@@ -303,7 +302,8 @@ for k = 1:Nt
             dt = time*G*M/c^3 #time shift
             #dt = 0.0
             
-            phi = phi - (t -dt)*fs*2*pi
+            phi = phi - (t - dt)*fs*2*pi
+            #phi = phi - (t + dt)*fs*2*pi
             phi = mod2pi(phi)
       
             #img4[j,i] = -4.0*painter(phi, theta)/2.0
@@ -313,8 +313,8 @@ for k = 1:Nt
                           stheta = colat,
                           delta = rho
                           )
-            
-            if inside
+             
+            if inside && y > -5
                 located_spot = true
             #if inside && inf_small
             #    inf_small = false
@@ -539,6 +539,7 @@ for k = 1:Nt
                 #rotatate star
                 #println("t: $t dt: $dt $(dt/t)")
                 phi = phi - (t - dt)*fs*2*pi
+                #phi = phi - (t + dt)*fs*2*pi
                 phi = mod2pi(phi)
                 
                 img5[j,i] = painter(phi, theta)/2.0
@@ -548,7 +549,7 @@ for k = 1:Nt
                               delta = rho
                               )
 
-                if inside
+                if inside && y > -5
 
                     if interp
                         delta = delta_interp[rad,chi]
@@ -646,10 +647,10 @@ toc()
 #write to file
 #opath = "out/"
 
-#opath = "out2/"
+opath = "out2/"
 #opath = "out2/cadeau+morsink/"
 #opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))n/"
-opath = "out3/HT/"
+#opath = "out3/HT/"
 
 mkpath(opath)
 

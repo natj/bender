@@ -35,7 +35,7 @@ function bbfluxes(EEd, delta, cosa)
     const Teff = 2.0 #blackbody effective temperature
 
     #Collect flux for different energies
-    fluxE = (EEd)^3 .* BE(Teff, Energs ./ EEd) .* Beam(cosa*delta) #*delta# energy flux
+    fluxE = (EEd)^3 .* BE(Teff, Energs ./ EEd) .* Beam(cosa*delta) *delta# energy flux
     fluxNE = (EEd)^2 .* NBE(Teff, Energs ./ EEd) .* Beam(cosa*delta) *delta# photon flux CORRECT I_E'/E
     #fluxNE = (EEd)^3 .* NBE(Teff, Energs ./ EEd) .* Beam(cosa*delta) # photon flux
     #fluxNE = (EEd)^3 .* BE(Teff, Energs) .* Beam(cosa*delta) ./ Energs * ergkev # photon flux
@@ -100,8 +100,8 @@ function radiation(rad, chi,
 
     #wp = 2*I*(2pi*fs)/X^2 / (G*M/c^2)
     #w = wp*Xob^3*(1-3*Xob)
-    #vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
-    vz = Rgm*(1/enu)*sin(theta)*(2pi*fs) #isoradial zamo
+    vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
+    #vz = Rgm*(1/enu)*sin(theta)*(2pi*fs) #isoradial zamo
     #vz = Rgm*(B/enu^2)*sin(theta)*(2pi*fs - w) #isotropic zamo
     
     bz = R*vz/c
@@ -132,14 +132,14 @@ function radiation(rad, chi,
     #return delta2, delta
     #return EEd, enu
     #return EEd, gamma
-    #return EEd, delta
+    return EEd, delta
     #return EEd, eta/eta2
     #return EEd, Lz*(2pi*fs)/(G*M/c^2)/(-cosz*b)
     #return EEd, -Lz/(cosz)
     #return EEd, Lz
     #return EEd, (1/eta2 -1) / (1/eta -1)
 
-    return EEd, cosg
+    #return EEd, cosg
     #return EEd, delta
     #return EEd, 1.0
 

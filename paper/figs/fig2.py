@@ -6,6 +6,7 @@ from palettable.wesanderson import Zissou_5 as wsZ
 import matplotlib.ticker as mtick
 
 from scipy.interpolate import interp1d
+from scipy.interpolate import griddata
 
 def read_JP_files(fname):
     da = np.genfromtxt(fname, delimiter="   ")
@@ -51,8 +52,8 @@ path_JP = "../../out/"
 tsize = 10.0
 
 
-nu = '1'
-#nu = '400'
+#nu = '1'
+nu = '400'
 
 
 fig.text(0.5, 0.92, '$\\nu = '+nu+'$ Hz  blackbody  $\\rho = 1^{\circ}$',  ha='center', va='center', size=tsize)
@@ -154,19 +155,22 @@ for j in range(4):
 
 
          #interpolate error
-         fluxi = interp1d(phase, flux, kind='linear')
+         #fluxi = interp1d(phase, flux, kind='linear')
          #fluxi = interp1d(phase, flux, kind='cubic')
-         err = (fluxi(phase2)/flux2 - 1)*100
-                  
+         fluxi2 = griddata(phase2, flux2, (phase), method='linear')
+         
+         #err = (fluxi(phase2)/flux2 - 1)*100
+         err = (flux/fluxi2 - 1)*100
+
          #flux2i = interp1d(phase2, flux2, kind='cubic', fill_value='extrapolate')
          #err = (flux/flux2i(phase) - 1)*100
 
-         ax2.plot(phase2, err, 'k-', linewidth = 0.4)
+         ax2.plot(phase, err, 'k-', linewidth = 0.4)
          
     mfiglim += panelh+epanelh+skiph
 
     
 
 
-savefig('fig2a.pdf', bbox_inches='tight')
-#savefig('fig2b.pdf', bbox_inches='tight')
+#savefig('fig2a.pdf', bbox_inches='tight')
+savefig('fig2b.pdf', bbox_inches='tight')
