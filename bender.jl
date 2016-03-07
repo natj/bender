@@ -94,7 +94,7 @@ include("strig.jl")
 function ptim(a, b, sini,
               x, nu2, B2, zeta2, wp, theta, Rg)
 
-    return exp(-2*x^3*nu2)*(2+x)^2*(-1 + a*x^3*(-1 + 3*x)*wp*sini)/(-2 + x)^2
+    return exp(-2*x^3*nu2) * (2 + x)^2 * (-1 + a*x^3*(-1 + 3*x)*wp*sini)/(-2 + x)^2
 end
 
 #Radial moment p^r

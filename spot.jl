@@ -11,8 +11,8 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(1.0)
-colat = deg2rad(50.0)
+rho = deg2rad(10.0)
+colat = deg2rad(0.0)
 
 interp = true
 
@@ -87,7 +87,7 @@ N_frame = 200
 #Ir(cosa) = cosa
 
 #Time parameters
-Nt = 64
+Nt = 10
 
 times = collect(linspace(0, 1/fs, Nt))
 tbin = abs(times[2] - times[1])/2.0 
@@ -98,6 +98,7 @@ spot_flux2 = zeros(Nt)
 
 sdelta = zeros(Nt)
 sdelta2 = zeros(Nt)
+sdelta3 = zeros(Nt)
 
 sfluxE = zeros(Nt, 3)
 sfluxNE = zeros(Nt, 3)
@@ -296,14 +297,13 @@ for k = 1:Nt
             phi = phi_interp_atan(rad,chi)
             theta = theta_interp[rad,chi]
             time = time_interp[rad,chi]
-            
+            dtau = dtau_interp[rad,chi]
             
             #rotate star
             dt = time*G*M/c^3 #time shift
             #dt = 0.0
             
             phi = phi - (t - dt)*fs*2*pi
-            #phi = phi - (t + dt)*fs*2*pi
             phi = mod2pi(phi)
       
             #img4[j,i] = -4.0*painter(phi, theta)/2.0
@@ -508,6 +508,7 @@ for k = 1:Nt
                 Xob = Xs_interp[rad,chi]
                 time = time_interp[rad,chi]
                 cosa = cosa_interp[rad,chi]
+                dtau = dtau_interp[rad,chi]
                 #hit = hits_interp[rad,chi] #test if we hit the surface
 
             #println(phi," ",theta," ",Xob," ",time," ",cosa," ",hit)
@@ -539,7 +540,6 @@ for k = 1:Nt
                 #rotatate star
                 #println("t: $t dt: $dt $(dt/t)")
                 phi = phi - (t - dt)*fs*2*pi
-                #phi = phi - (t + dt)*fs*2*pi
                 phi = mod2pi(phi)
                 
                 img5[j,i] = painter(phi, theta)/2.0
@@ -577,6 +577,7 @@ for k = 1:Nt
                     
                     sdelta[k] += delta * frame_dxdy #* imgscale
                     sdelta2[k] += EEd * frame_dxdy #* imgscale
+                    sdelta3[k] += dtau * frame_dxdy
                     Ndelta += frame_dxdy
                     
                     img5[j,i] += dfluxB * frame_dxdy * imgscale * 1.0e5
@@ -585,11 +586,11 @@ for k = 1:Nt
                     kd = k
                     
                     for ie = 1:3
-                        sfluxE[kd, ie] += dfluxE[ie] * frame_dxdy * imgscale
-                        sfluxNE[kd, ie] += dfluxNE[ie] * frame_dxdy * imgscale
+                        sfluxE[kd, ie] += dfluxE[ie] * frame_dxdy * imgscale *dtau
+                        sfluxNE[kd, ie] += dfluxNE[ie] * frame_dxdy * imgscale *dtau
                     end
-                    sfluxNB[kd] += dfluxNB * frame_dxdy * imgscale
-                    sfluxB[kd] += dfluxB * frame_dxdy * imgscale
+                    sfluxNB[kd] += dfluxNB * frame_dxdy * imgscale *dtau
+                    sfluxB[kd] += dfluxB * frame_dxdy * imgscale *dtau
                 end #inside spot
             end#hiti
         end #x
@@ -610,8 +611,11 @@ for k = 1:Nt
     p10c = oplot([phase[k]], [sfluxB[k]], "ko")
 
     #doppler factor
-    sdelta[k] = sdelta[k]/Ndelta
-    p10d = plot(phase, sdelta, "b-")
+    sdelta[k] = sdelta3[k]/Ndelta
+    sdelta2[k] = sdelta3[k]/Ndelta
+    sdelta3[k] = sdelta3[k]/Ndelta
+
+    p10d = plot(phase, sdelta3, "b-")
     #p10d = oplot(phase, sdelta2, "r-")
     #p10c = oplot(phase, (sdelta2./Ndelta).^5, "r-")
     #p10c = plot(phase, (sdelta2./sdelta), "r-")
