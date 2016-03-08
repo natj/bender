@@ -38,8 +38,8 @@ xmin = -0.04
 xmax = 1.04
 
 #error window limits
-eymin = -5.0
-eymax = 5.0
+eymin = -1.0
+eymax = 1.0
 
 #figure shape parameters
 panelh = 45
@@ -50,7 +50,7 @@ skiph = 30
 mfiglim = 0
 
 #path to files
-path_JP = "../../out2/f700/r12nn/"
+path_JP = "../../out2/f700/r12nnn/"
 
 #labels size
 tsize = 10.0
@@ -150,15 +150,33 @@ for j in range(3):
          #JP data
          ax1.plot(phase, flux, 'k-')
 
+         if i == 0:
+             pshft = 0.0
+             merr = 1.0e6
+             for pshift in np.linspace(-0.1, 0.1, 100):
+                 fluxi2 = griddata(phase2 + pshift, flux2, (phase), method='cubic', fill_value=0.0)
+                 err = (fluxi2/flux - 1)*100
+
+                 serr = 0.0
+                 for ijk in range(len(err)):
+                     if fluxi2[ijk] != 0:
+                         serr += np.abs(err[ijk])
+                 if serr < merr:
+                     merr = serr
+                     pshft = pshift
+             
+             print "min shift:", pshft
+
          #arbitrary phase shifts
          #flux2 = flux2 * 0.99
-         #phase2 = phase2 - 0.0018
+         phase2 = phase2 + pshft
+         
          if j == 0:
-             phase2 = phase2 - 0.01
+             phase2 = phase2 - 0.009 - pshft
          elif j == 1:
-             phase2 = phase2 - 0.006
+             phase2 = phase2 - 0.0048 - pshft
          elif j == 2:
-             phase2 = phase2 - 0.0
+             phase2 = phase2 + 0.0 - pshft
                      
              
          #phase = phase - 0.01

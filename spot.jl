@@ -11,8 +11,8 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(10.0)
-colat = deg2rad(0.0)
+rho = deg2rad(30.0)
+colat = deg2rad(50.0)
 
 interp = true
 
@@ -87,7 +87,7 @@ N_frame = 200
 #Ir(cosa) = cosa
 
 #Time parameters
-Nt = 10
+Nt = 64
 
 times = collect(linspace(0, 1/fs, Nt))
 tbin = abs(times[2] - times[1])/2.0 
@@ -565,9 +565,9 @@ for k = 1:Nt
                         old_subframe[4] = frame_x2 < x ? x : frame_x2 #right max
 
                         
-                        EEd, delta = radiation(rad, chi,
-                                               phi, theta, cosa,
-                                               X, Xob, Osb, sini)
+                        EEd, delta, dtau = radiation(rad, chi,
+                                                     phi, theta, cosa,
+                                                     X, Xob, Osb, sini)
                     end
                     #println(EEd, " ", delta)
                     #println()

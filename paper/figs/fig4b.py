@@ -95,6 +95,8 @@ for j in range(4):
         #fname = path_JP + 'rho30d50sphere.txt'
         #fname = path_JP + 'rho30d50oblnodel.txt'
         fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_dtdtau.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_dtdtau_div.csv'
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_sphere.csv'
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_sphere_gamma.csv'
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30nodel.csv'

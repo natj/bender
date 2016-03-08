@@ -52,8 +52,8 @@ xmin = -0.04
 xmax = 1.04
 
 
-eymin = -20.0
-eymax = 3.0
+eymin = -5.0
+eymax = 5.0
 
 
 panelh = 45
@@ -83,21 +83,25 @@ for j in range(4):
 
     if j == 0:
         fname = path3 + 'small-1-'
-        fname2 = path3 + 'f400pbbr12m1.6d50i60x1.csv'
+        fname2 = path3 + 'f400pbbr12m1.6d50i60x1_+q.csv'
     if j == 1:
         fname = path3 + 'small-30-'
-        fname2 = path3 + 'f400pbbr12m1.6d50i60x30.csv'
+        fname2 = path3 + 'f400pbbr12m1.6d50i60x30_+q.csv'
     if j == 2:
         fname = path3 + 'large-1-'
         #fname2 = path3 + 'f600pbbr15m1.6d50i60x1.csv'
+        fname2 = path3 + 'f600pbbr15m1.6d50i60x1_+q.csv'
+        #fname2 = path3 + 'f600pbbr15m1.6d50i60x1.csv'
         #fname2 = path3 + 'f600pbbr15m1.6d50i60x1_HT+q+w+b.csv'
-        fname2 = path3 + 'r15x1d50i60f600.txt'
+        #fname2 = path3 + 'r15x1d50i60f600.txt'
         #fname2 = path3 + 'f600pbbr15m1.6d50i60x1_Kr.csv'
         #fname2 = path3 + 'f600pbbr15m1.6d50i60x1_sHT.csv'
     if j == 3:
         fname = path3 + 'large-30-'
+        #fname2 = path3 + 'f600pbbr15m1.6d50i60x30.csv'
+        fname2 = path3 + 'f600pbbr15m1.6d50i60x30_+q.csv'
         #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_HT.csv'
-        fname2 = path3 + 'f600pbbr15m1.6d50i60x30_HT-q+w+b.csv' #normal
+        #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_HT-q+w+b.csv' #normal
         #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_HT+q+w+b.csv'
         #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_HT+q+w-b.csv'
         #fname2 = path3 + 'f600pbbr15m1.6d50i60x30_HT-q-w+b.csv'
@@ -113,10 +117,10 @@ for j in range(4):
     #read JN data
     #phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JN_files(fname2) 
 
-    if j == 2:
-        phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JP2_files(fname2)
-    else:
-        phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JN_files(fname2)
+    #if j == 2:
+    #    phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JP2_files(fname2)
+    #else:
+    phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JN_files(fname2)
 
     phasetmp = phase2
     
@@ -202,15 +206,15 @@ for j in range(4):
              
              print "min shift:", pshft
 
-         if j == 0:
-              phase2 = phase2 + 0.0568 - pshft
-         elif j == 1:
-              phase2 = phase2 + 0.0568 - pshft
-         elif j == 2:
-              #phase2 = phase2 + 0.08
-              phase2 = phase2 + 0.081 - pshft
-         elif j == 3:
-             phase2 = phase2 + 0.0789473684211 - pshft
+         #if j == 0:
+         #     phase2 = phase2 + 0.0568 - pshft
+         #elif j == 1:
+         #     phase2 = phase2 + 0.0568 - pshft
+         #elif j == 2:
+         #     #phase2 = phase2 + 0.08
+         #     phase2 = phase2 + 0.081 - pshft
+         #elif j == 3:
+         #    phase2 = phase2 + 0.0789473684211 - pshft
 
 
          phase2 = phase2 + pshft    
@@ -221,7 +225,7 @@ for j in range(4):
          ax2 = subplot(gs[(mfiglim+panelh):(mfiglim+panelh+epanelh), i])
          ax2.minorticks_on()
          ax2.set_xlim(xmin, xmax)
-         ax2.set_ylim(eymin, eymax)
+         #ax2.set_ylim(eymin, eymax)
 
          if i == 0:
              ax2.set_ylabel('$\Delta$ %',size=lsize)
