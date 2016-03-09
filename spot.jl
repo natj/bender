@@ -114,125 +114,212 @@ rad_diffs = 1 ./ exp(linspace(0.0, 1.5, Nrad_frame-1).^2)
 rad_grid_d = rmax * cumsum(rad_diffs) / sum(rad_diffs)
 unshift!(rad_grid_d, 0.0)
 
+chi_sweep = zeros(Nchi)
+
 tic()
-#for k = 1:Nt
-for k = 2:1
+for k = 1:Nt
+#for k = 2:1
     t = times[k]
 
-    radmin = 0.0
-    radmax = 10.0
-    chimin = 0.0
-    chimax = 2pi
+    jradmin = Nrad
+    jradmax = 1
+    ichimin = Nchi
+    ichimax = 1
+
+    located_spot = false
     
     for i = 2:Nchi-1
         chi = chi_grid[i]
 
         #avoid double integrating angle edges
-        if chi < 0; continue; end
-        if chi > 2pi; continue; end
+        #if chi <= 0; continue; end
+        #if chi >= 2pi; continue; end
         
         #if mod(i,10) == 0; println("chi: $(round(chi/2pi,2))"); end
-    
+
+        located_spot_chi = false
         for j = 2:Nrad-1
             rad = rad_grid[j]
 
-            if hits[j, i] < 1; break; end
+            if rad <= edge_interp(chi)
+                
+                #Ray traced photons
+                phi = Phis[j, i]
+                theta = Thetas[j, i]
+                time = Times[j, i]
+                
+                #rotate star
+                dt = time*G*M/c^3
+                phi = phi - (t - dt)*fs*2*pi
+                phi = mod2pi(phi)
 
-    
-            #Ray traced photons
-            ####
-            phi = Phis[j, i]
-            theta = Thetas[j, i]
-
-            #rotate star
-            phi = phi - t*fs*2*pi
-            phi = mod2pi(phi)
-
-            inside = spot(0.0, phi, theta,
-                          stheta = colat,
-                          delta = rho
-                          )
+                inside = spot(0.0, phi, theta,
+                              stheta = colat,
+                              delta = rho
+                              )
 
             
-            if inside #|| inside2
-                #println("inside")
-                radmin = rad > radmin ? rad : radmin
-                radmax = rad < radmax ? rad : radmax
-                                 
-                #time = Times[j, i]
-                #Xob = Xs[j, i]
-                #cosa = cosas[j, i]
-                #dF = dFlux[j, i]
-                #dE = Reds[j, i]
+                if inside
+                    located_spot = true
+                    located_spot_chi = true
+                    
+                    #println("inside")
+                    jradmax = rad > rad_grid[jradmax] ? j : jradmax
+                    jradmin = rad < rad_grid[jradmin] ? j : jradmin
+                    
+                    #time = Times[j, i]
+                    #Xob = Xs[j, i]
+                    #cosa = cosas[j, i]
+                    #dF = dFlux[j, i]
+                    #dE = Reds[j, i]
 
-                #kd = time_lag(time, k, times, Nt, tbin, phi, theta)
 
-                #drdchi = abs(rad_grid[j+1] - rad_grid[j-1])*abs(chi_grid[i+1] - chi_grid[i-1])*rad_grid[j]
-                #spot_flux2[kd] += dF * drdchi
-            end#inside
+                    #drdchi = abs(rad_grid[j+1] - rad_grid[j-1])*abs(chi_grid[i+1] - chi_grid[i-1])*rad_grid[j]
+                    #spot_flux2[kd] += dF * drdchi
+                end#inside spot
+            end#inside star
         end#rad
+
+        chi_sweep[i] = located_spot_chi ? 1.0 : 0.0
     end#chi
 
+    
+    #bounding box limits
+    jradmin = jradmin == 1 ? 1 : jradmin - 1
+    jradmax = jradmax == Nrad ? Nrad : jradmax + 1
+    println("radmin: $(rad_grid[jradmin]) radmax: $(rad_grid[jradmax])")
+    #println("chimin: $(chi_grid[ichimin]) chimax: $(chi_grid[ichimax])")
 
-    #Integrate in thick interpolated grid
-    println("radmin: $radmin radmax: $radmax")
+    #build chi limits for bounding box
+    if jradmin == 1 #full circle
+        #ichimax = Nchi-1
+        #ichimin = 2
+        chimin = 0.0
+        chimax = 2.0pi
+    else #pizza slices
+        #println(chi_sweep)
 
-       
-    for i = 2:Nchi-1
-        chi = chi_grid[i]
+        if chi_sweep[Nchi-1] == 1 #splitted spot 
+            #ichimin = minimum(findin(chi_sweep, [1]))
+            #ichimax = maximum(findin(chi_sweep, [1]))
 
-        #avoid double integrating angle edges
-        if chi < 0; continue; end
-        if chi > 2pi; continue; end
-        
-        for j = 2:Nrad_frame-1
-        #j = 2
-        #while j <= Nrad_frame-1    
-            rad = rad_grid_d[j]
-
-            #if rad < radmin; continue; end
-            #if rad > radmax; j = Nrad_frame; end
+            #get end of the spot sweep
+            q1 = 2
+            while chi_sweep[q1] == 1
+                q1 += 1
+            end
+            q1 += 1
             
+            #get start of the spot sweep
+            q2 = Nchi-1
+            while chi_sweep[q2] == 1
+                q2 -= 1
+            end
+            q2 -= 1
+
+            chimin = chi_grid[q2] - 2.0pi
+            chimax = chi_grid[q1]
             
-            if hits_interp[rad, chi] < 1; break; end
+        else
+            #find limits
+            ichimin = minimum(findin(chi_sweep, [1]))
+            ichimax = maximum(findin(chi_sweep, [1]))
 
-            phi = phi_interp_atan(rad, chi)
-            theta = theta_interp[rad, chi]
-            
-            #rotate star
-            phi = phi - t*fs*2*pi
-            phi = mod2pi(phi)
-            
-            inside = spot(0.0, phi, theta,
-                          stheta = colat,
-                          delta = rho
-                          )
+            #expand
+            ichimin = ichimin == 1 ? 1 : ichimin - 1
+            ichimax = ichimax == Nchi ? Nchi : ichimax + 1
 
-            #println("spot")
-            
-            if inside
-                #println("inside")
-                time = time_interp[rad, chi]
-                Xob = Xs_interp[rad, chi]
-                cosa = cosa_interp[rad, chi]
-                dF = flux_interp[rad, chi]
-                dE = reds_interp[rad, chi]
-
-                kd = time_lag(time, k, times, Nt, tbin, phi, theta)
-
-                drdchi = abs(rad_grid_d[j+1] - rad_grid_d[j-1])*abs(chi_grid[i+1] - chi_grid[i-1])*rad_grid_d[j]
-                spot_flux2[kd] += dF * drdchi
-            end#inside
-
-            #j += 1
+            chimin = chi_grid[ichimin]
+            chimax = chi_grid[ichimax]
         end
     end
+    
 
     
-    println("time = $t")
-    p10polar = plot(phase, spot_flux2, "k-")
-    p10polar = oplot([phase[k]], [spot_flux2[k]], "ko")
-    display(p10polar)
+    #plot in cartesian coords
+    img4[:,:] = 0.0
+    
+    for j = y1s:y2s
+        y = y_grid_d[j]
+        for i = x1s[j]:x2s[j]
+            x = x_grid_d[i]
+
+            rad = hypot(x,y)
+            chi = mod2pi(pi/2 - atan2(y,x))
+
+            if rad <= edge_interp(chi)
+            
+                #trace back to star
+                phi = phi_interp_atan(rad,chi)
+                theta = theta_interp[rad,chi]
+                time = time_interp[rad,chi]
+            
+                #rotate star
+                dt = time*G*M/c^3 #time shift
+                phi = phi - (t - dt)*fs*2*pi
+                phi = mod2pi(phi)
+      
+                img4[j,i] = painter(phi, theta)/2.0
+                
+                inside = spot(0.0, phi, theta,
+                              stheta = colat,
+                              delta = rho
+                              )
+             
+                if inside && y > -5
+
+                    cosa = cosa_interp[rad,chi]
+                    delta = delta_interp[rad,chi]
+                    EEd = reds_interp[rad,chi]
+                    dfluxE, dfluxNE, dfluxNB, dfluxB = bbfluxes(EEd, delta, cosa)
+                    img4[j,i] += dfluxB * dxdy * imgscale*1.0e7
+                end #if inside            
+            end #hiti
+        end# for x
+    end#for y
+    
+    
+    #Plot large image with bounding box for the spot
+    p10a = plot2d(img4, x_grid_d, y_grid_d, 0, 0, 2, "Blues")
+    #add time stamp
+    xs = x_grid_d[1] + 0.84*(x_grid_d[end] - x_grid_d[1])
+    ys = y_grid_d[1] + 0.93*(y_grid_d[end] - y_grid_d[1])
+    Winston.add(p10a, Winston.DataLabel(xs, ys, "$(k) ($(round(times[k]*fs,3)))"))
+
+    frame_Nchi = 20
+    frame_chis = linspace(chimin, chimax, frame_Nchi)
+    frame_xs = zeros(frame_Nchi)
+    frame_ys = zeros(frame_Nchi)
+    frame_xs2 = zeros(frame_Nchi)
+    frame_ys2 = zeros(frame_Nchi)
+    
+    for i = 1:frame_Nchi
+        chi = frame_chis[i]
+
+        #transform to cartesian
+        frame_xs[i] = rad_grid[jradmax]*sin(chi) 
+        frame_ys[i] = rad_grid[jradmax]*cos(chi)
+
+        frame_xs2[i] = rad_grid[jradmin]*sin(chi) 
+        frame_ys2[i] = rad_grid[jradmin]*cos(chi)
+    end
+        
+    Winston.add(p10a, Curve(frame_xs, frame_ys,
+                            linestyle="solid"))
+    Winston.add(p10a, Curve([frame_xs[1], frame_xs2[1]],
+                            [frame_ys[1], frame_ys2[1]],
+                            linestyle="solid",
+                            color="black"))
+    Winston.add(p10a, Curve([frame_xs[end], frame_xs2[end]],
+                            [frame_ys[end], frame_ys2[end]],
+                            linestyle="solid",
+                            color="red"))
+    Winston.add(p10a, Curve(frame_xs2, frame_ys2,
+                            linestyle="solid", color="red"))
+    
+    
+    display(p10a)
+          
     
 end#time
 toc()
@@ -249,7 +336,8 @@ old_subframe = [y_grid_d[1],
 
 tic()
 
-for k = 1:Nt
+for k = 2:1
+#for k = 1:Nt
 #for k = 20:32
 #for k = 55:90
 #for k = 12:23

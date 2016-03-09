@@ -3,8 +3,8 @@ include("bender.jl")
 
 
 #grid setup
-Nrad = 100
-Nchi = 100
+Nrad = 30
+Nchi = 30
 
 rmin = 0.0
 rmax = 12.0
