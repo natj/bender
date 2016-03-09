@@ -516,6 +516,17 @@ with $\alpha_1 = 1.19736$.
 
 \subsection{Method of solution}
 
+
+\begin{figure}
+\centering
+\includegraphics[width=8cm]{figs/fig6a.pdf}
+%\includegraphics[width=7cm]{figs/fig6b.pdf}
+\caption{\label{fig:grid}
+  $N_r = 20$ and $N_{\chi} = 30$ polar grid.
+}
+\end{figure}
+
+
 In practise we trace the photons from the image plate at infinity all the way to the surface of the star by solving the first order differential equations \eqref{eq:dphi} - \eqref{eq:dtheta} backwards in time.
 In addition, we make a change of variable $r \rightarrow 1/\tilde{x}$ that will help us by stretching the step when far from the star and shortening it when coming close to the star surface.
 Here a 2nd order Heun's Runge-Kutta integrator is used with adaptive stepsize with forward Euler's method as predictor and trapezoidal method as corrector.

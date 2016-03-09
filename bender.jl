@@ -2,8 +2,6 @@ using Winston
 using Colors
 using Interpolations
 
-include("plot2d.jl")
-
 ######################
 # Physical constants
 const G = 6.67408e-8

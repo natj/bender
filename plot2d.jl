@@ -2,14 +2,17 @@ function plot2d(sdata, xx_grid, yy_grid,
                 smooth=0,
                 hmin=0.0,
                 hmax=0.0,
-                colmap="RdBu")
+                colmap="RdBu";
+                xlabel="",
+                ylabel="")
     
     xmin = minimum(xx_grid)
     xmax = maximum(xx_grid)
     ymin = minimum(yy_grid)
     ymax = maximum(yy_grid)
     
-    p = FramedPlot()
+    p = FramedPlot(xlabel=xlabel,
+                   ylabel=ylabel)
     #hmin = minimum(sdata[find(sdata)])
 
     if hmin == 0 && hmax == 0

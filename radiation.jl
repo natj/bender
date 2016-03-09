@@ -134,6 +134,8 @@ function radiation(rad, chi,
     #return EEd, enu
     #return EEd, gamma
     return EEd, delta, dtau
+    #return EEd, delta, delta
+    #return EEd, delta, 1.0
     #return EEd, eta/eta2
     #return EEd, Lz*(2pi*fs)/(G*M/c^2)/(-cosz*b)
     #return EEd, -Lz/(cosz)

@@ -48,7 +48,7 @@ end
 
 #set new maximum rad limit
 #rscale = maximum(rlims)
-rmax = maximum(rlims)*1.02
+rmax = maximum(rlims)*1.005
 println("max edge: $rmax")
 
 #Create edge function to get the exact shape of the outline
@@ -78,7 +78,7 @@ unshift!(chi_grid, chi_grid[1] - dchi_edge)
 push!(chi_grid, chi_grid[end] + dchi_edge)
 
 
-rad_diffs = 1 ./ exp(linspace(0.0, 2.0, Nrad-1).^2)
+rad_diffs = 1 ./ exp(linspace(1.2, 2.0, Nrad-1).^2)
 rad_grid = rmax * cumsum(rad_diffs) / sum(rad_diffs)
 unshift!(rad_grid, 0.0)
 
