@@ -19,8 +19,8 @@ const cm_parsec = 3.2404e-23 #1cm/10kpc
 
 incl = deg2rad(60.0)
 M    = 1.6Msun
-R    = 15.0km
-fs   = 600
+R    = 12.0km
+fs   = 400
 
 
 #Dist = 1.0*cm_parsec

@@ -79,7 +79,7 @@ end
 img4 = zeros(Ny_dense, Nx_dense) #debug array
 
 #Spot image frame size
-N_frame = 200
+N_frame = 500
 
 N_frame_chi = 500
 N_frame_rad = 100
@@ -119,8 +119,8 @@ unshift!(rad_grid_d, 0.0)
 chi_sweep = zeros(Nchi)
 
 tic()
-for k = 1:Nt
-#for k = 2:1
+#for k = 1:Nt
+for k = 2:1
     t = times[k]
 
     jradmin = Nrad
@@ -446,8 +446,8 @@ old_subframe = [y_grid_d[1],
 
 tic()
 
-for k = 2:1
-#for k = 1:Nt
+#for k = 2:1
+for k = 1:Nt
 #for k = 20:32
 #for k = 55:90
 #for k = 12:23

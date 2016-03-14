@@ -35,8 +35,8 @@ xmin = -0.04
 xmax = 1.04
 
 
-eymin = -2.0
-eymax = 2.0
+eymin = -1.0
+eymax = 1.0
 
 
 panelh = 45
@@ -68,13 +68,13 @@ for j in range(4):
 
     if j == 0:
         fname = path_JP + 'nu'+nu+'Hz_blackbody_rho1deg.dat'
-        fname2 = path_JP + 'f'+nu+'pbbr12m1.6d50i60x1.csv'
+        fname2 = path_JP + 'f'+nu+'pbbr12m1.6d50i60x1_test.csv'
     if j == 1:
         fname = path_JP + 'nu'+nu+'Hz_hopf_rho1deg.dat'
         fname2 = path_JP + 'f'+nu+'phopfr12m1.6d50i60x1.csv'
     if j == 2:
         fname = path_JP + 'nu'+nu+'Hz_blackbody_rho30deg.dat'
-        fname2 = path_JP + 'f'+nu+'pbbr12m1.6d50i60x30.csv'
+        fname2 = path_JP + 'f'+nu+'pbbr12m1.6d50i60x30_test.csv'
     if j == 3:
         fname = path_JP + 'nu'+nu+'Hz_hopf_rho30deg.dat'
         fname2 = path_JP + 'f'+nu+'phopfr12m1.6d50i60x30.csv'
@@ -157,7 +157,7 @@ for j in range(4):
          #interpolate error
          #fluxi = interp1d(phase, flux, kind='linear')
          #fluxi = interp1d(phase, flux, kind='cubic')
-         fluxi2 = griddata(phase2, flux2, (phase), method='linear')
+         fluxi2 = griddata(phase2, flux2, (phase), method='cubic')
          
          #err = (fluxi(phase2)/flux2 - 1)*100
          err = (flux/fluxi2 - 1)*100

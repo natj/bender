@@ -133,7 +133,9 @@ function radiation(rad, chi,
     #return delta2, delta
     #return EEd, enu
     #return EEd, gamma
-    return EEd, delta, dtau
+    #return EEd, delta, dtau
+    return EEd, 1.0, 1.0
+    #return EEd2, 1.0, 1.0
     #return EEd, delta, delta
     #return EEd, delta, 1.0
     #return EEd, eta/eta2
