@@ -81,6 +81,8 @@ img4 = zeros(Ny_dense, Nx_dense) #debug array
 #Spot image frame size
 N_frame = 200
 
+N_frame_chi = 500
+N_frame_rad = 100
 
 #Beaming function for the radiation
 #Ir(cosa) = 1.0 #isotropic beaming
@@ -185,8 +187,10 @@ for k = 1:Nt
 
     
     #bounding box limits
-    jradmin = jradmin == 1 ? 1 : jradmin - 1
-    jradmax = jradmax == Nrad ? Nrad : jradmax + 1
+    #jradmin = jradmin == 1 ? 1 : jradmin - 1
+    #jradmax = jradmax == Nrad ? Nrad : jradmax + 1
+    jradmin = max(1, jradmin - 2)
+    jradmax = min(Nrad, jradmax + 2)
     println("radmin: $(rad_grid[jradmin]) radmax: $(rad_grid[jradmax])")
     #println("chimin: $(chi_grid[ichimin]) chimax: $(chi_grid[ichimax])")
 
@@ -317,9 +321,115 @@ for k = 1:Nt
     Winston.add(p10a, Curve(frame_xs2, frame_ys2,
                             linestyle="solid", color="red"))
     
+    #integrate
+    Ndelta = 0.0
+
+    #linear chi grid with thick spacing
+    chi_grid2 = linspace(chimin, chimax, N_frame_chi)
+    chi_diff2 = zeros(N_frame_chi)
     
-    display(p10a)
-          
+    chi_diff2[2:N_frame_chi] = 0.5 * abs(diff(chi_grid2))
+    chi_diff2[1:N_frame_chi-1] .+= 0.5 * abs(diff(chi_grid2))
+
+    chi_diff2[1] = 0.5 * abs(chi_grid2[2] - chi_grid[1])
+    chi_diff2[N_frame_chi] = 0.5 * abs(chi_grid2[N_frame_chi] - chi_grid2[N_frame_chi-1])
+
+    #weighted rad grid with double spacing
+    rad_diff2 = zeros(Nrad)
+
+    rad_diff2[2:Nrad] = 0.5 * abs(diff(rad_grid))
+    rad_diff2[1:Nrad-1] .+= 0.5 * abs(diff(rad_grid))
+
+    rad_diff2[1] = 0.5 * abs(rad_grid[2] - rad_grid[1])
+    rad_diff2[Nrad] = 0.5 * abs(rad_grid[Nrad] - rad_grid[Nrad-1])
+    println(chi_grid2)
+
+    for i = 1:N_frame_chi
+        chi = mod2pi(chi_grid2[i])
+
+        for j = jradmin:jradmax
+            rad = rad_grid[j]
+
+            if rad <= edge_interp(chi)
+
+                #trace back to star
+                phi = phi_interp_atan(rad,chi)
+                theta = theta_interp[rad,chi]
+                time = time_interp[rad,chi]
+                
+                
+
+                #rotate star
+                dt = time*G*M/c^3 #time shift
+                #dt = 0.0
+            
+                phi = phi - (t - dt)*fs*2*pi
+                phi = mod2pi(phi)
+
+                inside = spot(0.0, phi, theta,
+                              stheta = colat,
+                              delta = rho
+                              )
+
+                #if inside spot
+                if inside
+                    cosa = cosa_interp[rad,chi]
+                    delta = clamp(delta_interp[rad,chi], 0.0, Inf)
+                    EEd = clamp(reds_interp[rad,chi], 0.0, Inf)
+                    dtau = clamp(dtau_interp[rad,chi], 0.0, Inf)
+                    
+
+                    dfluxE, dfluxNE, dfluxNB, dfluxB = bbfluxes(EEd, delta, cosa)
+
+                    #drdchi = rad * (rad_diff2[j-1] + rad_diff2[j]) * (chi_diff2[i-1] + chi_diff2[i])
+                    #drdchi = 0.25*abs(rad_grid[j+1] - rad_grid[j-1])*abs(chi_grid2[i+1] - chi_grid2[i-1])*rad
+                    drdchi = rad * rad_diff2[j] * chi_diff2[i]
+                                        
+                    sdelta[k] += delta * drdchi #* imgscale
+                    sdelta2[k] += EEd * drdchi #* imgscale
+                    sdelta3[k] += dtau * drdchi
+                    Ndelta += drdchi
+                          
+                    for ie = 1:3
+                        sfluxE[k, ie] += dfluxE[ie] * drdchi * imgscale *dtau
+                        sfluxNE[k, ie] += dfluxNE[ie] * drdchi * imgscale *dtau
+                    end
+                    sfluxNB[k] += dfluxNB * drdchi * imgscale *dtau
+                    sfluxB[k] += dfluxB * drdchi * imgscale *dtau
+
+                    Ndelta += drdchi
+
+                    #if sfluxB[k] < 0
+                    #    println(cosa)
+                    #    println(delta)
+                    #    println(EEd)
+                    #    println(dtau)
+                    #end
+                    
+                end
+
+            end
+        end
+    end
+
+    #plot
+    #bol flux
+    p10c = plot(phase, sfluxB, "k-")
+    p10c = oplot([phase[k]], [sfluxB[k]], "ko")
+
+    #doppler factor
+    sdelta[k] = sdelta3[k]/Ndelta
+    sdelta2[k] = sdelta3[k]/Ndelta
+    sdelta3[k] = sdelta3[k]/Ndelta
+    sdelta3[k] = Ndelta
+
+    p10d = plot(phase, sdelta3, "b-")
+
+    tt = Table(3,1)
+    tt[1,1] = p10a
+    tt[2,1] = p10c
+    tt[3,1] = p10d
+    display(tt)
     
 end#time
 toc()

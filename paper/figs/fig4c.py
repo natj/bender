@@ -83,12 +83,16 @@ for j in range(4):
         fname = path_JP + 'rho30d50obl.txt'
         #fname = path_JP + 'rho1d50sphere.txt'
         #fname = path_JP + 'rho1d50oblnodel.txt' ###
-        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_gamma.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_gamma.csv'
+        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_gamma_polar.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30.csv'
     elif j == 3:
         #fname = path_JP + 'rho1d50obl.txt'
         fname = path_JP + 'rho30d50sphere.txt'
         #fname = path_JP + 'rho1d50oblnodel.txt' ###
-        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_sphere_gamma.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_sphere_gamma.csv'
+        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_sphere_gamma_polar3.csv'
+        
 
 
         
