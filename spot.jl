@@ -79,7 +79,7 @@ end
 img4 = zeros(Ny_dense, Nx_dense) #debug array
 
 #Spot image frame size
-N_frame = 500
+N_frame = 200
 
 N_frame_chi = 500
 N_frame_rad = 100

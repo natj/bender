@@ -83,15 +83,21 @@ for j in range(4):
         fname = path_JP + 'rho30d50obl.txt'
         #fname = path_JP + 'rho1d50sphere.txt'
         #fname = path_JP + 'rho1d50oblnodel.txt' ###
-        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_gamma.csv'
-        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_gamma_polar.csv'
+        #fname = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_gamma.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_gamma_polar.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_gamma_hires_polar.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_henon4.csv'
+        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_test.csv'
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30.csv'
     elif j == 3:
         #fname = path_JP + 'rho1d50obl.txt'
         fname = path_JP + 'rho30d50sphere.txt'
         #fname = path_JP + 'rho1d50oblnodel.txt' ###
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_sphere_gamma.csv'
-        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_sphere_gamma_polar3.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_sphere_gamma_polar3.csv'
+
+        #fname = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_sphere_henon.csv'
+        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_sphere_nohenon.csv'
         
 
 
@@ -196,7 +202,7 @@ for j in range(4):
          elif j == 2:
              phase2 = phase2 + 0.005
          elif j == 3:
-             phase2 = phase2 - 0.0
+             phase2 = phase2 #- 0.0005
              
          #phase = phase - 0.01
          

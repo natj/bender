@@ -19,8 +19,8 @@ const cm_parsec = 3.2404e-23 #1cm/10kpc
 
 incl = deg2rad(60.0)
 M    = 1.6Msun
-R    = 12.0km
-fs   = 400
+R    = 15.0km
+fs   = 600
 
 
 #Dist = 1.0*cm_parsec
@@ -212,19 +212,32 @@ function bender3(x, y, sini,
     ers = Float64[0.0,0.0]
     lvs = Float64[1.0,1.0]
 
+    #
+    tni = 0.0
+    yni = 0.0
+    zni = 0.0
+    rri = 0.0
+    xoi = 0.0
+    rsigni = rsign
+    psigni = psign
+
+    
     Xob = 100.0
     maxr = rr
     
     oneturn = true
     while rr <= Xob
         err = 1.0
-        
+
+        tni = tn
         yni = yn
+        zni = zn
+        rri = rr
+        xoi = Xob
+       
         psigni = psign
         rsigni = rsign
-
-        
-        
+           
         tp1 = 0.0
         yp1 = 0.0
         zp1 = 0.0
@@ -237,7 +250,7 @@ function bender3(x, y, sini,
         #k1t = 0.0
         #k2t = 0.0
                     
-        while err > tol && level <= 128.0
+        while err > tol && level <= 256.0
             level *= 2.0
             #level = max(level*2.0, min(128.0, 1.1*err/tol))
                         
@@ -258,6 +271,7 @@ function bender3(x, y, sini,
             #if (rturn1 || rturn2)
             #    rsign *= -1.0
             #end
+
             if tturn1
                 psign *= -1.0
             end
@@ -290,9 +304,9 @@ function bender3(x, y, sini,
             #err = max(abs(erry), abs(errz)) #abs err
         end
 
-        rr = rr + rsign*hi
+        rr += rsign*hi
         
-        push!(lvs, log2(level))
+        push!(lvs, log2(level)*rsign)
         #push!(lvs, level*psign)
         push!(ers, err)
 
@@ -341,14 +355,119 @@ function bender3(x, y, sini,
             end
         end
 
-        #Break down if we are close to the star;
+        #Slow down if we are close to the star;
         #helps with surface detection and with 1/r^3 functions
-        if rr > Xob*0.95
-            level = 128.0
-            #level = 64.0
-        end
+        #if rr > Xob*0.95
+        #    level = 128.0
+        #end
     end
 
+    #Henon's trick
+    
+    #println("Xob: ",Xob)
+    #println("rr: ",rr)
+    
+    err = (Xob - rr)/Xob
+    const stol = 1.0e-8 #surface detection tolerance
+
+    #if !hit
+    #    println("aaaaaaaaaaaaa")
+    #end
+    if hit
+    #if false
+
+        #previous (non-penetrated) step
+        tn = tni
+        yn = yni
+        zn = zni
+        rr = rri
+        Xob = xoi
+        rsign = rsigni
+        psign = psigni
+        
+        tp1 = 0.0
+        yp1 = 0.0
+        zp1 = 0.0
+        rro = rr
+        
+        while abs(err) > stol
+
+
+            #rr = rro
+            hi = Xob - rr
+            hi = clamp(hi, -h, h)
+            #hi = rr - Xob
+
+            #if abs(hi) > h/128.0
+            #    hi = h/128.0
+            #end
+            
+            #take a step
+            k1t, k1y, k1z, tturn1, rturn1 = rk_step(rr, yn, x, y, sini, wp, Rg)
+            #k2t, k2y, k2z, tturn2, rturn2 = rk_step(rr+rsign*hi, yn+ psign*k1y*hi, x, y, sini, wp, Rg)
+
+            if tturn1
+                psign *= -1.0
+            end
+            if rturn1
+                rsign *= -1.0
+            end
+
+            #rk1 (euler)
+            tp1 = tn + hi*k1t
+            yp1 = yn + hi*k1y*psign
+            zp1 = zn + hi*k1z
+            
+            #rk21 adaptive
+            #tp1 = tn + hi*(0.5*k1t + 0.5*k2t)
+            #yp1 = yn + hi*(0.5*k1y + 0.5*k2y)*psign
+            #zp1 = zn + hi*(0.5*k1z + 0.5*k2z)
+
+            rro = rr + rsign*hi
+
+            #compute new Xob
+            nu2   = beta/3.0 - quad*0.5*(3*cos(yp1)^2-1)
+            B2    = beta
+            enu = (1-rro/2)/(1+rro/2)*exp(nu2*rro^3)
+            B = (1-rro/2)*(1+rro/2) + B2*rro^2
+
+            Rgm, dtR = Rgmf(yp1, X, Osb) #radius (isoradial)
+            Xobi = X/Rgm
+            Xob = Xobi*B/enu #isotropic x to be referenced with rro
+
+            err = (Xob - rro)/Xob
+            #println("err: ", err, " hi: ",hi)
+
+            #update step
+            rr = rro
+            tn = tp1
+            yn = yp1
+            zn = zp1
+           
+            #store photon trace
+            #push!(tns, tp1)
+            #push!(yns, yp1)
+            #push!(rns, rro)
+            #push!(zns, zp1)
+            #push!(ers, err)
+        end
+
+        push!(tns, tp1)
+        push!(yns, yp1)
+        push!(rns, rro)
+        push!(zns, zp1)
+        push!(ers, err)
+
+        tn = tp1
+        yn = yp1
+        zn = zp1
+        #rr = rr
+    end
+
+    #println("Xob2: ",Xob)
+    #println("rr2: ",rr)
+    #println()
+    
     time = tn
     theta = yn
     phi = mod2pi(pi-zn)-pi
@@ -371,9 +490,9 @@ function bender3(x, y, sini,
 
     #return time, psign, rsign, Xob, hit, 0.0
     
-    if !hit
-        return time, theta, phi, Xob, hit, 0.0
-    end
+    #if !hit
+    #    return time, theta, phi, Xob, hit, 0.0
+    #end
 
     
     #Emission angle alpha
@@ -433,6 +552,6 @@ function bender3(x, y, sini,
     end
     cosa = clamp(cosa, 0.0, 1.0)
     
-    #return rns, yns, zns, tns, ers, lvs, hit
-    return time, phi, theta, Xob, hit, cosa
+    return rns, yns, zns, tns, ers, lvs, hit
+    #return time, phi, theta, Xob, hit, cosa
 end
