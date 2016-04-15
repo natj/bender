@@ -87,7 +87,7 @@ for j in range(4):
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_gamma_polar.csv'
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_gamma_hires_polar.csv'
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_henon4.csv'
-        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_test.csv'
+        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_test2.csv'
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30.csv'
     elif j == 3:
         #fname = path_JP + 'rho1d50obl.txt'
@@ -97,7 +97,7 @@ for j in range(4):
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_sphere_gamma_polar3.csv'
 
         #fname = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_sphere_henon.csv'
-        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_sphere_nohenon.csv'
+        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_sphere_test2.csv'
         
 
 

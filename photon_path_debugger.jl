@@ -1,8 +1,16 @@
 #Compare path of 2 photons
+#using Winston
+
 include("bender.jl")
 
-xpoint = 0.1
-ypoint = 7.4
+xpoint = 1.0
+ypoint = 1.0
+
+#xpoint = 0.1
+#ypoint = 7.37
+
+#xpoint = 0.1
+#ypoint = -6.85
 
 #xpoint = 0.01
 #ypoint = -0.01
@@ -42,6 +50,15 @@ rns, yns, zns, tns, ers, lvs, hit = bender3(xpoint, ypoint, sini,X, Osb,
 println("x y end $(rns[end]) $(tns[end]*tcor)")
 println(pi/2-yns[end])
 
+
+# iskip = 10
+# rns = rns[end-iskip:end]
+# yns = yns[end-iskip:end]
+# tns = tns[end-iskip:end]
+# ers = ers[end-iskip:end]
+# lvs = lvs[end-iskip:end]
+
+
 p1 = plot(rns, (pi/2-yns), "b-")#,xrange=[0.2, 0.21])
 p2 = plot(rns, zns, "b-")#, xrange=[0.0, 0.0001])
 p3 = plot(rns, ers, "b-", yrange=[0.0, 2.0e-5])
@@ -49,15 +66,14 @@ p4 = plot(rns, lvs, "b-")
 
 
 ##########
-rns, yns, zns, tns, ers, lvs, hit = bender3(xpoint2, ypoint2, sini,X, Osb,
-                                       beta, quad, wp, Rg)
-println("x y end $(rns[end]) $(tns[end]*tcor)")
-println(pi/2-yns[end])
-
-p1 = plot(p1, rns, (pi/2-yns), "r--")
-p2 = plot(p2, rns, zns, "r-")
-p3 = plot(p3, rns, ers, "r--")
-p4 = plot(p4, rns, lvs, "r-")
+#rns, yns, zns, tns, ers, lvs, hit = bender3(xpoint2, ypoint2, sini,X, Osb,
+#                                       beta, quad, wp, Rg)
+#println("x y end $(rns[end]) $(tns[end]*tcor)")
+#println(pi/2-yns[end])
+#p1 = plot(p1, rns, (pi/2-yns), "r--")
+#p2 = plot(p2, rns, zns, "r-")
+#p3 = plot(p3, rns, ers, "r--")
+#p4 = plot(p4, rns, lvs, "r-")
 
 
 

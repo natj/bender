@@ -1,5 +1,4 @@
 #Compute spot on the NS
-
 include("plot2d.jl")
 
 #Load photon bender
@@ -11,10 +10,12 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(30.0)
-colat = deg2rad(50.0)
+rho = deg2rad(10.0)
+colat = deg2rad(18.0)
 
 interp = true
+exact_edges = false
+
 
 ########
 function spot(t, phi, theta;
@@ -29,10 +30,10 @@ function spot(t, phi, theta;
     end
 
     #secondary spot
-    # d = great_circle_dist(0.0, phi+pi, pi-stheta, theta)
-    # if abs(d) < delta
-    #     return true
-    # end
+    #d = great_circle_dist(0.0, phi+pi, pi-stheta, theta)
+    #if abs(d) < delta
+    #    return true
+    #end
 
     
     return false
@@ -79,7 +80,7 @@ end
 img4 = zeros(Ny_dense, Nx_dense) #debug array
 
 #Spot image frame size
-N_frame = 200
+N_frame = 50
 
 N_frame_chi = 500
 N_frame_rad = 100
@@ -270,7 +271,7 @@ for k = 2:1
                               delta = rho
                               )
              
-                if inside && y > -5
+                if inside #&& y > -5
 
                     cosa = cosa_interp[rad,chi]
                     delta = delta_interp[rad,chi]
@@ -512,7 +513,7 @@ for k = 1:Nt
                           delta = rho
                           )
              
-            if inside && y > -5
+            if inside #&& y > -5
                 located_spot = true
             #if inside && inf_small
             #    inf_small = false
@@ -534,7 +535,7 @@ for k = 1:Nt
                 #Time shifts for differnt parts
                 time = time_interp[rad,chi]
                 cosa = cosa_interp[rad,chi]
-                kd = time_lag(time, k, times, Nt, tbin, phi, theta)
+                #kd = time_lag(time, k, times, Nt, tbin, phi, theta)
     
                 #Xob = Xs_interp[y,x] 
                 #cosa = cosa_interp[y,x]
@@ -747,7 +748,7 @@ for k = 1:Nt
                               delta = rho
                               )
 
-                if inside && y > -5
+                if inside #&& y > -5
 
                     if interp
                         delta = delta_interp[rad,chi]
@@ -769,6 +770,29 @@ for k = 1:Nt
                     end
                     #println(EEd, " ", delta)
                     #println()
+
+                    if exact_edges && delta < 0.98
+                        println("exact edge for $rad")
+                        time, phi, theta, Xob, hit, cosa = bender3p(rad, chi, sini,
+                                                                    X, Osb, beta, quad, wp, Rg)
+                        time -= time0
+                        dt = time*G*M/c^3
+                        phi = phi - (t - dt)*fs*2*pi
+                        phi = mod2pi(phi)
+                        inside = spot(0.0, phi, theta,
+                                      stheta = colat,
+                                      delta = rho)
+                        if inside && hit
+                            EEd, delta, dtau = radiation(rad, chi,
+                                                         phi, theta, cosa,
+                                                         X, Xob, Osb, sini)
+
+                        else
+                            EEd = 1.0
+                            delta = 1.0
+                            dtau = 0.0
+                        end
+                    end
                     
                     #println("inside")
                     dfluxE, dfluxNE, dfluxNB, dfluxB = bbfluxes(EEd, delta, cosa)
@@ -781,14 +805,14 @@ for k = 1:Nt
                     img5[j,i] += dfluxB * frame_dxdy * imgscale * 1.0e5
 
                     #skip timelag
-                    kd = k
+                    #kd = k
                     
                     for ie = 1:3
-                        sfluxE[kd, ie] += dfluxE[ie] * frame_dxdy * imgscale *dtau
-                        sfluxNE[kd, ie] += dfluxNE[ie] * frame_dxdy * imgscale *dtau
+                        sfluxE[k, ie] += dfluxE[ie] * frame_dxdy * imgscale #*dtau
+                        sfluxNE[k, ie] += dfluxNE[ie] * frame_dxdy * imgscale #*dtau
                     end
-                    sfluxNB[kd] += dfluxNB * frame_dxdy * imgscale *dtau
-                    sfluxB[kd] += dfluxB * frame_dxdy * imgscale *dtau
+                    sfluxNB[k] += dfluxNB * frame_dxdy * imgscale #*dtau
+                    sfluxB[k] += dfluxB * frame_dxdy * imgscale #*dtau
                 end #inside spot
             end#hiti
         end #x
@@ -813,7 +837,9 @@ for k = 1:Nt
     sdelta2[k] = sdelta3[k]/Ndelta
     sdelta3[k] = sdelta3[k]/Ndelta
 
-    p10d = plot(phase, sdelta3, "b-")
+    p10d = plot(phase, sdelta3, "b-",
+                xrange=[0.0, 1.0],
+                yrange=[0.8, 1.2])
     #p10d = oplot(phase, sdelta2, "r-")
     #p10c = oplot(phase, (sdelta2./Ndelta).^5, "r-")
     #p10c = plot(phase, (sdelta2./sdelta), "r-")

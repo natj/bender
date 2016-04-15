@@ -1,4 +1,4 @@
-using Winston
+#using Winston
 using Colors
 using Interpolations
 
@@ -12,15 +12,15 @@ const ergkev = 6.2415e8 # erg/keV
 const cm_parsec = 3.2404e-23 #1cm/10kpc
 
 #initial parameters in physical units
-#incl = deg2rad(45.0)
-#M    = 1.4Msun
-#R    = 12.0km
-#fs   = 700
-
-incl = deg2rad(60.0)
+incl = deg2rad(45.0)
 M    = 1.6Msun
-R    = 15.0km
-fs   = 600
+R    = 12.0km
+fs   = 700
+
+#incl = deg2rad(60.0)
+#M    = 1.4Msun
+#R    = 10.0km
+#fs   = 600
 
 
 #Dist = 1.0*cm_parsec
@@ -134,18 +134,18 @@ function pphi(a, b, sini,
 end
 
 #Runge-Kutta step
-function rk_step(rri, yni,
+function rk_step(rrs, yis,
                  x, y, sini, wp, Rg)
     
-    nu2   = beta/3.0 - quad*0.5*(3*cos(yni)^2-1)
+    nu2   = beta/3.0 - quad*0.5*(3*cos(yis)^2-1)
     B2    = beta
-    zeta2 = beta*(3*0.5*(3*cos(yni)^2-1)/4-1/3)
+    zeta2 = beta*(3*0.5*(3*cos(yis)^2-1)/4-1/3)
 
-    pa        = ptim(x, y, sini, rri, nu2, B2, zeta2, wp, yni, Rg)
-    pr, rturn = prad(x, y, sini, rri, nu2, B2, zeta2, wp, yni, Rg)
-    pt, tturn = pthe(x, y, sini, rri, nu2, B2, zeta2, wp, yni, Rg)
-    pp        = pphi(x, y, sini, rri, nu2, B2, zeta2, wp, yni, Rg)
-    dr        = -Rg/rri^2 #dx to dr
+    pa        = ptim(x, y, sini, rrs, nu2, B2, zeta2, wp, yis, Rg)
+    pr, rturn = prad(x, y, sini, rrs, nu2, B2, zeta2, wp, yis, Rg)
+    pt, tturn = pthe(x, y, sini, rrs, nu2, B2, zeta2, wp, yis, Rg)
+    pp        = pphi(x, y, sini, rrs, nu2, B2, zeta2, wp, yis, Rg)
+    dr        = -Rg/rrs^2 #dx to dr
 
     dt = dr*pa/pr
     dy = dr*pt/pr
@@ -172,6 +172,8 @@ end
 function bender3(x, y, sini,
                  X, Osb,
                  beta, quad, wp, Rg)
+
+    #println(x," ",y)
     
     if y >= 0.0
         psign = -1.0
@@ -218,15 +220,20 @@ function bender3(x, y, sini,
     zni = 0.0
     rri = 0.0
     xoi = 0.0
+    maxri = 0.0
     rsigni = rsign
     psigni = psign
 
+    counter = 0
     
     Xob = 100.0
     maxr = rr
     
     oneturn = true
-    while rr <= Xob
+    #while rr <= Xob
+    while true
+        #println(rr)
+        
         err = 1.0
 
         tni = tn
@@ -234,7 +241,8 @@ function bender3(x, y, sini,
         zni = zn
         rri = rr
         xoi = Xob
-       
+        maxri = maxr
+        
         psigni = psign
         rsigni = rsign
            
@@ -249,8 +257,10 @@ function bender3(x, y, sini,
         #k2z = 0.0
         #k1t = 0.0
         #k2t = 0.0
-                    
-        while err > tol && level <= 256.0
+
+        level_break = true
+        #while err > tol #&& level <= 256.0
+        while err > tol && level_break
             level *= 2.0
             #level = max(level*2.0, min(128.0, 1.1*err/tol))
                         
@@ -302,13 +312,17 @@ function bender3(x, y, sini,
 
             err = max(abs(erry/yp1), abs(errz/zp1), 10*abs(errt/tp1)) #rel err
             #err = max(abs(erry), abs(errz)) #abs err
+
+            if level > 512.0
+                level_break = false
+            end
         end
 
         rr += rsign*hi
         
-        push!(lvs, log2(level)*rsign)
+        #push!(lvs, log2(level)*rsign)
         #push!(lvs, level*psign)
-        push!(ers, err)
+        #push!(ers, err)
 
         level = max(0.5, level/4.0)
         
@@ -319,12 +333,11 @@ function bender3(x, y, sini,
         zn = zp1
 
         #store photon trace
-        push!(tns, tn)
-        push!(yns, yn)
-        push!(rns, rr)
-        push!(zns, zn)
-        #push!(zns, k1z)
-        
+        #push!(tns, tn)
+        #push!(yns, yn)
+        #push!(rns, rr)
+        #push!(zns, zn)
+        ##push!(zns, k1z)
 
         nu2   = beta/3.0 - quad*0.5*(3*cos(yn)^2-1)
         B2    = beta
@@ -350,6 +363,7 @@ function bender3(x, y, sini,
         #Terminate photon if we miss by 5%
         if rr < maxr
             if rr < Xob/0.95
+                #println("terminate")
                 hit = false
                 break
             end
@@ -360,6 +374,43 @@ function bender3(x, y, sini,
         #if rr > Xob*0.95
         #    level = 128.0
         #end
+
+        #serr = (Xob - rr)/Xob
+        #if rr > 0.18
+        #    println("Xob: ",Xob, " rr:", rr, " serr: ",serr, " lvl:", level, " hit: ",hit, " yni:", yn)
+        #end
+
+        #if false
+        if rr >= Xob
+            #println("    penetration")
+            
+            serr = (Xob - rr)/Xob
+            counter += 1
+
+            if counter > 50
+                break
+            end
+            
+            if abs(serr) > 1.0e-6
+                #println("set previous step")
+                
+                #previous (non-penetrated) step
+                tn = tni
+                yn = yni
+                zn = zni
+                rr = rri
+                maxr = rri
+                #maxr = maxri
+                #Xob = xoi
+                rsign = rsigni
+                psign = psigni
+                level *= 4.0
+
+                #level = min(level, 128.0)
+            else
+                break
+            end
+        end
     end
 
     #Henon's trick
@@ -368,22 +419,34 @@ function bender3(x, y, sini,
     #println("rr: ",rr)
     
     err = (Xob - rr)/Xob
-    const stol = 1.0e-8 #surface detection tolerance
-
+    stol = 1.0e-8 #surface detection tolerance
     #if !hit
     #    println("aaaaaaaaaaaaa")
     #end
-    if hit
-    #if false
+    #if hit
+    if false
 
+        #set boundaries
+        rmin = rri
+        rdmin = xoi - rmin
+        
+        rmax = rr
+        rdmax = Xob - rmax
+
+        println("l: ",length(yns))
+        println("rmin: ",rmin)
+        println("rdmin: ",rdmin)
+        println("rmax: ",rmax)
+        println("rdmax: ",rdmax)
+        
         #previous (non-penetrated) step
-        tn = tni
-        yn = yni
-        zn = zni
-        rr = rri
-        Xob = xoi
-        rsign = rsigni
-        psign = psigni
+        #tn = tni
+        #yn = yni
+        #zn = zni
+        #rr = rri
+        #Xob = xoi
+        #rsign = rsigni
+        #psign = psigni
         
         tp1 = 0.0
         yp1 = 0.0
@@ -391,37 +454,27 @@ function bender3(x, y, sini,
         rro = rr
         
         while abs(err) > stol
-
-
-            #rr = rro
+        #for j = 0:20
+            
             hi = Xob - rr
-            hi = clamp(hi, -h, h)
-            #hi = rr - Xob
-
-            #if abs(hi) > h/128.0
-            #    hi = h/128.0
-            #end
+            #hi = clamp(hi, -h/64, h/64)
             
             #take a step
             k1t, k1y, k1z, tturn1, rturn1 = rk_step(rr, yn, x, y, sini, wp, Rg)
-            #k2t, k2y, k2z, tturn2, rturn2 = rk_step(rr+rsign*hi, yn+ psign*k1y*hi, x, y, sini, wp, Rg)
+            k2t, k2y, k2z, tturn2, rturn2 = rk_step(rr+rsign*hi, yn+ psign*k1y*hi, x, y, sini, wp, Rg)
 
-            if tturn1
-                psign *= -1.0
-            end
-            if rturn1
-                rsign *= -1.0
-            end
+            if tturn1; psign *= -1.0; end
+            if rturn1; rsign *= -1.0; end
 
             #rk1 (euler)
-            tp1 = tn + hi*k1t
-            yp1 = yn + hi*k1y*psign
-            zp1 = zn + hi*k1z
+            #tp1 = tn + hi*k1t
+            #yp1 = yn + hi*k1y*psign
+            #zp1 = zn + hi*k1z
             
             #rk21 adaptive
-            #tp1 = tn + hi*(0.5*k1t + 0.5*k2t)
-            #yp1 = yn + hi*(0.5*k1y + 0.5*k2y)*psign
-            #zp1 = zn + hi*(0.5*k1z + 0.5*k2z)
+            tp1 = tn + hi*(0.5*k1t + 0.5*k2t)
+            yp1 = yn + hi*(0.5*k1y + 0.5*k2y)*psign
+            zp1 = zn + hi*(0.5*k1z + 0.5*k2z)
 
             rro = rr + rsign*hi
 
@@ -436,13 +489,15 @@ function bender3(x, y, sini,
             Xob = Xobi*B/enu #isotropic x to be referenced with rro
 
             err = (Xob - rro)/Xob
-            #println("err: ", err, " hi: ",hi)
+            println("err: ", err, " hi: ",hi)
 
+            
             #update step
-            rr = rro
-            tn = tp1
-            yn = yp1
-            zn = zp1
+            #rr = rro
+            #tn = tp1
+            #yn = yp1
+            #zn = zp1
+
            
             #store photon trace
             #push!(tns, tp1)
@@ -452,11 +507,11 @@ function bender3(x, y, sini,
             #push!(ers, err)
         end
 
-        push!(tns, tp1)
-        push!(yns, yp1)
-        push!(rns, rro)
-        push!(zns, zp1)
-        push!(ers, err)
+        #push!(tns, tp1)
+        #push!(yns, yp1)
+        #push!(rns, rro)
+        #push!(zns, zp1)
+        #push!(ers, err)
 
         tn = tp1
         yn = yp1
@@ -464,6 +519,8 @@ function bender3(x, y, sini,
         #rr = rr
     end
 
+    #println()
+    #println("l2: ",length(yns))
     #println("Xob2: ",Xob)
     #println("rr2: ",rr)
     #println()
@@ -552,6 +609,6 @@ function bender3(x, y, sini,
     end
     cosa = clamp(cosa, 0.0, 1.0)
     
-    return rns, yns, zns, tns, ers, lvs, hit
-    #return time, phi, theta, Xob, hit, cosa
+    #return rns, yns, zns, tns, ers, lvs, hit
+    return time, phi, theta, Xob, hit, cosa
 end

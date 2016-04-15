@@ -134,6 +134,7 @@ function radiation(rad, chi,
     #return EEd, enu
     #return EEd, gamma
     #return EEd, delta, dtau
+    #return EEd, 1.0, dtau
     return EEd, 1.0, 1.0
     #return EEd2, 1.0, 1.0
     #return EEd, delta, delta
@@ -189,8 +190,8 @@ for i = 2:Nchi-1
     for j = 2:Nrad-1
         rad = rad_grid[j]
 
-        if rad > edge_interp(chi); break; end
-        #if hits[j, i] < 1; break; end
+        #if rad > edge_interp(chi); break; end
+        if hits[j, i] < 1; break; end
 
     
         #Ray traced photons

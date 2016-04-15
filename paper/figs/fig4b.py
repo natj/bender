@@ -71,11 +71,10 @@ for j in range(4):
 
     if j == 0:
         #fname = path_JP + 'rho1d50obl.txt'
-        #fname = path_JP + 'rho1d50sphere.txt'
-        fname = path_JP + 'rho1d50oblnodel.txt' ###
-
-        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x1oblnodel.csv'
-        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x1.csv'
+        fname = path_JP + 'rho1d50sphere.txt'
+        #fname = path_JP + 'rho1d50oblnodel.txt' ###
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x1oblnodel.csv'
+        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x1.csv'
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x1nodel.csv'
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x1nodel_delta.csv' ###
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x1_delta.csv'
@@ -93,10 +92,13 @@ for j in range(4):
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x1_risti2.csv'
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x1_delta_-dt.csv'
     elif j == 1:
-        #fname = path_JP + 'rho30d50obl.txt'
+        fname = path_JP + 'rho30d50obl.txt'
         #fname = path_JP + 'rho30d50sphere.txt'
-        fname = path_JP + 'rho30d50oblnodel.txt'
+        #fname = path_JP + 'rho30d50oblnodel.txt'
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_sphere_test4.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_sphere_gamma_test2.csv'
+        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_gamma_test2.csv'
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30.csv'
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_hires2.csv' ###
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d50i60x30_obl_dtdtau.csv'
@@ -111,7 +113,8 @@ for j in range(4):
     elif j == 2:
         fname = path_JP + 'rho10d90obl.txt'
         #fname2 = path_JP + 'rho10d90oblnodel.txt'
-        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d90i60x10.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d90i60x10.csv'
+        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d90i60x10_obl_gamma_test2.csv'
         #fname = path_JP + 'f'+nu+'pbbr15m1.6d90i60x10_obl_delta_dtau.csv'
         #fname = path_JP + 'f'+nu+'pbbr15m1.6d90i60x10_obl_delta_128.csv'
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d90i60x10_obl_delta_nodel.csv'
@@ -120,7 +123,7 @@ for j in range(4):
     elif j == 3:
         fname = path_JP + 'rho10d0obl.txt'
         #fname = path_JP + 'rho10d0oblnodel.txt'
-        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d0i60x10.csv'
+        fname2 = path_JP + 'f'+nu+'pbbr15m1.6d0i60x10_2.csv'
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d0i60x10nodel_delta.csv'
         #fname2 = path_JP + 'f'+nu+'pbbr15m1.6d0i60x10_obl_gamma.csv'
 
@@ -219,12 +222,12 @@ for j in range(4):
          #flux2 = flux2 * 0.99
          #phase2 = phase2 + pshft
          if j == 0:
-             phase2 = phase2 + 0.0035
+             phase2 = phase2 #+ 0.0035
          elif j == 1:
              phase2 = phase2 + 0.0048
              #phase2 = phase2 + 0.00
          elif j == 2:
-             phase2 = phase2 + 0.009
+             phase2 = phase2 + 0.0085
          elif j == 3:
              phase2 = phase2 + 0.0
 
