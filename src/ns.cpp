@@ -175,6 +175,16 @@ geo::geo(double p_aa, double p_bb, metric &p_m) {
 
 }
 
+void geo::set_polar(double rad, double chi) {
+    a = rad*std::sin(chi);
+    b = rad*std::cos(chi);
+
+    C = pow(a, 2) + pow(b, 2); 
+    Lz = a*m->sini;
+
+    return;
+}
+
 double geo::ptim(double x, double the) {
     double enu2 = pow((m->enu(x,the)),2);
     double w = m->w(x);
@@ -299,12 +309,12 @@ bool geo::bender(nstar &ns) {
     // double Xob = 0.0;
 
 
-    std::cout << "tn " << tn << std::endl;
-    std::cout << "yn " << yn << std::endl;
-    std::cout << "zn " << zn << std::endl;
+    // std::cout << "tn " << tn << std::endl;
+    // std::cout << "yn " << yn << std::endl;
+    // std::cout << "zn " << zn << std::endl;
 
-    std::ofstream myfile;
-    myfile.open("path.csv");
+    // std::ofstream myfile;
+    // myfile.open("path.csv");
 
     while (true) {
         double err = 1.0;
@@ -371,9 +381,10 @@ bool geo::bender(nstar &ns) {
         // XXX fixme
         Xob = (ns.X/ns.Rf(yn)) * m->R2iR(rr, yn);
 
-        std::cout << tn << ", " << yn << ", " << zn << " " << 
-                    ns.Rf(yn) << " " << Xob << " " << err << std::endl;
-        myfile << rr << ", " << tn << ", " << yn << ", " << zn << std::endl;
+        // std::cout << tn << ", " << yn << ", " << zn << " " << 
+
+        //             ns.Rf(yn) << " " << Xob << " " << err << std::endl;
+        // myfile << rr << ", " << tn << ", " << yn << ", " << zn << std::endl;
 
         // keep track of U-turns
         if (rr > maxr) { maxr = rr;}
@@ -415,7 +426,7 @@ bool geo::bender(nstar &ns) {
     // emission angle
 
 
-    myfile.close();
+    // myfile.close();
 
     return true;
 }

@@ -13,6 +13,21 @@
 #include <o2scl/cli.h>
 #include <o2scl/hdf_file.h>
 
+#include <boost/multi_array.hpp> 
+#include <o2scl/uniform_grid.h>
+#include <o2scl/search_vec.h>
+#include <o2scl/vector.h>
+#include <o2scl/tensor.h>
+#include <o2scl/tensor_grid.h>
+#include <o2scl/interp2_seq.h>
+
+#include <boost/timer.hpp>
+
+typedef boost::numeric::ublas::vector<double> ubvector;
+typedef boost::numeric::ublas::vector<size_t> ubvector_size_t;
+typedef boost::numeric::ublas::matrix<double> ubmatrix;
+typedef boost::numeric::ublas::matrix_row<ubmatrix> ubmatrix_row;
+
 #include "ns.h"
 
 

@@ -81,6 +81,15 @@ namespace tools{
         return x;
     };
 
+
+    // inline double max(std::vector<double>& vec){
+    //     return *std::max_element(vec.begin(), vec.end());
+    // }
+
+    // inline double max(boost::numeric::ublas::vector<double>& vec){
+    //     return *std::max_element(vec.begin(), vec.end());
+    // }
+
     //-------------------------------------------------- 
 
     // Write CSV files

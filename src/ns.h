@@ -204,6 +204,9 @@ namespace cppe {
             // main class
             geo(double p_aa, double p_bb, metric &p_m);
 
+            void set_polar(double rad, double chi);
+
+
             // moments
             //-------------------------------------------------- 
             // double ptim(metric &m, double rr, double theta); 
