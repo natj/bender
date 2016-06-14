@@ -6,6 +6,15 @@ function Rgmf2(theta, X, Osb)
     return 1.0, 0.0
 end
 
+#simplified radial function
+function Rgmf4(theta, X, Osb)
+    Rgm = (1-0.15*cos(theta)^2)
+    dtR = 0.3*sin(theta)*cos(theta)
+
+    return Rgm, dtR
+end
+
+
 #Radial function by AlGendy & Morsink 2014
 #Circumferential (isoradial) radius
 function Rgmf(theta, X, Osb)
@@ -16,6 +25,10 @@ function Rgmf(theta, X, Osb)
     req=1.0
     o2=(o20+o21*X)*Osb^2
     Rgm = req*(1+o2*cos(theta)^2)
+
+    #println("Osb = $Osb")
+    #println("o2 = $o2")
+    #println("dr = ", -2*Osb^2*(o20+o21*X))
 
     #derivative dR/dtheta
     dtR = -2*Osb^2*(o20+o21*X)*cos(theta)*sin(theta) #from AlGendy & Morsink 2014

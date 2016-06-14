@@ -53,7 +53,7 @@ LFLAGS =
 LIBS = -lo2scl_hdf -lo2scl -lhdf5
 
 # define the C source files
-SRCS = ns.cpp geo.cpp cppe.cpp main.cpp
+SRCS = ns.cpp cppe.cpp main.cpp
 
 # define the C object files 
 #

@@ -10,11 +10,11 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(10.0)
-colat = deg2rad(18.0)
+rho = deg2rad(1.0)
+colat = deg2rad(0.0)
 
 interp = true
-exact_edges = false
+exact_edges = true
 
 
 ########
@@ -837,7 +837,7 @@ for k = 1:Nt
     sdelta2[k] = sdelta3[k]/Ndelta
     sdelta3[k] = sdelta3[k]/Ndelta
 
-    p10d = plot(phase, sdelta3, "b-",
+    p10d = plot(phase, sdelta, "b-",
                 xrange=[0.0, 1.0],
                 yrange=[0.8, 1.2])
     #p10d = oplot(phase, sdelta2, "r-")
@@ -874,11 +874,11 @@ toc()
 
 #write to file
 #opath = "out/"
-
-opath = "out2/"
+#opath = "out2/"
 #opath = "out2/cadeau+morsink/"
 #opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))n/"
 #opath = "out3/HT/"
+opath = "out4/"
 
 mkpath(opath)
 

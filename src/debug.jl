@@ -16,7 +16,20 @@ pt, tturn = pthe(x, y, sini, rrs, nu2, B2, zeta2, wp, yis, Rg)
 pp        = pphi(x, y, sini, rrs, nu2, B2, zeta2, wp, yis, Rg)
 dr        = -Rg/rrs^2 #dx to dr
 
-println(pa)
-println(pr)
-println(pt)
-println(pp)
+println("tim ", pa)
+println("rad ", pr)
+println("the ", pt)
+println("phi ", pp)
+
+
+t0, phi, theta, Xob, hit, cosa = bender3(x, y, sini, X, Osb, beta, quad, wp, Rg)
+#rns, yns, zns, tns, ers, lvs, hit  = bender3(x, y, sini, X, Osb, beta, quad, wp, Rg)
+
+
+println("timec ", t0)
+println("rad   ", Xob)
+println("the   ", theta)
+println("phi   ", phi)
+println("cosa  ", cosa)
+
+

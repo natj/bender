@@ -1,8 +1,4 @@
 #include "cppe.h"
-#include "ns.h"
-#include "geo.h"
-
-
 
 
 using namespace std;
@@ -53,7 +49,8 @@ void cppe_class::setup_cli() {
     p_incl.help = "Inclination of the NS observer (in deg)";
     cl.par_list.insert(std::make_pair("incl", &p_incl));
 
-
+    std::cout.setf(std::ios_base::scientific, std::ios_base::floatfield);
+    std::cout.precision(7);
 
 
     return;
@@ -88,7 +85,7 @@ int cppe_class::init(std::vector<std::string> &sv, bool itive_com){
     return 0;
 }
 
-int cppe_class::rtrace(nstar ns, metric m) {
+int cppe_class::rtrace(nstar &ns, metric &m) {
 
     std::cout << "rtrace()" << std::endl;
     std::cout << ns;
@@ -100,15 +97,23 @@ int cppe_class::rtrace(nstar ns, metric m) {
 
     std::cout << "---------" << std::endl;
     geo pho(2.5, 3.0, m);
-    std::cout << pho.C << std::endl;
-    std::cout << pho.Lz << std::endl;
-    std::cout << pho.ptim(0.2, 0.4) << std::endl;
-    std::cout << pho.prad(0.2, 0.4) << std::endl;
-    std::cout << pho.pthe(0.2, 0.4) << std::endl;
-    std::cout << pho.pphi(0.2, 0.4) << std::endl;
+    std::cout << "C" << pho.C << std::endl;
+    std::cout << "Lz" << pho.Lz << std::endl;
+    // std::cout << "tim " << pho.ptim(0.2, 0.4) << std::endl;
+    // std::cout << "rad " << pho.prad(0.2, 0.4) << std::endl;
+    // std::cout << "the " << pho.pthe(0.2, 0.4) << std::endl;
+    // std::cout << "phi " << pho.pphi(0.2, 0.4) << std::endl;
 
 
+    bool hit;
+    hit = pho.bender(ns);
+    std::cout << "tim  " << pho.timec << std::endl;
+    std::cout << "rad  " << pho.Xob << std::endl;
+    std::cout << "the  " << pho.theta << std::endl;
+    std::cout << "phi  " << pho.phi << std::endl;
 
+    std::cout << "cosa " << pho.cosa << std::endl;
+    std::cout << "1+z  " << pho.opz << std::endl;
 
     return 0;
 }
@@ -158,6 +163,7 @@ void cppe_class::run(int argc, char *argv[]) {
     std::cout << " ----- " << std::endl;
     nstar_obl nso(mass, rad, spin);
     metric mo(nso, incld);
+    std::cout << nso << std::endl;
     rtrace(nso, mo);
 
 

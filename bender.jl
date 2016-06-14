@@ -4,24 +4,18 @@ using Interpolations
 
 ######################
 # Physical constants
-const G = 6.67408e-8
+const G = 6.67384e-8
 const c = 2.99792458e10
-const Msun = 1.98892e33
+const Msun = 1.9885469e33 #XXX
 const km = 1.0e5
-const ergkev = 6.2415e8 # erg/keV 
-const cm_parsec = 3.2404e-23 #1cm/10kpc
+const ergkev = 6.24150934326e8 # erg/keV 
+const cm_parsec = 3.24077929e-23 #1cm/10kpc # 3.08567758135
 
 #initial parameters in physical units
-incl = deg2rad(45.0)
+incl = deg2rad(60.0)
 M    = 1.6Msun
 R    = 12.0km
-fs   = 700
-
-#incl = deg2rad(60.0)
-#M    = 1.4Msun
-#R    = 10.0km
-#fs   = 600
-
+fs   = 400
 
 #Dist = 1.0*cm_parsec
 
@@ -67,9 +61,9 @@ wp2 = 2*jmom*(c^4/M/G^2)
 println("wp2 = $wp2")
 const wp = 2*jmom
 
-const beta = 0.0
-const quad = 0.0
-const wp = 0.0
+#const beta = 0.0
+#const quad = 0.0
+#const wp = 0.0
 #println("beta=$beta q=$quad wp=$wp")
 
 #
@@ -92,6 +86,14 @@ include("strig.jl")
 function ptim(a, b, sini,
               x, nu2, B2, zeta2, wp, theta, Rg)
 
+    # println("enu0:",(1-x/2)/(1+x/2))
+    # println("enu2:",exp(nu2*x^3))
+    # println("enu:",((1-x/2)/(1+x/2)*exp(nu2*x^3))^2)
+    # println("w:",x^3*(1 - 3*x)*wp)
+    # println(" enu2:",exp(-2*x^3*nu2) * (2 + x)^2 / (-2 + x)^2)
+    # println(" w   :",(-1 + a*x^3*(-1 + 3*x)*wp*sini))
+
+
     return exp(-2*x^3*nu2) * (2 + x)^2 * (-1 + a*x^3*(-1 + 3*x)*wp*sini)/(-2 + x)^2
 end
 
@@ -100,7 +102,12 @@ function prad(a, b, sini,
               x, nu2, B2, zeta2, wp, theta, Rg)
     
     rturn = false
-    sq = (-16*(a^2 + b^2)*exp(4*x^3*nu2)*(-2 + x)^4*x^2)/(Rg^2*(2 + x)^4*(4 + (-1 + 4*B2)*x^2)^2) + (1 + a*x^3*(1 - x*3)*wp*sini^2)
+    sq = (-16*(a^2 + b^2)*exp(4*x^3*nu2)*(-2 + x)^4*x^2)/(Rg^2*(2 + x)^4*(4 + (-1 + 4*B2)*x^2)^2) + (-1 + a*x^3*(-1 + x*3)*wp*sini)^2
+    sq1 = (-16*(a^2 + b^2)*exp(4*x^3*nu2)*(-2 + x)^4*x^2)/(Rg^2*(2 + x)^4*(4 + (-1 + 4*B2)*x^2)^2)
+    sq2 = (1 - a*x^3*(-1 + x*3)*wp*sini)^2
+    #println("rad sq ",sq)
+    #println("rad sq1 ",sq1)
+    #println("rad sq2 ",sq2)
     if sq < 0.0
         sq = -sq
         rturn = true
@@ -114,6 +121,7 @@ function pthe(a, b, sini,
     
     tturn = false
     sq = a^2 + b^2 - a^2*(sini*csc(theta))^2
+    #println("the sq",sq)
     if sq < 0.0
         sq = -sq
         tturn = true
@@ -229,6 +237,14 @@ function bender3(x, y, sini,
     Xob = 100.0
     maxr = rr
     
+    println()
+    println("tn ", tn)
+    println("yn ", yn)
+    println("zn ", zn)
+    println()
+
+
+
     oneturn = true
     #while rr <= Xob
     while true
@@ -313,6 +329,10 @@ function bender3(x, y, sini,
             err = max(abs(erry/yp1), abs(errz/zp1), 10*abs(errt/tp1)) #rel err
             #err = max(abs(erry), abs(errz)) #abs err
 
+            #println("tp1 ",tp1)
+            #println("yp1 ",yp1)
+            #println("zp1 ",zp1)
+
             if level > 512.0
                 level_break = false
             end
@@ -333,10 +353,10 @@ function bender3(x, y, sini,
         zn = zp1
 
         #store photon trace
-        #push!(tns, tn)
-        #push!(yns, yn)
-        #push!(rns, rr)
-        #push!(zns, zn)
+        push!(tns, tn)
+        push!(yns, yn)
+        push!(rns, rr)
+        push!(zns, zn)
         ##push!(zns, k1z)
 
         nu2   = beta/3.0 - quad*0.5*(3*cos(yn)^2-1)
@@ -354,6 +374,7 @@ function bender3(x, y, sini,
         #Xobi = X/Rgm
         #Xob = Xobi #*enu/B #isotropic x; assuming spherical star, i.e. no conversion
 
+        println("$tn, $yn, $zn $err $Rgm $Xob")
         
         #Keep track of photon U-turns
         if rr > maxr
@@ -489,7 +510,7 @@ function bender3(x, y, sini,
             Xob = Xobi*B/enu #isotropic x to be referenced with rro
 
             err = (Xob - rro)/Xob
-            println("err: ", err, " hi: ",hi)
+            #println("err: ", err, " hi: ",hi)
 
             
             #update step

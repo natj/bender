@@ -13,16 +13,13 @@ namespace tools{
     // mathematical constants
     //-------------------------------------------------- 
     const double pi=acos(-1.0);
+    const double twopi= 2.0*acos(-1.0);
 
     // Riemann Zeta function values
     const double zeta2 = 1.6449340668482273;
     const double zeta3 = 1.2020569031595951;
     const double zeta4 = 1.0823232337111395;
 
-
-    double deg2rad(double ang) {
-        return ang*pi/180.0;
-    }
 
     // physical constants (cgs)
     //-------------------------------------------------- 
@@ -55,6 +52,34 @@ namespace tools{
 
 
 
+    inline double deg2rad(double ang) {
+        return ang*pi/180.0;
+    };
+
+    /* wrap x -> [0,max) */
+    inline double wrapMax(double x, double max)
+    {
+        /* integer math: `(max + x % max) % max` */
+        return std::fmod(max + fmod(x, max), max);
+    };
+
+    /* wrap x -> [min,max) */
+    inline double wrapMinMax(double x, double min, double max)
+    {
+        return min + wrapMax(x - min, max - min);
+    };
+
+    inline double modpi(double x) {
+        return wrapMinMax(x, -pi, pi);
+    };
+
+    // modulo 2pi using while
+    // this is fastest when x has few rotations only
+    inline double mod2pi(double x) {
+        while (x > twopi) {x -= twopi;}
+        while (x < 0.0) {x += twopi;}
+        return x;
+    };
 
     //-------------------------------------------------- 
 

@@ -15,6 +15,7 @@
 
 #include "ns.h"
 
+
 namespace cppe {
 
     class cppe_class {
@@ -45,12 +46,12 @@ namespace cppe {
 
 
         // set up the 'cli' object
-        virtual void setup_cli();
+        void setup_cli();
 
         // nstar nss;
         // metric ms;
 
-        virtual int init(std::vector<std::string> &sv, bool itive_com);
+        int init(std::vector<std::string> &sv, bool itive_com);
 
 
         public:
@@ -58,7 +59,7 @@ namespace cppe {
             // main class containing everything
             cppe_class();
 
-            virtual int rtrace(nstar ns, metric m);
+            int rtrace(nstar &ns, metric &m);
 
             // command-line argument parser
             void run(int argc, char *argv[]);
