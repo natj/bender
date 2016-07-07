@@ -6,29 +6,24 @@ include("bender.jl")
 #constbb = hzkeV^4 * 2*h/c^2
 #hzkeV = 2.41789894e17
 #BE(T, Ener) = 5.039617e22 * (Ener .^3.0)./expm1(Ener ./ T)
-function BE(temp, x)
-    constbb = 5.039617e22
-    ex = exp(-x./ temp)
-    return constbb*(x.^3) .* ex ./ (1.0-ex)
-end
-    
+#BE(T, Ener) = 5.039617e22 * (Ener .^3.0)./expm1(Ener ./ T)
+BE(T, Ener) = 5.040366e22 * (Ener .^3.0)./expm1(Ener ./ T)
+
 #Planck function photon flux N_E(T) = ph cm^-2 s^-1 str^-1 keV^-1
 #constbb = hzkeV^4 * 2*h/c^2
 #hzkeV = 2.41789894e17
 #NBE(T, Ener) = 5.039617e22 * (Ener .^3.0)./expm1(Ener ./ T) ./ Ener * ergkev
-function NBE(temp, x)
-    constbb = 5.039617e22
-    ex = exp(-x./ temp)
-    return constbb*(x.^3) .* ex ./ (1.0-ex) ./x * ergkev
-end
+NBE(T, Ener) = 5.040366e22 * (Ener .^3.0)./expm1(Ener ./ T) ./ Ener * ergkev
 
 #Number of black body photons N(T) = \int dE B_E(T)/E(keV) * ergkev
 #\int dE E^2 /(exp(E/T)-1) = Gamma(3)Zeta(3) T^3 
-NB(temp) = 5.039617e22*ergkev*2.404*temp.^3.0
+#NB(T) = 5.039617e22*ergkev*2.404*T.^3.0
+NB(T) = 5.040366e22*ergkev*2.404*T.^3.0
 
 #Energy of black body photons E(T) = \int dE B_E(T)
 #\int dE E^3 /(exp(E/T)-1) = Gamma(4)Zeta(4) T^4 = 6 * pi^4/90  * T^4
-EB(temp) = 5.039617e22*(pi^4/15.0)*temp.^4 * ergkev
+#EB(T) = 5.039617e22*(pi^4/15.0)*T.^4 * ergkev
+EB(T) = 5.040366e22*(pi^4/15.0)*T.^4 * ergkev
 
 #Beaming function
 Beam(mu) = 1.0 #Lambertian
@@ -49,8 +44,8 @@ function bbfluxes(EEd, delta, cosa)
     const Teff = 2.0 #blackbody effective temperature
 
     #Collect flux for different energies
-    fluxE = (EEd)^3 .* BE(Teff, Energs ./ EEd) .* Beam(cosa*delta) *delta# energy flux
-    fluxNE = (EEd)^2 .* NBE(Teff, Energs ./ EEd) .* Beam(cosa*delta) *delta# photon flux CORRECT I_E'/E
+    fluxE = (EEd)^3 .* BE(Teff, Energs ./ EEd) .* Beam(cosa*delta) #*delta# energy flux
+    fluxNE = (EEd)^2 .* NBE(Teff, Energs ./ EEd) .* Beam(cosa*delta) #*delta# photon flux CORRECT I_E'/E
     #fluxNE = (EEd)^3 .* NBE(Teff, Energs ./ EEd) .* Beam(cosa*delta) # photon flux
     #fluxNE = (EEd)^3 .* BE(Teff, Energs) .* Beam(cosa*delta) ./ Energs * ergkev # photon flux
 
@@ -129,7 +124,8 @@ function radiation(rad, chi,
     delta = (eta/gamma)
     EEd = delta*enu
 
-
+    dtau = 1.0/gamma
+    
     ##################
     #end
     #dS = (Rgm)^2*sin(theta)*sqrt(1 + fa^2)
@@ -141,12 +137,23 @@ function radiation(rad, chi,
     #dF = (EEd^3)*dOmega*Ir(cosap)
     #dF = (EEd^3)*dOmega*delta
 
+    #println("      EEd2/EEd = ", EEd2/EEd)
+    #println("      eta2/eta = ", eta2/eta)
+    #println("      gamma2/gamma = ", gamma2/gamma)
+
     #return EEd, 1.0
     #return EEd, -b*cosz/tmp
     #return delta2, delta
     #return EEd, enu
     #return EEd, gamma
-    return EEd, delta
+    #return EEd, delta, dtau
+    #return EEd, 1.0, dtau
+    return EEd, 1.0, 1.0
+    #return EEd2, 1.0, 1.0
+    #return EEd, eta2/eta, gamma2/gamma
+    #return EEd, EEd2/EEd, gamma2/gamma
+    #return EEd, delta, delta
+    #return EEd, delta, 1.0
     #return EEd, eta/eta2
     #return EEd, Lz*(2pi*fs)/(G*M/c^2)/(-cosz*b)
     #return EEd, -Lz/(cosz)
@@ -168,8 +175,9 @@ end
 
 #Areas = zeros(Nrad, Nchi)
 #dFlux = zeros(Nrad, Nchi)
-Reds = zeros(Nrad, Nchi)
+Reds   = zeros(Nrad, Nchi)
 Deltas = zeros(Nrad, Nchi)
+Dtaus  = zeros(Nrad, Nchi)
 
 #Additional F_E and F
 #NE = 3
@@ -197,8 +205,8 @@ for i = 2:Nchi-1
     for j = 2:Nrad-1
         rad = rad_grid[j]
 
-        if rad > edge_interp(chi); break; end
-        #if hits[j, i] < 1; break; end
+        #if rad > edge_interp(chi); break; end
+        if hits[j, i] < 1; break; end
 
     
         #Ray traced photons
@@ -241,14 +249,15 @@ for i = 2:Nchi-1
         
         #Ir(cosa) = 1.0 #lambertian intensity
         
-        EEd, delta = radiation(rad, chi,
-                               phi, theta, cosa,
-                               X, Xob, Osb, sini)
+        EEd, delta, dtau = radiation(rad, chi,
+                                     phi, theta, cosa,
+                                     X, Xob, Osb, sini)
 
         
         #dFlux[j, i] = dF
         Reds[j, i] = EEd
         Deltas[j, i] = delta
+        Dtaus[j, i] = dtau
                 
     end#j over rad
 end#i over chi
@@ -257,6 +266,7 @@ end#i over chi
 #meanflux = 0.0
 meanreds = 0.0
 meandelta = 0.0
+meandtau = 0.0
 #meanarea = 0.0
 meanN = 0
 for i = 1:Nchi
@@ -264,6 +274,7 @@ for i = 1:Nchi
         #meanflux += dFlux[2,i]
         meanreds += Reds[2,i]
         meandelta += Deltas[2,i]
+        meandtau += Dtaus[2,i]
         #meanarea += Areas[2,i]
         meanN += 1
     end
@@ -272,6 +283,7 @@ end
 #dFlux[1,:] = meanflux/meanN
 Reds[1,:] = meanreds/meanN
 Deltas[1,:] = meandelta/meanN
+Dtaus[1,:] = meandtau/meanN
 #Areas[1,:]= meanarea/meanN
 
 toc()
@@ -279,4 +291,5 @@ toc()
 #area_interp    = interpolate((rad_grid, chi_grid), Areas, method)
 #flux_interp    = interpolate((rad_grid, chi_grid), dFlux, method)
 reds_interp    = interpolate((rad_grid, chi_grid), Reds, method)
-delta_interp    = interpolate((rad_grid, chi_grid), Deltas, method)
+delta_interp   = interpolate((rad_grid, chi_grid), Deltas, method)
+dtau_interp    = interpolate((rad_grid, chi_grid), Dtaus, method)

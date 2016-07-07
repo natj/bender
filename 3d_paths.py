@@ -73,7 +73,8 @@ def spher_2_cart(rad, theta, phi, rcutmin=0.0, rcutmax=20.0):
             
 #fdir = "ppath_x2_yslice/"
 #fdir = "ppath/"
-fdir = "ppath_inclpi4/"
+#fdir = "ppath_inclpi4/"
+fdir = "ppath_incl0/"
 
 #####################
 fig = figure()
@@ -115,7 +116,6 @@ ax.plot_surface(x, y, z,
 #plot photons
 onlyfiles = [f for f in listdir(fdir) if isfile(join(fdir, f))]
 
-
 for i in range(len(onlyfiles)):
     pfile = onlyfiles[i]
 
@@ -129,14 +129,45 @@ for i in range(len(onlyfiles)):
         print fname, xx, yy
 
         rad, theta, phi, err, lvl = read_path(fname)
-        xs, ys, zs = spher_2_cart(rad, theta, phi)
-
+        #xs, ys, zs = spher_2_cart(rad, theta, phi, rcutmin=0.0, rcutmax=20)
+        xs, ys, zs = spher_2_cart(rad, theta, phi, rcutmin=19.0, rcutmax=20.0)
+        
         ax.plot(xs, ys, zs, "b", alpha=0.5)
         
 
 
 #trick to force equal unit scale
 set_axes_equal(ax)
-ax.view_init(elev=20., azim=-75)
+#ax.view_init(elev=20., azim=-75)
+ax.view_init(elev=5., azim=-67)
+#plt.show()
 
-plt.show()
+
+#rgrid = np.linspace(0.0, 20.0, 10)
+rgrid = np.logspace(np.log10(0.001), np.log10(20.0), 10)
+
+for q in range(len(rgrid)-1):
+
+    for i in range(len(onlyfiles)):
+        pfile = onlyfiles[i]
+
+        if 'p_' in pfile:
+            fname = fdir+pfile
+
+            #extract x and y from dirname
+            xx = float(pfile.split('_')[1])
+            yy = float((pfile.split('_')[2]).split('.csv')[0])
+                
+            print fname, xx, yy
+
+            rad, theta, phi, err, lvl = read_path(fname)
+            xs, ys, zs = spher_2_cart(rad, theta, phi,
+                                      rcutmin=rgrid[4-q],
+                                      rcutmax=rgrid[3-q])
+
+            ax.plot(xs, ys, zs, "b", alpha=0.5)
+        
+    set_axes_equal(ax)
+    ax.view_init(elev=5., azim=-67)
+
+    plt.savefig('movie_rtrace/raytrace_'+str(q).zfill(3)+'.png')#, bbox_inches='tight')

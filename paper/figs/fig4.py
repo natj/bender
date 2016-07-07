@@ -38,8 +38,8 @@ xmin = -0.04
 xmax = 1.04
 
 #error window limits
-eymin = -5.0
-eymax = 5.0
+eymin = -2.0
+eymax = 2.0
 
 #figure shape parameters
 panelh = 45
@@ -50,7 +50,8 @@ skiph = 30
 mfiglim = 0
 
 #path to files
-path_JP = "../../out2/f700/r12nn/"
+#path_JP = "../../out2/f700/r12nnn/"
+path_JP = "../../out2/f700n/r12/"
 
 #labels size
 tsize = 10.0
@@ -70,17 +71,17 @@ fig.text(0.5, 0.52, '$\\theta_s = 90^{\\circ}$',  ha='center', va='center', size
 for j in range(3):
 
     if j == 0:
-        fname = path_JP + 'r12x10d18i45.txt'
-        #fname2 = path_JP + 'r12x10d18i45_2.txt'
-        fname2 = path_JP + 'f'+nu+'pbbr12m1.4d18i45x10.csv'
+        #fname = path_JP + 'r12x10d18i45.txt'
+        fname = path_JP + 'r12m16f700x10d18i45.txt'
+        fname2 = path_JP + 'f'+nu+'pbbr12m1.6d18i45x10.csv'
     if j == 1:
-        fname = path_JP + 'r12x10d45i45.txt'
-        #fname2 = path_JP + 'r12x10d45i45_2.txt'
-        fname2 = path_JP + 'f'+nu+'pbbr12m1.4d45i45x10.csv'
+        #fname = path_JP + 'r12x10d45i45.txt'
+        fname = path_JP + 'r12m16f700x10d45i45.txt'
+        fname2 = path_JP + 'f'+nu+'pbbr12m1.6d45i45x10.csv'
     if j == 2:
-        fname = path_JP + 'r12x10d90i45.txt'
-        #fname2 = path_JP + 'r12x10d90i45_2.txt'
-        fname2 = path_JP + 'f'+nu+'pbbr12m1.4d90i45x10.csv'
+        #fname = path_JP + 'r12x10d90i45.txt'
+        fname = path_JP + 'r12m16f700x10d90i45.txt'
+        fname2 = path_JP + 'f'+nu+'pbbr12m1.6d90i45x10.csv'
     #if j == 3:
     #    fname = path_JP + 'nu'+nu+'Hz_hopf_rho30deg.dat'
     #    fname2 = path_JP + 'f'+nu+'phopfr12m1.6d50i60x30.csv'
@@ -150,15 +151,33 @@ for j in range(3):
          #JP data
          ax1.plot(phase, flux, 'k-')
 
+         if i == 0:
+             pshft = 0.0
+             merr = 1.0e6
+             for pshift in np.linspace(-0.1, 0.1, 100):
+                 fluxi2 = griddata(phase2 + pshift, flux2, (phase), method='cubic', fill_value=0.0)
+                 err = (fluxi2/flux - 1)*100
+
+                 serr = 0.0
+                 for ijk in range(len(err)):
+                     if fluxi2[ijk] != 0:
+                         serr += np.abs(err[ijk])
+                 if serr < merr:
+                     merr = serr
+                     pshft = pshift
+             
+             print "min shift:", pshft
+
          #arbitrary phase shifts
          #flux2 = flux2 * 0.99
-         #phase2 = phase2 - 0.0018
+         phase2 = phase2 + pshft
+         
          if j == 0:
-             phase2 = phase2 - 0.01
+             phase2 = phase2 + 0.003 - pshft
          elif j == 1:
-             phase2 = phase2 - 0.006
+             phase2 = phase2 + 0.003 - pshft
          elif j == 2:
-             phase2 = phase2 - 0.0
+             phase2 = phase2 + 0.003 - pshft
                      
              
          #phase = phase - 0.01

@@ -1,6 +1,8 @@
 #Compute image in cartesian grid and make plots from raw image grid
 
+include("plot2d.jl")
 include("bender.jl")
+
 #include("rtrace.jl")
 
 
@@ -396,8 +398,9 @@ for j = 1:Ny_dense
         #test if we hit the surface
         hit = hits_interp[rad,chi]
         hiti = round(Int,hit - 0.49)
-        
-        if hiti > 0
+
+        if rad <= edge_interp(chi)
+        #if hiti > 0
             #solid angle
             ####
 
@@ -555,7 +558,6 @@ for j = 1:Ny_dense
     end
 end
 
-
 #mad h4xs to smoothen the flux
 ##############################
 #Nsmooth = 3
@@ -612,7 +614,10 @@ toc()#end of interpolation into dense grid
 p0 = plot2d(Times_dense, x_grid_d, y_grid_d, 0,0,10.0,"Blues")
 p1 = plot2d(Phis_dense, x_grid_d, y_grid_d)
 p2 = plot2d(Thetas_dense, x_grid_d, y_grid_d)
-p3 = plot2d(img, x_grid_d, y_grid_d)
+p3 = plot2d(img, x_grid_d, y_grid_d, 0, 0, 0, "Blues",
+            xlabel="<i>x</i> (GM/c^2)",
+            ylabel="<i>y</i> (GM/c^2)")
+           
 
 p4 = plot2d(img2, x_grid_d, y_grid_d, 0, 0, 0, "Blues")
 p5 = plot2d(img3, x_grid_d, y_grid_d, 0, 0.0, 0, "Blues")
@@ -647,6 +652,80 @@ p6e2 = oplot(img2[:,xslice], zeros(length(y_grid_d)), "k",linestyle="dotted")
 #p8 = plot2d(Reds, x_grid_d, y_grid_d, 0,0,0, "RdBu")
 p7 = plot2d(Delta_cart, x_grid_d, y_grid_d, 0,0,0, "Blues")
 p8 = plot2d(Reds_cart, x_grid_d, y_grid_d, 0,0,0, "Blues")
+
+
+#######################
+#draw polar grid
+#yshift = (edge_interp(0.0) - edge_interp(pi))/2.0
+yshift = 0.0
+
+#r coords
+for i = 2:Nchi-1
+    chi = chi_grid[i]
+    
+    const_rad = zeros(Nrad,2)
+    
+    for j = 1:Nrad
+        rad = rad_grid[j]
+
+        #transform to cartesian
+        x = rad*sin(chi)
+        y = rad*cos(chi) + yshift
+
+        const_rad[j,1] = x
+        const_rad[j,2] = y
+    end
+
+    #println(const_rad)
+    p3 = Winston.add(p3, Curve(const_rad[:,1], const_rad[:,2]))
+end
+
+#const chi
+rad_slices = linspace(0.0, rad_grid[end], 10)
+#for rad in rad_slices
+for rad in rad_grid    
+    const_chi = zeros(5*Nchi, 2)
+    j = 1
+    for chi in linspace(0.0, 2pi, 5*Nchi)
+        #transform to cartesian
+        x = rad*sin(chi)
+        y = rad*cos(chi) + yshift
+
+        const_chi[j,1] = x
+        const_chi[j,2] = y
+        j+= 1
+    end
+
+    #println(const_rad)
+    p3 = Winston.add(p3, Curve(const_chi[:,1], const_chi[:,2]))
+end
+
+#edge
+#frontside
+sopts = Dict()
+sopts[:linewidth] = 5.0
+sopts[:linekind] = "dashed"
+sopts[:color] = "red"
+
+const_edge = zeros(5*Nchi, 2)
+j = 1
+for chi in linspace(0.0, 2pi, 5*Nchi)
+
+    rad = edge_interp(chi)
+    
+    #transform to cartesian
+    x = rad*sin(chi)
+    y = rad*cos(chi) #+ yshift
+
+    const_edge[j,1] = x
+    const_edge[j,2] = y
+    j+= 1
+end
+p3 = Winston.add(p3, Curve(const_edge[:,1], const_edge[:,2], sopts))
+#p3 = Winston.setattr(p3, xlabel=
+#p3 = Winston.setattr(p3, ylabel="<i>y</i> (GM/c^2)")
+
+savefig(p3, "paper/figs/grid.pdf")
 
 
 #####

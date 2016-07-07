@@ -16,6 +16,10 @@ def read_JN_files(fname):
     da = np.genfromtxt(fname, delimiter=",")
     return da[:,0],da[:,1],da[:,2],da[:,3],da[:,4],da[:,5]
 
+def read_PP_files(fname):
+    da = np.genfromtxt(fname, delimiter=" ")
+    return da[:,0],da[:,1]
+
 
     
 ## Plot
@@ -35,8 +39,8 @@ xmin = -0.04
 xmax = 1.04
 
 
-eymin = -2.0
-eymax = 2.0
+eymin = -1.0
+eymax = 1.0
 
 
 panelh = 45
@@ -69,12 +73,14 @@ for j in range(4):
     if j == 0:
         fname = path_JP + 'nu'+nu+'Hz_blackbody_rho1deg.dat'
         fname2 = path_JP + 'f'+nu+'pbbr12m1.6d50i60x1.csv'
+        fname3 = path_JP + 'popiha/flux_'+nu+'hz_1deg.dat'
     if j == 1:
         fname = path_JP + 'nu'+nu+'Hz_hopf_rho1deg.dat'
         fname2 = path_JP + 'f'+nu+'phopfr12m1.6d50i60x1.csv'
     if j == 2:
         fname = path_JP + 'nu'+nu+'Hz_blackbody_rho30deg.dat'
         fname2 = path_JP + 'f'+nu+'pbbr12m1.6d50i60x30.csv'
+        fname3 = path_JP + 'popiha/flux_'+nu+'hz_30deg.dat'
     if j == 3:
         fname = path_JP + 'nu'+nu+'Hz_hopf_rho30deg.dat'
         fname2 = path_JP + 'f'+nu+'phopfr12m1.6d50i60x30.csv'
@@ -86,7 +92,8 @@ for j in range(4):
     #read JN data
     phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JN_files(fname2) 
 
-    
+    if (j == 0) or (j == 2):
+        phase3, flux3 = read_PP_files(fname3)
     
     for i in range(4):
 
@@ -124,16 +131,23 @@ for j in range(4):
              flux2 = N12kev2
          elif i == 3:
              ax1.set_ylabel('Bolometric [ph cm$^{-2}$ s$^{-1}$]',size=lsize)
-             flux = Nbol
-             flux2 = Nbol2
-
+             #flux = Nbol
+             #flux2 = Nbol2
+             flux  = Fbol
+             flux2 = Fbol2
              
+
          #JP data
          ax1.plot(phase, flux, 'k-')
 
-
          #JN data
          ax1.plot(phase2, flux2, 'r--')
+             
+         #PP data
+         if i == 3:
+            if (j == 0) or (j == 2):
+                phase3 = phase3 - 0.0007
+                ax1.plot(phase3, flux3, 'b--', linewidth=0.4)
          
          #frame for the error panel
          ax2 = subplot(gs[(mfiglim+panelh):(mfiglim+panelh+epanelh), i])
@@ -143,7 +157,6 @@ for j in range(4):
 
          if i == 0:
              ax2.set_ylabel('$\Delta$ %',size=lsize)
-
              
          if j != 3:
             ax2.set_xticklabels([])
@@ -155,8 +168,7 @@ for j in range(4):
 
 
          #interpolate error
-         #fluxi = interp1d(phase, flux, kind='linear')
-         #fluxi = interp1d(phase, flux, kind='cubic')
+         #fluxi2 = griddata(phase2, flux2, (phase), method='cubic')
          fluxi2 = griddata(phase2, flux2, (phase), method='linear')
          
          #err = (fluxi(phase2)/flux2 - 1)*100
@@ -167,6 +179,13 @@ for j in range(4):
 
          ax2.plot(phase, err, 'k-', linewidth = 0.4)
          
+
+         if (j == 0) or (j == 2):
+             fluxi3 = griddata(phase3, flux3, (phase), method='linear')
+             err3 = (flux/fluxi3 - 1)*100
+             ax2.plot(phase, err3, 'b-', linewidth = 0.4)
+
+
     mfiglim += panelh+epanelh+skiph
 
     

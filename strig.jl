@@ -2,13 +2,22 @@
 ######################
 
 #Spherical radial function
-function Rgmf(theta, X, Osb)
+function Rgmf2(theta, X, Osb)
     return 1.0, 0.0
 end
 
+#simplified radial function
+function Rgmf4(theta, X, Osb)
+    Rgm = (1-0.15*cos(theta)^2)
+    dtR = 0.3*sin(theta)*cos(theta)
+
+    return Rgm, dtR
+end
+
+
 #Radial function by AlGendy & Morsink 2014
 #Circumferential (isoradial) radius
-function Rgmf2(theta, X, Osb)
+function Rgmf(theta, X, Osb)
     const o20 = -0.788
     const o21 = 1.030
 
@@ -17,10 +26,13 @@ function Rgmf2(theta, X, Osb)
     o2=(o20+o21*X)*Osb^2
     Rgm = req*(1+o2*cos(theta)^2)
 
+    #println("Osb = $Osb")
+    #println("o2 = $o2")
+    #println("dr = ", -2*Osb^2*(o20+o21*X))
+
     #derivative dR/dtheta
     dtR = -2*Osb^2*(o20+o21*X)*cos(theta)*sin(theta) #from AlGendy & Morsink 2014
 
-    #return 1.0, 0.0
     return Rgm, dtR
 end
 
