@@ -41,7 +41,7 @@ println("x=$X ($U) and Osb=$Osb incl=$incl")
 
 #Hartle-Thorne parameters
 const beta = 0.4454*Osb^2*X #Matter quadrupole moment; AlGendy & Morsink 2014
-const quad = -0.11*(Osb/X)^2 #Energy quadrupole moment; AlGendy & Morsink 2014
+const quad = 0.11*(Osb/X)^2 #Energy quadrupole moment; AlGendy & Morsink 2014
 
 #I = sqrt(X)*(1.136 - 2.53*X + 5.6*X^2) #Moment of inertia; AlGendy & Morsink 2014
 I = sqrt(X)*(1.136 - 2.53*X + 5.6*X^2)*M*R^2 #Moment of inertia; AlGendy & Morsink 2014
@@ -143,6 +143,10 @@ function rk_step(rri, yni,
     B2    = beta
     zeta2 = beta*(3*0.5*(3*cos(yni)^2-1)/4-1/3)
 
+    #nu2   = 0.0
+    #B2    = 0.0
+    #zeta2 = 0.0
+    
     pa        = ptim(x, y, sini, rri, nu2, B2, zeta2, wp, yni, Rg)
     pr, rturn = prad(x, y, sini, rri, nu2, B2, zeta2, wp, yni, Rg)
     pt, tturn = pthe(x, y, sini, rri, nu2, B2, zeta2, wp, yni, Rg)
@@ -316,6 +320,8 @@ function bender3(x, y, sini,
 
         nu2   = beta/3.0 - quad*0.5*(3*cos(yn)^2-1)
         B2    = beta
+        #nu2   = 0.0
+        #B2    = 0.0
         enu = (1-rr/2)/(1+rr/2)*exp(nu2*rr^3)
         B = (1-rr/2)*(1+rr/2) + B2*rr^2
 

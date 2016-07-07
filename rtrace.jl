@@ -6,6 +6,9 @@ include("bender.jl")
 Nrad = 100
 Nchi = 100
 
+#Nrad = 100
+#Nchi = 100
+
 rmin = 0.0
 rmax = 12.0
 

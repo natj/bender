@@ -79,7 +79,7 @@ end
 img4 = zeros(Ny_dense, Nx_dense) #debug array
 
 #Spot image frame size
-N_frame = 200
+N_frame = 500
 
 
 #Beaming function for the radiation
@@ -87,7 +87,7 @@ N_frame = 200
 #Ir(cosa) = cosa
 
 #Time parameters
-Nt = 64
+Nt = 128
 
 times = collect(linspace(0, 1/fs, Nt))
 tbin = abs(times[2] - times[1])/2.0 
@@ -249,8 +249,6 @@ old_subframe = [y_grid_d[1],
 tic()
 
 for k = 1:Nt
-#for k = 20:32
-#for k = 55:90
 #for k = 12:23
 #for k = 40:40
 #for k = 27:26
@@ -427,22 +425,22 @@ for k = 1:Nt
     println("x = $frame_xs y = $frame_ys")
 
     #pick smaller
-    #if frame_xs > frame_ys
-    #    Nx_frame = N_frame
-    #    Ny_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
-    #else
-    #    Ny_frame = N_frame
-    #    Nx_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
-    #end
-
-    #select larger
-    if frame_xs < frame_ys
+    if frame_xs > frame_ys
         Nx_frame = N_frame
         Ny_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
     else
         Ny_frame = N_frame
         Nx_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
     end
+
+    #select larger
+    #if frame_xs < frame_ys
+    #    Nx_frame = N_frame
+    #    Ny_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
+    #else
+    #    Ny_frame = N_frame
+    #    Nx_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
+    #end
 
     #keep aspect ratio
     #if frame_xs < frame_ys
@@ -574,6 +572,10 @@ for k = 1:Nt
                     
                     #println("inside")
                     dfluxE, dfluxNE, dfluxNB, dfluxB = bbfluxes(EEd, delta, cosa)
+
+                    #println(dfluxE)
+                    #println("x=$x y=$y r=$rad chi=$chi")
+
                     
                     sdelta[k] += delta * frame_dxdy #* imgscale
                     sdelta2[k] += EEd * frame_dxdy #* imgscale
@@ -590,6 +592,9 @@ for k = 1:Nt
                     end
                     sfluxNB[kd] += dfluxNB * frame_dxdy * imgscale
                     sfluxB[kd] += dfluxB * frame_dxdy * imgscale
+
+                    #catch_NaN(sfluxE)
+                    
                 end #inside spot
             end#hiti
         end #x
@@ -606,8 +611,10 @@ for k = 1:Nt
     #display(p10)
 
     #bol flux
-    p10c = plot(phase, sfluxB, "k-")
-    p10c = oplot([phase[k]], [sfluxB[k]], "ko")
+    #p10c = plot(phase, sfluxB, "k-")
+    #p10c = oplot([phase[k]], [sfluxB[k]], "ko")
+    p10c = plot(phase, sfluxE[:,1], "k-")
+    p10c = oplot([phase[k]], [sfluxE[k,1]], "ko")
 
     #doppler factor
     sdelta[k] = sdelta[k]/Ndelta
