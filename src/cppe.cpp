@@ -51,7 +51,8 @@ void cppe_class::setup_cli() {
     cl.par_list.insert(std::make_pair("incl", &p_incl));
 
     std::cout.setf(std::ios_base::scientific, std::ios_base::floatfield);
-    std::cout.precision(7);
+    // std::cout.precision(7);
+    std::cout.precision(2);
 
 
     return;
@@ -118,8 +119,8 @@ int cppe_class::rtrace(nstar &ns, metric &m) {
 
     // --------------------------------------------------
     // Number of radial and angle points
-    const int Nrad = 50;
-    const int Nchi = 50;
+    const int Nrad = 20;
+    const int Nchi = 20;
 
     // limits for the initial image; scaled later on to fit the star
     double rmin = 0.0;
@@ -171,13 +172,14 @@ int cppe_class::rtrace(nstar &ns, metric &m) {
     }
 
     rmax = *std::max_element(rlims.begin(), rlims.end())*1.005;
+    // rmax = 8.0; // XXX debug addition
     
     // create edge function to get the exact shape of the outline
-    o2scl::interp_vec<> oi(Nedge, chis, rlims, o2scl::itp_linear); 
+    o2scl::interp_vec<> edge_interp(Nedge, chis, rlims, o2scl::itp_linear); 
 
     std::cout << "interp:" << std::endl;
     for(size_t i=0; i<Nedge; i++){
-        std::cout << i << " " << oi.eval(chis[i]) << " " << rlims[i] << std::endl;
+        std::cout << i << " " << edge_interp.eval(chis[i]) << " " << rlims[i] << std::endl;
     }
 
 
@@ -185,7 +187,7 @@ int cppe_class::rtrace(nstar &ns, metric &m) {
     o2scl::vector_grid(o2scl::uniform_grid_end<double>(rmin, rmax, Nrad-1), rad_grid);  
     o2scl::vector_grid(o2scl::uniform_grid_end<double>(chimin, chimax, Nchi-1), chi_grid);  
 
-    o2scl::tensor_grid<ubvector, ubvector_size_t> img;
+    // o2scl::tensor_grid<ubvector, ubvector_size_t> img;
     size_t dims[3] = {Nrad, Nchi, 8};
     img.resize(3, dims);
 
@@ -204,6 +206,20 @@ int cppe_class::rtrace(nstar &ns, metric &m) {
     grid.push_back(7.0);
 
     img.set_grid_packed(grid);
+
+
+    // fill with zero
+    for(size_t i=0; i<Nchi; i++) {
+        for (size_t j=0; j<Nrad; j++) {
+            dims[0] = j;
+            dims[1] = i;
+            for (size_t k=0; k<8; k++) {
+                dims[2] = k;
+                img.set(dims, 0.0);
+            }
+        }
+    }
+            
 
     std::cout << "computing image.." << std::endl;
     boost::timer btimer;
@@ -246,19 +262,186 @@ int cppe_class::rtrace(nstar &ns, metric &m) {
             img.set(dims, pho.opz);
 
 
-            if(!hit) {break;}
+            if(!hit) {
+                std::cout << "break at r:" << rad << std::endl;
+                break;
+            }
         }
     }
     double etime = btimer.elapsed();
     std::cout << "elapsed time: " << etime << std::endl;
 
 
+    
 
 
 
 
     return 0;
 }
+
+
+// int cppe_class::pulse(int argc, char *argv[]) {
+int cppe_class::pulse(nstar &ns) {
+
+    static const int Nt = 32;
+
+    // time grid
+    double stop_time = 1.0/ns.spin;
+    ubvector times(Nt), phase(Nt);
+    o2scl::vector_grid(o2scl::uniform_grid_end<double>(0.0, stop_time, Nt-1), times);
+    for (std::size_t k=0; k<Nt; k++) { phase[k] = times[k] * ns.spin; };
+
+    
+    // dense cartesian image
+    double xmin = -10.0;
+    double xmax = 10.0;
+    double ymin = -10.0;
+    double ymax = 10.0;
+
+    int Nx_dense = 30;
+    int Ny_dense = 30;
+    ubvector x_grid_d(Nx_dense), y_grid_d(Nx_dense);
+    o2scl::vector_grid(o2scl::uniform_grid_end<double>(xmin, xmax, Nx_dense-1), x_grid_d); 
+    o2scl::vector_grid(o2scl::uniform_grid_end<double>(ymin, ymax, Ny_dense-1), y_grid_d); 
+
+
+
+
+
+    // locate star edges in cartesian image
+    std::cout << "locating cartesian limits..." << std::endl;
+    std::vector<int> x1s(Ny_dense), x2s(Ny_dense);
+    int y1s = 0;
+    int y2s = 0;
+    bool img_top = false;
+
+
+    // interpolation specific stuff
+    img.set_interp_type(o2scl::itp_linear);
+
+    for(size_t i=0; i<20; i++) {
+        for (size_t j=0; j<20; j++) {
+            size_t dims[3] = {j, i, 5};
+            // dims[0] = j;
+            // dims[1] = i;
+            // dims[2] = 4;
+            double tmp = img.get(dims);
+            std::cout << "(" << i << "," << j << "; " << tmp <<") ";
+        }
+        std::cout << std::endl;
+    }
+
+
+    for (std::size_t j=0; j<Ny_dense; j++) {
+        double y = y_grid_d[j];
+        for (std::size_t i=0; i<Nx_dense; i++) {
+            double x = x_grid_d[i];
+
+            double rad = std::sqrt(pow(x,2) + pow(y,2));
+            // double chi = tools::mod2pi(std::atan2(x,y));
+            double chi = tools::mod2pi(tools::pi/2.0 - std::atan2(y,x));
+
+            double vals[3];
+            vals[0] = rad;
+            // vals[1] = chi;
+            vals[1] = 0.0;
+            vals[2] = 5;
+            double tmp = img.interp_linear(vals);
+
+            std::cout << "rad:" << rad << " chi:" << chi << " f:" << tmp
+            << " x:" << x << " y:" << y << std::endl;
+            // std::cout << "(" << i << "," << j << "; " << tmp <<") ";
+        }
+        std::cout << std::endl;
+    }
+
+
+
+    for (std::size_t j=0; j<Ny_dense; j++) {
+        double y = y_grid_d[j];
+
+        bool left = false;
+        for (std::size_t i=0; i<Nx_dense; i++) {
+            double x = x_grid_d[i];
+
+            double rad = std::sqrt(pow(x,2) + pow(y,2));
+            double chi = tools::mod2pi(tools::pi/2.0 - std::atan2(y,x));
+
+            double vals[3];
+            vals[0] = rad;
+            vals[1] = chi;
+            vals[2] = 5;
+            double hitd = img.interp_linear(vals);
+
+            if (hitd > 0.55) {
+                if (!left) { 
+                    x1s[j] = i;
+                    left = true;
+                } else { x2s[j] = i;}
+
+                if (!img_top) {
+                    y1s = j;
+                    img_top = true;
+                }
+                else {y2s = j;}
+            }
+        }
+    }
+
+
+    std::cout << "top:" << y1s << " " << y_grid_d[y1s] << std::endl;
+    std::cout << "bot:" << y2s << " " << y_grid_d[y2s] << std::endl;
+    for(std::size_t i=y1s; i<y2s; i++) {
+        std::cout << "  " << i << " left:" << x1s[i] << " right:" << x2s[i] << std::endl;
+    }
+
+
+    for(std::size_t k=0; k<Nt; k++) {
+
+        double t = times[k];
+        std::cout << "k:" << k << " t:" << t << std::endl;
+
+        double frame_y2, frame_y1, frame_x1, frame_x2;
+        frame_y2 = y_grid_d[0];
+        frame_y1 = y_grid_d[Nx_dense-1];
+        frame_x1 = x_grid_d[Ny_dense-1];
+        frame_y2 = x_grid_d[0];
+
+        bool located_spot = false;
+
+        for(std::size_t j=y1s; j<y2s; j++) {
+            double y = y_grid_d[j];
+
+            for(std::size_t i=x1s[j]; i<x2s[j]; i++) {
+                double x = x_grid_d[i];
+
+                double rad = std::sqrt(pow(x,2) + pow(y,2));
+                double chi = tools::mod2pi(tools::pi/2.0 - std::atan2(y,x));
+
+                // double edge_rad = edge_interp.eval(chi)
+                double edge_rad = 6.5; // XXX debug addition
+
+                if (rad <= edge_rad) {
+
+                    // trace back to star
+                    // phi, theta, time dtau
+                    std::cout << "inside star" << std::endl;
+
+
+
+
+
+                } // end of if inside edge
+            } // end of x loop (i)
+        } // end of y loop (j)
+    } // end of time loop (k)
+
+
+    return 0;
+}
+
+
 
 void cppe_class::run(int argc, char *argv[]) {
 
@@ -307,6 +490,11 @@ void cppe_class::run(int argc, char *argv[]) {
     metric mo(nso, incld);
     std::cout << nso << std::endl;
     rtrace(nso, mo);
+    pulse(nso);
+
+
+
+
 
 
     return;

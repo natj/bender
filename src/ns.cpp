@@ -176,6 +176,7 @@ geo::geo(double p_aa, double p_bb, metric &p_m) {
 }
 
 void geo::set_polar(double rad, double chi) {
+
     a = rad*std::sin(chi);
     b = rad*std::cos(chi);
 

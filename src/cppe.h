@@ -74,7 +74,10 @@ namespace cppe {
             // main class containing everything
             cppe_class();
 
+            o2scl::tensor_grid<ubvector, ubvector_size_t> img;
+            
             int rtrace(nstar &ns, metric &m);
+            int pulse(nstar &ns);
 
             // command-line argument parser
             void run(int argc, char *argv[]);
