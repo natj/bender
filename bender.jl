@@ -4,18 +4,29 @@ using Interpolations
 
 ######################
 # Physical constants
-const G = 6.67384e-8
-const c = 2.99792458e10
-const Msun = 1.9885469e33 #XXX
+#const G = 6.67384e-8
+#const c = 2.99792458e10
+#const Msun = 1.9885469e33 #XXX
+#const km = 1.0e5
+#const ergkev = 6.24150934326e8 # erg/keV 
+#const cm_parsec = 3.24077929e-23 #1cm/10kpc # 3.08567758135
+#const constbb = 5.040366e22
+
+#JP constants
+const G = 6.67384e-8 
+const c = 2.99792458d10  
+const Msun = 1.98892e33
 const km = 1.0e5
-const ergkev = 6.24150934326e8 # erg/keV 
-const cm_parsec = 3.24077929e-23 #1cm/10kpc # 3.08567758135
+const ergkev = 6.2415e8
+const cm_parsec =  3.2404e-23
+const constbb = 5.039617322 
+
 
 #initial parameters in physical units
 incl = deg2rad(60.0)
 M    = 1.6Msun
 R    = 12.0km
-fs   = 400
+fs   = 1
 
 #Dist = 1.0*cm_parsec
 
@@ -61,9 +72,9 @@ wp2 = 2*jmom*(c^4/M/G^2)
 println("wp2 = $wp2")
 const wp = 2*jmom
 
-#const beta = 0.0
-#const quad = 0.0
-#const wp = 0.0
+const beta = 0.0
+const quad = 0.0
+const wp = 0.0
 #println("beta=$beta q=$quad wp=$wp")
 
 #
@@ -237,11 +248,11 @@ function bender3(x, y, sini,
     Xob = 100.0
     maxr = rr
     
-    println()
-    println("tn ", tn)
-    println("yn ", yn)
-    println("zn ", zn)
-    println()
+    #println()
+    #println("tn ", tn)
+    #println("yn ", yn)
+    #println("zn ", zn)
+    #println()
 
 
 
@@ -376,7 +387,7 @@ function bender3(x, y, sini,
         #Xobi = X/Rgm
         #Xob = Xobi #*enu/B #isotropic x; assuming spherical star, i.e. no conversion
 
-        println("$tn, $yn, $zn $err $Rgm $Xob")
+        #println("$tn, $yn, $zn $err $Rgm $Xob")
         
         #Keep track of photon U-turns
         if rr > maxr

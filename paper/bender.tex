@@ -78,8 +78,8 @@
 \title{Radiation from rotating oblate neutron stars}
 
 \author{J. N\"attil\"a\altaffilmark{1,2}\thanks{nattila.joonas@gmail.com},
-  P. Pihajoki\altaffilmark{3} and
-  J. Poutanen\altaffilmark{1,2}}
+  P. Pihajoki\altaffilmark{3}}
+%  J. Poutanen\altaffilmark{1,2}}
 
 \affil{}
 \altaffiltext{1}{Tuorla Observatory, University of Turku}
@@ -93,7 +93,25 @@ Formulas are to be derived for gravitational bending near rotating compact objec
 \keywords{stars: neutron}
 
 \section{Introduction}
+Emission from and around compact objects is
+
+intro 
+    - applications
+literature
+    - forward-in-time
+    - backwads-
+the gap
+why?
+    physics check
+    GR gives correct results
+    - slower but faster than full 2nd order geodesic eq
+    visualization
+paper outline
+
+
 \clearpage
+
+
 
 %________________________________________________________________
 \section{Theory}
@@ -476,6 +494,24 @@ I = \left(\frac{E}{E'} \right)^4 ~I'(\delta \alpha).
 \ee
 The total flux $F$ can then be obtained by integrating over the whole image plate i.e. summing over the $dF$ elements.
 
+In addition, one needs to take into account the transformation of the solid angle $\Omega_0 = dS'\cos/\sigma$ with area element $dS$ and the corresponding observer angle $\cos\sigma$, that are defined in the non-rotating frame.
+Transformation of this element from the non-rotating to rotating frame can be obtained using a projection operator of a co-rotating observer\footnote{We thank S. Morsink for pointing this out}
+\be
+h_{ab} = g_{ab} + s_a s_b - n_a n_b,
+\ee
+where $s_a$ is the 4-velocity of the previously defined star's fluid element and $w_a$ is again the 4-velocity orthogonal to the oblate surface. 
+Using this operator perpendicular to the star's surface, we can then define the area element as $dS' = \sqrt{\det{h_{ab}}} dx^1 dx^2$ with surface coordinates $x^1$ and $x^2$.
+The two-dimensional metric tensor for the surface is then
+\be
+h_{ab} dx^a dx^b = e^{2(\zetab - \nub)} \rb^2 d\rb^2 + \frac{B^2 e^{-2\nub} \rb^2 \sin^2\theta}{1-v_Z^2} (d\phi - \Omega dt)^2
+\ee
+and hence we get
+\begin{align}\begin{split}
+dS' =& \frac{e^{\zetab}}{B} \frac{1}{\sqrt{1-v_Z^2}} e^{2\nub} \Bb^2 \rb^2 \sin\theta d\theta (d\phi - \Omega dt) \\
+  =& \frac{e^{\zetab}}{B} \frac{1}{\sqrt{1-v_Z^2}} dS_o.
+\end{split}\end{align}
+In the limit of \sch space-time $e^{\zetab}/B \approx 1 + \mathcal{O}(\Omega^2)$ and so we obtain a standard result where the latitudinal direction is just Lorentz contracted with $\gamma = (1-v^2)^{-1/2}$ as $v_Z = v + \mathcal{O}(\Omega)$.
+
 \subsection{Angular distribution of radiation}
 \subsubsection{Isotropic radiation}
 
@@ -607,13 +643,13 @@ Following 5 light curves are computed: monochromatic photon flux ($\mathrm{ph}\,
 
 \subsection{Hartle-Thorne -like spacetimes}
 
-\begin{figure*}
-\centering
-\includegraphics[width=18cm]{figs/fig5.pdf}
-\caption{\label{fig:sch_comp400}
-  Light curve comparisons for Hartle-Thorne spacetime with rapidly rotating oblate stars.
-}
-\end{figure*}
+%\begin{figure*}
+%\centering
+%\includegraphics[width=18cm]{figs/fig5.pdf}
+%\caption{\label{fig:sch_comp400}
+%  Light curve comparisons for Hartle-Thorne spacetime with rapidly rotating oblate stars.
+%}
+%\end{figure*}
 
 
 

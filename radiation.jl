@@ -5,25 +5,20 @@ include("bender.jl")
 #Planck function B_E(T) = erg cm^-2 s^-1 str^-1 keV^-1
 #constbb = hzkeV^4 * 2*h/c^2
 #hzkeV = 2.41789894e17
-#BE(T, Ener) = 5.039617e22 * (Ener .^3.0)./expm1(Ener ./ T)
-#BE(T, Ener) = 5.039617e22 * (Ener .^3.0)./expm1(Ener ./ T)
-BE(T, Ener) = 5.040366e22 * (Ener .^3.0)./expm1(Ener ./ T)
+BE(T, Ener) = constbb * (Ener .^3.0)./expm1(Ener ./ T)
 
 #Planck function photon flux N_E(T) = ph cm^-2 s^-1 str^-1 keV^-1
 #constbb = hzkeV^4 * 2*h/c^2
 #hzkeV = 2.41789894e17
-#NBE(T, Ener) = 5.039617e22 * (Ener .^3.0)./expm1(Ener ./ T) ./ Ener * ergkev
-NBE(T, Ener) = 5.040366e22 * (Ener .^3.0)./expm1(Ener ./ T) ./ Ener * ergkev
+NBE(T, Ener) = constbb * (Ener .^3.0)./expm1(Ener ./ T) ./ Ener * ergkev
 
 #Number of black body photons N(T) = \int dE B_E(T)/E(keV) * ergkev
 #\int dE E^2 /(exp(E/T)-1) = Gamma(3)Zeta(3) T^3 
-#NB(T) = 5.039617e22*ergkev*2.404*T.^3.0
-NB(T) = 5.040366e22*ergkev*2.404*T.^3.0
+NB(T) = constbb*ergkev*2.404*T.^3.0
 
 #Energy of black body photons E(T) = \int dE B_E(T)
 #\int dE E^3 /(exp(E/T)-1) = Gamma(4)Zeta(4) T^4 = 6 * pi^4/90  * T^4
-#EB(T) = 5.039617e22*(pi^4/15.0)*T.^4 * ergkev
-EB(T) = 5.040366e22*(pi^4/15.0)*T.^4 * ergkev
+EB(T) = constbb*(pi^4/15.0)*T.^4 * ergkev
 
 #Beaming function
 Beam(mu) = 1.0 #Lambertian
@@ -44,15 +39,15 @@ function bbfluxes(EEd, delta, cosa)
     const Teff = 2.0 #blackbody effective temperature
 
     #Collect flux for different energies
-    fluxE = (EEd)^3 .* BE(Teff, Energs ./ EEd) .* Beam(cosa*delta) #*delta# energy flux
-    fluxNE = (EEd)^2 .* NBE(Teff, Energs ./ EEd) .* Beam(cosa*delta) #*delta# photon flux CORRECT I_E'/E
-    #fluxNE = (EEd)^3 .* NBE(Teff, Energs ./ EEd) .* Beam(cosa*delta) # photon flux
-    #fluxNE = (EEd)^3 .* BE(Teff, Energs) .* Beam(cosa*delta) ./ Energs * ergkev # photon flux
+    fluxE = (EEd)^3 .* BE(Teff, Energs ./ EEd) .* Beam(cosa) #*delta# energy flux
+    fluxNE = (EEd)^2 .* NBE(Teff, Energs ./ EEd) .* Beam(cosa) #*delta# photon flux CORRECT I_E'/E
+    #fluxNE = (EEd)^3 .* NBE(Teff, Energs ./ EEd) .* Beam(cosa) # photon flux
+    #fluxNE = (EEd)^3 .* BE(Teff, Energs) .* Beam(cosa) ./ Energs * ergkev # photon flux
 
     
     #Bolometric fluxes
-    fluxB = (EEd)^4 * EB(Teff) * Beam(cosa*delta) #*delta # energy bol flux
-    fluxNB = (EEd)^3 * NB(Teff) * Beam(cosa*delta) #*delta# photon bol flux
+    fluxB = (EEd)^4 * EB(Teff) * Beam(cosa) #*delta # energy bol flux
+    fluxNB = (EEd)^3 * NB(Teff) * Beam(cosa) #*delta# photon bol flux
 
     
     return fluxE ./ d2, fluxNE ./ d2, fluxNB ./ d2, fluxB ./ d2
@@ -141,6 +136,10 @@ function radiation(rad, chi,
     #println("      eta2/eta = ", eta2/eta)
     #println("      gamma2/gamma = ", gamma2/gamma)
 
+    return EEd, 1.0, dtau
+
+
+    #Old return values
     #return EEd, 1.0
     #return EEd, -b*cosz/tmp
     #return delta2, delta
@@ -148,8 +147,7 @@ function radiation(rad, chi,
     #return EEd, gamma
     #return EEd, delta, dtau
     #return EEd, 1.0, dtau
-    return EEd, 1.0, 1.0
-    #return EEd2, 1.0, 1.0
+    #return EEd2, delta, 1.0
     #return EEd, eta2/eta, gamma2/gamma
     #return EEd, EEd2/EEd, gamma2/gamma
     #return EEd, delta, delta

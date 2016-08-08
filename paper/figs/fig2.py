@@ -56,8 +56,8 @@ path_JP = "../../out/"
 tsize = 10.0
 
 
-#nu = '1'
-nu = '400'
+nu = '1'
+#nu = '400'
 
 
 fig.text(0.5, 0.92, '$\\nu = '+nu+'$ Hz  blackbody  $\\rho = 1^{\circ}$',  ha='center', va='center', size=tsize)
@@ -191,5 +191,5 @@ for j in range(4):
     
 
 
-#savefig('fig2a.pdf', bbox_inches='tight')
-savefig('fig2b.pdf', bbox_inches='tight')
+savefig('fig2a.pdf', bbox_inches='tight')
+#savefig('fig2b.pdf', bbox_inches='tight')

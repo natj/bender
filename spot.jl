@@ -10,8 +10,8 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(1.0)
-colat = deg2rad(0.0)
+rho = deg2rad(30.0)
+colat = deg2rad(50.0)
 
 interp = true
 exact_edges = true
@@ -80,7 +80,7 @@ end
 img4 = zeros(Ny_dense, Nx_dense) #debug array
 
 #Spot image frame size
-N_frame = 50
+N_frame = 100
 
 N_frame_chi = 500
 N_frame_rad = 100
@@ -90,7 +90,7 @@ N_frame_rad = 100
 #Ir(cosa) = cosa
 
 #Time parameters
-Nt = 128
+Nt = 32
 
 times = collect(linspace(0, 1/fs, Nt))
 tbin = abs(times[2] - times[1])/2.0 
@@ -810,11 +810,11 @@ for k = 1:Nt
                     #kd = k
                     
                     for ie = 1:3
-                        sfluxE[k, ie] += dfluxE[ie] * frame_dxdy * imgscale #*dtau
-                        sfluxNE[k, ie] += dfluxNE[ie] * frame_dxdy * imgscale #*dtau
+                        sfluxE[k, ie] += dfluxE[ie] * frame_dxdy * imgscale *dtau
+                        sfluxNE[k, ie] += dfluxNE[ie] * frame_dxdy * imgscale *dtau
                     end
-                    sfluxNB[k] += dfluxNB * frame_dxdy * imgscale #*dtau
-                    sfluxB[k] += dfluxB * frame_dxdy * imgscale #*dtau
+                    sfluxNB[k] += dfluxNB * frame_dxdy * imgscale *dtau
+                    sfluxB[k] += dfluxB * frame_dxdy * imgscale *dtau
                 end #inside spot
             end#hiti
         end #x
@@ -831,10 +831,10 @@ for k = 1:Nt
     #display(p10)
 
     #bol flux
-    #p10c = plot(phase, sfluxB, "k-")
-    #p10c = oplot([phase[k]], [sfluxB[k]], "ko")
-    p10c = plot(phase, sfluxE[:,1], "k-")
-    p10c = oplot([phase[k]], [sfluxE[k,1]], "ko")
+    p10c = plot(phase, sfluxNB, "k-")
+    p10c = oplot([phase[k]], [sfluxNB[k]], "ko")
+    #p10c = plot(phase, sfluxE[:,1], "k-")
+    #p10c = oplot([phase[k]], [sfluxE[k,1]], "ko")
 
     #doppler factor
     sdelta[k] = sdelta3[k]/Ndelta
@@ -877,12 +877,12 @@ toc()
 
 
 #write to file
-#opath = "out/"
+opath = "out/"
 #opath = "out2/"
 #opath = "out2/cadeau+morsink/"
 #opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))n/"
 #opath = "out3/HT/"
-opath = "out4/"
+#opath = "out4/"
 
 mkpath(opath)
 
