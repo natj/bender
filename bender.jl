@@ -19,7 +19,7 @@ const Msun = 1.98892e33
 const km = 1.0e5
 const ergkev = 6.2415e8
 const cm_parsec =  3.2404e-23
-const constbb = 5.039617322 
+const constbb = 5.0396173e22 
 
 
 #initial parameters in physical units

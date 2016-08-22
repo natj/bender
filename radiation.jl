@@ -21,7 +21,7 @@ NB(T) = constbb*ergkev*2.404*T.^3.0
 EB(T) = constbb*(pi^4/15.0)*T.^4 * ergkev
 
 #Beaming function
-Beam(mu) = 1.0 #Lambertian
+#Beam(mu) = 1.0 #Lambertian
 #Beam(mu) = 0.42822 + 0.92236*mu - 0.085751*mu^2 #approx Hopf
 #Beam(mu) = (1.0 + 2.3*mu - 0.3*mu^2)/(2*1.194)
 
