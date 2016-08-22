@@ -10,23 +10,23 @@ using Interpolations
 #const km = 1.0e5
 #const ergkev = 6.24150934326e8 # erg/keV 
 #const cm_parsec = 3.24077929e-23 #1cm/10kpc # 3.08567758135
-#const constbb = 5.040366e22
+const constbb = 5.040366e22
 
 #JP constants
 const G = 6.67384e-8 
-const c = 2.99792458d10  
+const c = 2.99792458e10  
 const Msun = 1.98892e33
 const km = 1.0e5
 const ergkev = 6.2415e8
 const cm_parsec =  3.2404e-23
-const constbb = 5.039617322 
+#const constbb = 5.0396173e22 
 
 
 #initial parameters in physical units
 incl = deg2rad(60.0)
 M    = 1.6Msun
 R    = 12.0km
-fs   = 1
+fs   = 400
 
 #Dist = 1.0*cm_parsec
 
@@ -114,8 +114,8 @@ function prad(a, b, sini,
     
     rturn = false
     sq = (-16*(a^2 + b^2)*exp(4*x^3*nu2)*(-2 + x)^4*x^2)/(Rg^2*(2 + x)^4*(4 + (-1 + 4*B2)*x^2)^2) + (-1 + a*x^3*(-1 + x*3)*wp*sini)^2
-    sq1 = (-16*(a^2 + b^2)*exp(4*x^3*nu2)*(-2 + x)^4*x^2)/(Rg^2*(2 + x)^4*(4 + (-1 + 4*B2)*x^2)^2)
-    sq2 = (1 - a*x^3*(-1 + x*3)*wp*sini)^2
+    #sq1 = (-16*(a^2 + b^2)*exp(4*x^3*nu2)*(-2 + x)^4*x^2)/(Rg^2*(2 + x)^4*(4 + (-1 + 4*B2)*x^2)^2)
+    #sq2 = (1 - a*x^3*(-1 + x*3)*wp*sini)^2
     #println("rad sq ",sq)
     #println("rad sq1 ",sq1)
     #println("rad sq2 ",sq2)
@@ -604,6 +604,13 @@ function bender3(x, y, sini,
     cosg = 1/sqrt(1 + fa^2)
     sing = fa*cosg
 
+    vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
+    bz = R*vz/c
+    gamma = 1/sqrt(1 - bz^2)
+    eta =  1/(1 + Lz*(2pi*fs)*(G*M/c^3))
+    delta = (eta/gamma)
+    EEd = delta*enu
+
     #cosg = 0.5
     #sing = 0.5
     
@@ -635,9 +642,25 @@ function bender3(x, y, sini,
     sq3 = C - Lz^2*csc(theta)^2
     if sq3 < 0; sq3 = 0.0; end
     t3 = psign*sing*enu^2/B*(Xob/Rg)*sqrt(sq3)
+    cosao = 1 + mult*(-t1 + t2 + t3)
     
-    cosa = 1 + mult*(-t1 + t2 + t3)
-    
+
+    #new emission angle using projection operator definition
+    # pr 
+    sq2 =  (ep + Lz*w)^2 - C*(enu^4)*(Xob^2)/(B^2)/(Rg^2)
+    if sq2 < 0; sq2 = 0.0; end
+    pr = sqrt(sq2)*ezeta/enu^2
+
+
+    sq3 = C - Lz^2*csc(theta)^2
+    if sq3 < 0; sq3 = 0.0; end
+    pt = psign*sqrt(sq3)*Xob*ezeta/B
+
+    dotpr = (cosg*pr + sing*pt*Xob)
+    cosa = enu^2/ezeta*delta*dotpr
+
+    #println("cosao: $cosao | cosa: $cosa | ratio $(cosao/cosa)")
+
     if cosa < 0
         hit = false
     end

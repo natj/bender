@@ -20,10 +20,6 @@ NB(T) = constbb*ergkev*2.404*T.^3.0
 #\int dE E^3 /(exp(E/T)-1) = Gamma(4)Zeta(4) T^4 = 6 * pi^4/90  * T^4
 EB(T) = constbb*(pi^4/15.0)*T.^4 * ergkev
 
-#Beaming function
-Beam(mu) = 1.0 #Lambertian
-#Beam(mu) = 0.42822 + 0.92236*mu - 0.085751*mu^2 #approx Hopf
-#Beam(mu) = (1.0 + 2.3*mu - 0.3*mu^2)/(2*1.194)
 
 #Compute blackbody flux elements
 function bbfluxes(EEd, delta, cosa)
@@ -119,7 +115,7 @@ function radiation(rad, chi,
     delta = (eta/gamma)
     EEd = delta*enu
 
-    dtau = 1.0/gamma
+    dtau = 1/gamma
     
     ##################
     #end
@@ -136,7 +132,7 @@ function radiation(rad, chi,
     #println("      eta2/eta = ", eta2/eta)
     #println("      gamma2/gamma = ", gamma2/gamma)
 
-    return EEd, 1.0, dtau
+    return EEd, 1.0, gamma
 
 
     #Old return values

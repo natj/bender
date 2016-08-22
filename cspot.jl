@@ -12,21 +12,22 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(30.0)
+rho = deg2rad(1.0)
 colat = deg2rad(50.0)
 
 interp = true
-exact_edges = false
+exact_edges = true
 
 
 ########
-function spot(t, phi, theta;
+function spot(gamma, phi, theta;
               stheta = deg2rad(50.0), #spot latitude
               delta = deg2rad(30.0) #spot half-opening angle
               )
 
     #Circular spot
-    d = great_circle_dist(0.0, phi, stheta, theta)
+    d = great_circle_dist_rel(0.0, phi, stheta, theta, gamma)
+    #d = great_circle_dist(0.0, phi, stheta, theta)
     if abs(d) < delta
         return true
     end
@@ -45,7 +46,7 @@ end
 img4 = zeros(Ny_dense, Nx_dense) #debug array
 
 #Spot image frame size
-N_frame = 20
+N_frame = 50
 
 N_frame_chi = 500
 N_frame_rad = 100
@@ -97,7 +98,7 @@ function dF(xx, yy)
         Xob = Xs_interp[rad,chi]
         time = time_interp[rad,chi]
         cosa = cosa_interp[rad,chi]
-        dtau = dtau_interp[rad,chi]
+        #dtau = dtau_interp[rad,chi]
         #hit = hits_interp[rad,chi] #test if we hit the surface
     
         #println(phi," ",theta," ",Xob," ",time," ",cosa," ",hit)
@@ -113,16 +114,21 @@ function dF(xx, yy)
         dt = time*G*M/c^3
         phi = phi - (t - dt)*fs*2*pi
         phi = mod2pi(phi)
-        inside = spot(0.0, phi, theta,
+
+        EEd, delta, gamma = radiation(rad, chi,
+                                     phi, theta, cosa,
+                                     X, Xob, Osb, sini)
+
+        inside = spot(gamma, phi, theta,
                       stheta = colat,
                       delta = rho
-                      )
+                     )
         if inside
     
             if interp
-                delta = delta_interp[rad,chi]
-                EEd = reds_interp[rad,chi]
-            #println(EEd, " ", delta)
+                unity = delta_interp[rad,chi]
+                #EEd = reds_interp[rad,chi]
+                #println(EEd, " ", delta)
             else
     
                 # update subimage corners; they might no be up-to-date
@@ -133,14 +139,14 @@ function dF(xx, yy)
                 #old_subframe[4] = frame_x2 < x ? x : frame_x2 #right max
     
                 
-                EEd, delta, dtau = radiation(rad, chi,
-                                             phi, theta, cosa,
-                                             X, Xob, Osb, sini)
+                #EEd, delta, dtau = radiation(rad, chi,
+                #                             phi, theta, cosa,
+                #                             X, Xob, Osb, sini)
             end
             #println(EEd, " ", delta)
             #println()
     
-            if exact_edges && delta < 0.98
+            if exact_edges && unity < 0.9999
                 #println("exact edge for $rad")
                 time, phi, theta, Xob, hit, cosa = bender3p(rad, chi, sini,
                                                             X, Osb, beta, quad, wp, Rg)
@@ -148,30 +154,32 @@ function dF(xx, yy)
                 dt = time*G*M/c^3
                 phi = phi - (t - dt)*fs*2*pi
                 phi = mod2pi(phi)
-                inside = spot(0.0, phi, theta,
+                
+		EEd, delta, gamma = radiation(rad, chi,
+                                                 phi, theta, cosa,
+                                                 X, Xob, Osb, sini)
+                inside = spot(gamma, phi, theta,
                               stheta = colat,
                               delta = rho)
                 if inside && hit
-                    EEd, delta, dtau = radiation(rad, chi,
-                                                 phi, theta, cosa,
-                                                 X, Xob, Osb, sini)
-    
+   			#exact edge 
                 else
                     EEd = 1.0
                     delta = 1.0
                     dtau = 0.0
+                    gamma = 1.0
                 end
             end
     
             dfluxE, dfluxNE, dfluxNB, dfluxB = bbfluxes(EEd, delta, cosa)
 
     
-            dfluxB *= dtau
-            dfluxNB *= dtau
-            for ie = 1:3
-               dfluxE[ie] *= dtau 
-               dfluxNE[ie] *= dtau
-            end
+            #dfluxB *= gamma
+            #dfluxNB *= gamma
+            #for ie = 1:3
+            #   dfluxE[ie] *= gamma 
+            #   dfluxNE[ie] *= gamma
+            #end
     
         end #inside spot
     end#hiti
@@ -203,6 +211,7 @@ t = 0.0
 frame_dxdy = 1.0
 
 
+#for k = 11:23
 for k = 1:Nt
 #for k = 1:1
     img4[:,:] = 0.0
@@ -236,7 +245,9 @@ for k = 1:Nt
                 phi = phi_interp_atan(rad,chi)
                 theta = theta_interp[rad,chi]
                 time = time_interp[rad,chi]
-                dtau = dtau_interp[rad,chi]
+                #dtau = dtau_interp[rad,chi]
+                cosa = cosa_interp[rad,chi]
+        	Xob = Xs_interp[rad,chi]
                 
                 #rotate star
                 dt = time*G*M/c^3 #time shift
@@ -248,7 +259,11 @@ for k = 1:Nt
                 #img4[j,i] = -4.0*painter(phi, theta)/2.0
                 img4[j,i] = painter(phi, theta)/2.0
                 
-                inside = spot(0.0, phi, theta,
+        	EEd, delta, gamma = radiation(rad, chi,
+                                     phi, theta, cosa,
+                                     X, Xob, Osb, sini)
+
+                inside = spot(gamma, phi, theta,
                               stheta = colat,
                               delta = rho
                               )
@@ -270,11 +285,10 @@ for k = 1:Nt
                     #println()
                      
                     #Time shifts for differnt parts
-                    time = time_interp[rad,chi]
-                    cosa = cosa_interp[rad,chi]
-    
-                    delta = delta_interp[rad,chi]
-                    EEd = reds_interp[rad,chi]
+                    #time = time_interp[rad,chi]
+                    #cosa = cosa_interp[rad,chi]
+                    #delta = delta_interp[rad,chi]
+                    #EEd = reds_interp[rad,chi]
                         
                     dfluxE, dfluxNE, dfluxNB, dfluxB = bbfluxes(EEd, delta, cosa)
                         
@@ -385,6 +399,8 @@ for k = 1:Nt
 
             sfluxNB[k] += dFs[7]
             sfluxB[k] += dFs[8]
+
+            img5[j,i] += dFs[8] * frame_dxdy * imgscale * 5.0e5
         end #x
     end#y
     println("Riemann integral iterations: $(iters[1])")
@@ -399,7 +415,7 @@ for k = 1:Nt
                            dF,
                            [frame_x1, frame_y1],
                            [frame_x2, frame_y2],
-                           reltol = 1.0e-3,
+                           reltol = 1.0e-4,
                            abstol = 0.0,
                            maxevals=0)
     println("Cubature iterations: $(iters[1])")
@@ -425,7 +441,7 @@ for k = 1:Nt
     sfluxB[k] = vals[8]
 
     println("num flux $val $err $merr")
-    p10b = plot2d(img5, frame_xgrid, frame_ygrid, 0, 0, 2, "Blues")
+    p10b = plot2d(img5, frame_xgrid, frame_ygrid, 0, 0, 0, "Blues")
 
     #add time stamp
     xs = frame_xgrid[1] + 0.84*(frame_xgrid[end]-frame_xgrid[1])
@@ -476,7 +492,7 @@ end#for t
 
 
 #write to file
-opath = "out_cub/"
+opath = "out/"
 #opath = "out2/"
 #opath = "out2/cadeau+morsink/"
 #opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))n/"
@@ -485,8 +501,8 @@ opath = "out_cub/"
 
 mkpath(opath)
 
-fname = "f$(round(Int,fs))pbbr$(round(Int,R/1e5))m$(round(M/Msun,1))d$(round(Int,rad2deg(colat)))i$(int((rad2deg(incl))))x$(round(Int,rad2deg(rho))).csv"
-#fname = "f$(round(Int,fs))phopfr$(round(Int,R/1e5))m$(round(M/Msun,1))d$(round(Int,rad2deg(colat)))i$(int((rad2deg(incl))))x$(round(Int,rad2deg(rho))).csv"
+#fname = "f$(round(Int,fs))pbbr$(round(Int,R/1e5))m$(round(M/Msun,1))d$(round(Int,rad2deg(colat)))i$(int((rad2deg(incl))))x$(round(Int,rad2deg(rho))).csv"
+fname = "f$(round(Int,fs))phopfr$(round(Int,R/1e5))m$(round(M/Msun,1))d$(round(Int,rad2deg(colat)))i$(int((rad2deg(incl))))x$(round(Int,rad2deg(rho))).csv"
 
 
 wmatr = zeros(Nt, 9)
