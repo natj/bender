@@ -8,6 +8,10 @@ import matplotlib.ticker as mtick
 from scipy.interpolate import interp1d
 from scipy.interpolate import griddata
 
+#from sg_filter import savitzky_golay
+from scipy.signal import savgol_filter
+import scipy.fftpack
+
 def read_JP_files(fname):
     da = np.genfromtxt(fname, delimiter="   ")
     return da[:,0], da[:,1], da[:,2], da[:,3],da[:,4],da[:,5]
@@ -39,8 +43,10 @@ xmin = -0.04
 xmax = 1.04
 
 
-eymin = -1.0
-eymax = 1.0
+#eymin = -1.0
+#eymax = 1.0
+eymin = -0.5
+eymax = 0.5
 
 
 panelh = 45
@@ -56,8 +62,8 @@ path_JP = "../../out/"
 tsize = 10.0
 
 
-#nu = '1'
-nu = '400'
+nu = '1'
+#nu = '400'
 
 
 fig.text(0.5, 0.92, '$\\nu = '+nu+'$ Hz  blackbody  $\\rho = 1^{\circ}$',  ha='center', va='center', size=tsize)
@@ -102,7 +108,7 @@ for j in range(4):
          #frame for the main pulse profile fig
          ax1 = subplot(gs[mfiglim:mfiglim+panelh, i])
          ax1.minorticks_on()
-         ax1.set_xticklabels([])
+         #ax1.set_xticklabels([])
          ax1.set_xlim(xmin, xmax)
 
          #ax1.yaxis.major.formatter.set_powerlimits((0,0))
@@ -112,11 +118,12 @@ for j in range(4):
          formatter.set_powerlimits((0,0))
          ax1.yaxis.set_major_formatter(formatter)
          
+         #not working solutions
          #ax1.yaxis.set_major_formatter(mtick.FormatStrFormatter('%.1e'))
-
          #xmft = ScalarFormatter()
          #xmft.set_powerlimits((-2,2))
          #ax1.xaxis.set_major_formatter(xmft)
+
          
          if i == 0:
              ax1.set_ylabel('$N$ (2 keV)\n[ph cm$^{-2}$ s$^{-1}$ keV$^{-1}$]',size=lsize)
@@ -137,7 +144,28 @@ for j in range(4):
              flux  = Fbol
              flux2 = Fbol2
              
-         #phase2 = phase2s - 0.00008
+         #Savitzky-Golay low-pass filtter
+         flux2[-1] = flux2[0]
+         #flux3 = savgol_filter(flux2, 15, 5, mode='wrap')
+         flux3 = savgol_filter(flux2, 15, 5, mode='wrap')
+         flux3[0:3] = flux2[0:3]
+         flux3[-1:-5] = flux2[-1:-5]
+         flux3[-1] = flux2[0]
+
+         #FFT filtterint
+         #w = scipy.fftpack.rfft(flux2)
+         #f = scipy.fftpack.rfftfreq(len(flux2), phase2[1]-phase2[0])
+         #spectrum = w**2
+         #
+         #cutoff_idx = spectrum < (spectrum.max()/1.0e6)
+         #print spectrum
+         #w2 = w.copy()
+         #w2[cutoff_idx] = 0
+         #flux3 = scipy.fftpack.irfft(w2)
+         #ax1.plot(phase2, flux3, "g--")
+
+         #if (j == 1) or (j == 3):
+         #   phase2 = phase2s - 0.00005
 
          #JP data
          ax1.plot(phase, flux, 'k-')
@@ -150,18 +178,21 @@ for j in range(4):
             if (j == 0) or (j == 2):
                 phase3 = phase3 - 0.0007
                 #ax1.plot(phase3, flux3, 'b--', linewidth=0.4)
+
+         ax1.set_yticks(ax1.get_yticks()[1:-1])
          
          #frame for the error panel
          ax2 = subplot(gs[(mfiglim+panelh):(mfiglim+panelh+epanelh), i])
          ax2.minorticks_on()
          ax2.set_xlim(xmin, xmax)
          ax2.set_ylim(eymin, eymax)
+         #ax2.set_yticks(ax2.get_yticks()[1:-1])
 
          if i == 0:
              ax2.set_ylabel('$\Delta$ %',size=lsize)
              
-         if j != 3:
-            ax2.set_xticklabels([])
+         #if j != 3:
+         #   ax2.set_xticklabels([])
 
          if j == 3:
             ax2.set_xlabel('Phase', size=lsize)
@@ -179,18 +210,25 @@ for j in range(4):
          #fluxi = griddata(phase, flux, (phase2), method='linear')
          fluxi = griddata(phase, flux, (phase2), method='cubic')
          err = (fluxi/flux2 - 1)*100
+         #ax2.plot(phase2, err, 'k-', linewidth = 0.4)
+
+         err = (fluxi/flux3 - 1)*100
          ax2.plot(phase2, err, 'k-', linewidth = 0.4)
 
-         if (j == 0) or (j == 2):
-             fluxi3 = griddata(phase3, flux3, (phase), method='linear')
-             err3 = (flux/fluxi3 - 1)*100
-             #ax2.plot(phase, err3, 'b-', linewidth = 0.4)
+         #if (j == 0) or (j == 2):
+         #    fluxi3 = griddata(phase3, flux3, (phase), method='linear')
+         #    err3 = (flux/fluxi3 - 1)*100
+         #    #ax2.plot(phase, err3, 'b-', linewidth = 0.4)
 
+         #for pshift in np.linspace(-0.0005, 0.0005, 10):
+         #    fluxi = griddata(phase+pshift, flux, (phase2), method='cubic')
+         #    err = (fluxi/flux2 - 1)*100
+         #    ax2.plot(phase2, err, 'b-', linewidth = 0.4)
 
     mfiglim += panelh+epanelh+skiph
 
     
 
 
-#savefig('fig2a.pdf', bbox_inches='tight')
-savefig('fig2b.pdf', bbox_inches='tight')
+savefig('fig2a.pdf', bbox_inches='tight')
+#savefig('fig2b.pdf', bbox_inches='tight')
