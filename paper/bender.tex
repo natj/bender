@@ -279,7 +279,7 @@ However, at some cases we will simplify the equations into more intuitive form b
 Due to the rotation and finite pressure supporting the system the neutron star is no longer a sphere when it is rotating.
 It, however, retains the axialsymmetry and can be approximated with an oblate spheroid.
 Similarly to the second order space-time quantities, \citet{aGM14} derived an approximate shape of the star as
-\begin{align}\begin{split}
+\begin{align}\begin{split}\label{eq:radf}
     R(\theta) &= \Req \left( 1 - \frac{\Req - R_{\mathrm{p}}}{\Req} \cos^2\theta \right) \\
               &= \Req (1-\Ob^2 (0.788 - 1.03x) \cos^2 \theta,
 \end{split}\end{align}
@@ -580,10 +580,14 @@ Hence, the co-rotating observer has a Cartesian metric
 & = dx^2 + \gamma_L^2 dy^2 + dz^2 + \mathcal{O}(\Omega^2)
 \end{split}\end{align}
 From here it is then easy to obtain the great circle distance (on a unit sphere) as measured by the co-rotating observer by using the generalized inner-product \eqref{eq:gen_angle} to get an angle
-\be
+\be\label{eq:rel_cos}
 \cos\rho = \frac{\cos\theta \cos\theta_\mathrm{S} + \cos\phi \sin\theta \sin\theta_{\mathrm{S}}}{\sqrt{ \cos^2\theta + \sin^2\theta (\cos\phi^2 + \gamma_{\mathrm{L}}^2 \sin\phi^2)}} + \mathcal{O}(\Omega^2), 
 \ee
 between locations at $(\theta, \phi)$ and $(\theta_{\mathrm{S}}, 0)$.
+This angle definition of $\rho$ is then a distance as measured on top of a co-rotating unit sphere.
+It is also possible to generalize the aforementioned angle for oblate surfaces by considering a projection operator $\hat{h}_{ab} = g_{ab} + s'_a s'_b - n_a n_b$ with an additional term $n_a$ that is the previously defined normal to the surface.
+%Physically, however, most of the shapes considered here are produced by the (co-rotating) magnetic field that is usually modelled in spherical coordinate system.
+%For an oblate surface we can then just project this shape to the surface that is not perpendicular to the magnetic field.
 
 We also note that the area element of the co-rotating observer can be obtained from
 \begin{align}\begin{split}
@@ -661,25 +665,27 @@ We also note that even the simple polynomial expansion \eqref{eq:apprx_hopf} has
 \includegraphics[width=8cm]{figs/fig6a.pdf}
 %\includegraphics[width=7cm]{figs/fig6b.pdf}
 \caption{\label{fig:grid}
-  $N_r = 20$ and $N_{\chi} = 30$ polar grid.
+Example of a non-equidistant polar grid used in our ray tracing with $N_r = 20$ and $N_{\chi} = 30$ points.
+Red dashed line corresponds to the outline of the actual oblate star that is covered with a chess board pattern.
 }
 \end{figure}
 
 
-In practise we trace the photons from the image plate at infinity all the way to the surface of the star by solving the first order differential equations \eqref{eq:dphi} - \eqref{eq:dtheta} backwards in time.
+In practise we trace the photons from the image plate at infinity all the way to the surface of the star by solving the first order differential equations \eqref{eq:deltatime} - \eqref{eq:deltaphi} backwards in time.
 In addition, we make a change of variable $r \rightarrow 1/\tilde{x}$ that will help us by stretching the step when far from the star and shortening it when coming close to the star surface.
 Here a 2nd order Heun's Runge-Kutta integrator is used with adaptive stepsize with forward Euler's method as predictor and trapezoidal method as corrector.
 All photons that travel more than $0.95\tilde{x}$ away from the star after a U-turn are terminated and considered to be missed.
 
 Our image plate is defined by using a polar coordinate system with radial parameter $b$ (i.e. the impact parameter) and angle parameter $\chi$.
 We also employ a non-equidistant grid in both parameters to accommodate the extra resolution needed around the edges of the star.
-Radial parameter $b$ is defined using a Gauss-Laguerre abscissae (i.e. $e^{-b}$ weighted) and the angle coordinate is weighted with a simple sinusoidal function so that the resolution is increased around the top and bottom parts where $\chi = 0$ or $\pi$ that is near where the poles are located.
+Radial parameter $b$ is defined using a Gauss-Laguerre abscissae (i.e. $e^{-b}$ weighted) and the angle coordinate is weighted with a simple sinusoidal function so that the resolution is increased around the top and bottom parts where $\chi = 0$ or $\pi$ that is near where the poles are located (see Fig.~\ref{fig:grid}).
 By raytracing we then obtain some mapping between the star's and image planes coordinates in some fixed positions.
 Arbitrary positions in the image plane are then obtained by a linear interpolation in $(b, \chi)$ space.
 
 For pulse profile calculations where only a small part of the star is emitting we first search a crude location of the spot on the image plane and then impose a fine subgrid around it in order to accurately calculate the flux from this small patch.
+The subgrid itself is defined either in polar grid (by constraining minimum and maximum $\chi$ and $b$) or in Cartesian image grid (by constraining minimum and maximum $\hat{x}$ and $\hat{y}$) depenging on the total area covered.
 To calculate the total flux $F(t)$ we then integrate this small subgrid by using an adaptive multidimensional integration.
-The adaptivity is based on a tensor product of Clenshaw-Curtis quadratures and is implemented using the \textsc{Cubature} package.
+The algorithm is based on a tensor product of nested Clenshaw-Curtis quadrature rules and is implemented using the \textsc{Cubature} package.
 
 
 
@@ -691,12 +697,14 @@ The adaptivity is based on a tensor product of Clenshaw-Curtis quadratures and i
 To validate the accuracy of the code we did several comparisons against previously made pulse profile calculations.
 First a general comparison of the ray tracing algorithms was made against the so-called Schwarzchild $+$ Doppler approximation \citep[see e.g.][]{PB06}.
 In addition, only spherical star was considered here.
-All of the other codes here propage photons forward in time from the surface to the observed so it is a great validation tool for many of the underlying methods because in our case the photons were propagated backwards in time.
+The comparison code here propagate photons forward in time (from the surface to the observed) so it is a great validation tool for many of the underlying methods because in our case the photons are propagated backwards in time.
 
 Main parameters are: stellar mass $M = 1.6~\Msun$, stellar radius $R = 12~\mathrm{km}$, the observer inclination $i = 60^{\circ}$, colatitude of the spot $\theta_{\mathrm{d}} = 50^{\circ}$.
 The effective temperature of the radiation is taken to be $T_{\mathrm{eff}} = 2~\mathrm{keV}$. 
 The distance to the source is assumed to be $D = 10~\mathrm{kpc}$.
 The spot is circular with angular radius $\rho$ either $1$ or $30$ degree.
+Here we stress that the spot is defined using an angle as measured by the co-rotating observer (see eq. \eqref{eq:rel_cos}) for a unit sphere.
+Hence, the spot is circular in shape for the co-rotating observer, not for the static observer.
 Angular distribution of radiation either corresponds to Lambert law (isotropic blackbody) with constant intensity or electron scattering dominated atmosphere, i.e. Hopf profile.
 
 The light curves are computed on 128 time bins.
@@ -724,30 +732,68 @@ Following 5 light curves are computed: monochromatic photon flux ($\mathrm{ph}\,
 \end{figure*}
 
 
+Comparison of these lightcurves are shown in Fig.~\ref{fig:sch_comp1} for slowly rotating star ($1$ Hz) and in Fig.~\ref{fig:sch_comp400} for fast rotation ($400$ Hz).
+In practise, comparing the profiles for slow rotation only tests our ray tracing routines because special relativistic effects (Doppler boosting, angle aberration and so on) are negliglible.
+Overall agreement of the two different methods is excellent and from here a baseline accuracy of about $<0.2\%$ relative error is constrained for the mapping of quantities between image plane and star's surface.
+Similarly, when rotation is increased and special relativistic effects start to play a role we are able to reproduce the pulse profiles usually down to $<0.3\%$ relative error.
+No large deviation between isotropic and Hopf profile is detected either, indicating that the emission angle is also computed correctly.
+
 \subsection{Oblate Schwarzchild $+$ Doppler}
 
-\begin{figure*}
-\centering
-\includegraphics[width=16cm]{figs/fig3.pdf}
-\caption{\label{fig:sch_obl}
-  Bolometric energy flux comparisons for oblate Schwarzchild approximation with rapidly rotating star ($R_{\mathrm{eq}} = 16.4~\mathrm{km}$, $M = 1.4~\Msun$, $\nu = 600~\mathrm{Hz}$, and $\rho = 1^{\circ}$).
-  Left panel shows a pulse profile as compared to fig. 3 in \cite{MLCB07} with $i = 70^{\circ}$ and $\theta_s = 49^{\circ}$.
-  The spherical star is taken to have $R(49^{\circ}) = 15.1~\mathrm{km}$.
-  Right panel can be compared against fig. 4 in \cite{MLCB07} with $i = 20^{\circ}$ and $\theta_s = 41^{\circ}$
-  In this case, the spherical star has $R(41^{\circ}) = 14.8~\mathrm{km}$.
-}
-\end{figure*}
+Next we compare emission from oblate surfaces.
+The surface here is defined using the radius function \eqref{eq:radf} but the star is still embbed in a symmetric \sch spacetime.
+The parameters used are equatorial radius $R_{\mathrm{eq}} = 12~\mathrm{km}$ (in the usual \sch metric), star mass of $M = 1.4~\Msun$, extreme rotational frequency $\nu = 700~\mathrm{Hz}$, observer inclination $i=45^{\circ}$, and spot angular size of $\rho = 10^{\circ}$
+Effective temperature of the radiation is again taken to be $T_{\mathrm{eff}} = 2~\mathrm{keV}$ and the distance $D = 10~\mathrm{kpc}$.
+Here the spot size is again defined in the co-rotating \textit{spherical} coordinate system on top of a unit sphere and is then projected to the oblate inclined surface.
+To trace the effects of the changing surface we consider the spot in three different locations at colatitudes of $\theta_{\mathrm{S}} = 18^{\circ}$, $45^{\circ}$, and $90^{\circ}$.
+Additionally for $\theta_{\mathrm{S}} = 90^{\circ}$ when the spot is on the equator we observer a full eclipse in the light curve.
+This imposes a serious test for both of the codes as the gradually more and more blocked spot is also seen from a very shallow angle before disappearing and appearing again.
+We note that when integrating flux from the spot in the image plane, a polar subgrid is extremely useful just before the eclipse as the impact parameter can vary only by a $\sim1\%$ before the spot is hidden behind the star.
+Attaining a similar resolution in a Cartesian subgrid would then need far more integrand evaluations as the spot is seen from a very shallow angle.
+
+%\begin{figure*}
+%\centering
+%\includegraphics[width=16cm]{figs/fig3.pdf}
+%\caption{\label{fig:sch_obl}
+%  Bolometric energy flux comparisons for oblate Schwarzchild approximation with rapidly rotating star ($R_{\mathrm{eq}} = 16.4~\mathrm{km}$, $M = 1.4~\Msun$, $\nu = 600~\mathrm{Hz}$, and $\rho = 1^{\circ}$).
+%  Left panel shows a pulse profile as compared to fig. 3 in \cite{MLCB07} with $i = 70^{\circ}$ and $\theta_s = 49^{\circ}$.
+%  The spherical star is taken to have $R(49^{\circ}) = 15.1~\mathrm{km}$.
+%  Right panel can be compared against fig. 4 in \cite{MLCB07} with $i = 20^{\circ}$ and $\theta_s = 41^{\circ}$
+%  In this case, the spherical star has $R(41^{\circ}) = 14.8~\mathrm{km}$.
+%}
+%\end{figure*}
 
 
 \begin{figure*}
 \centering
 \includegraphics[width=18cm]{figs/fig4.pdf}
-\caption{\label{fig:sch_comp400}
+\caption{\label{fig:osch_comp700}
   Light curve comparisons for oblate Schwarzchild spacetimes with three different spot colatitudes: $\theta_{\mathrm{c}} = 18^{\circ}$, $45^{\circ}$ and $90^{\circ}$.
   Parameters of the star, spot and observer are: $R_{\mathrm{eq}} = 12.0~\mathrm{km}$, $M = 1.4~\Msun$, $\nu = 700~\mathrm{Hz}$, $i = 45^{\circ}$ and $\rho = 10^{\circ}$.
+  Otherwise the parameters and symbols are the same is in Fig.~\ref{fig:sch_comp1}.
   }
 \end{figure*}
 
+Comparison of the oblate lightcurves are shown in Fig.~\ref{fig:osch_comp700}.
+
+
+
+
+
+
+\subsection{Hartle-Thorne -like spacetimes}
+
+%\begin{figure*}
+%\centering
+%\includegraphics[width=18cm]{figs/fig5.pdf}
+%\caption{\label{fig:sch_comp400}
+%  Light curve comparisons for Hartle-Thorne spacetime with rapidly rotating oblate stars.
+%}
+%\end{figure*}
+
+
+
+\subsection{Carter's constant splitting}
 
 \begin{figure*}
 \centering
@@ -762,15 +808,8 @@ Following 5 light curves are computed: monochromatic photon flux ($\mathrm{ph}\,
   }
 \end{figure*}
 
-\subsection{Hartle-Thorne -like spacetimes}
 
-%\begin{figure*}
-%\centering
-%\includegraphics[width=18cm]{figs/fig5.pdf}
-%\caption{\label{fig:sch_comp400}
-%  Light curve comparisons for Hartle-Thorne spacetime with rapidly rotating oblate stars.
-%}
-%\end{figure*}
+
 
 
 

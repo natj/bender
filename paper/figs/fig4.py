@@ -51,14 +51,14 @@ mfiglim = 0
 
 #path to files
 #path_JP = "../../out2/f700/r12nnn/"
-path_JP = "../../out2/f700n/r12/"
+#path_JP = "../../out2/f700n/r12/"
+path_JP = "../../out2/f700/r12/"
 
 #labels size
 tsize = 10.0
 
 
 nu = '700'
-#nu = '400'
 
 
 fig.text(0.5, 0.92, '$\\theta_s = 18^{\\circ}$',  ha='center', va='center', size=tsize)
@@ -71,17 +71,17 @@ fig.text(0.5, 0.52, '$\\theta_s = 90^{\\circ}$',  ha='center', va='center', size
 for j in range(3):
 
     if j == 0:
-        #fname = path_JP + 'r12x10d18i45.txt'
-        fname = path_JP + 'r12m16f700x10d18i45.txt'
-        fname2 = path_JP + 'f'+nu+'pbbr12m1.6d18i45x10.csv'
+        fname = path_JP + 'r12x10d18i45.txt'
+        #fname = path_JP + 'r12m16f700x10d18i45.txt'
+        fname2 = path_JP + 'f'+nu+'pbbr12m1.4d18i45x10.csv'
     if j == 1:
-        #fname = path_JP + 'r12x10d45i45.txt'
-        fname = path_JP + 'r12m16f700x10d45i45.txt'
-        fname2 = path_JP + 'f'+nu+'pbbr12m1.6d45i45x10.csv'
+        fname = path_JP + 'r12x10d45i45.txt'
+        #fname = path_JP + 'r12m16f700x10d45i45.txt'
+        fname2 = path_JP + 'f'+nu+'pbbr12m1.4d45i45x10.csv'
     if j == 2:
-        #fname = path_JP + 'r12x10d90i45.txt'
-        fname = path_JP + 'r12m16f700x10d90i45.txt'
-        fname2 = path_JP + 'f'+nu+'pbbr12m1.6d90i45x10.csv'
+        fname = path_JP + 'r12x10d90i45.txt'
+        #fname = path_JP + 'r12m16f700x10d90i45.txt'
+        fname2 = path_JP + 'f'+nu+'pbbr12m1.4d90i45x10.csv'
     #if j == 3:
     #    fname = path_JP + 'nu'+nu+'Hz_hopf_rho30deg.dat'
     #    fname2 = path_JP + 'f'+nu+'phopfr12m1.6d50i60x30.csv'
