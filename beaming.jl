@@ -124,6 +124,9 @@ display(p2)
 
 
 #Final beaming function
-Beam(mu) = Hne(mu)./(2*momse[2])
-
+#Beaming function
+Beam(mu) = 1.0 #Lambertian
+#Beam(mu) = 0.42822 + 0.92236*mu - 0.085751*mu^2 #approx Hopf
+#Beam(mu) = (1.0 + 2.3*mu - 0.3*mu^2)/(2*1.194)
+#Beam(mu) = Hne(mu)./(2*momse[2])
 

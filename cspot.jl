@@ -12,14 +12,16 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(30.0)
-colat = deg2rad(50.0)
+#rho = deg2rad(30.0)
+#colat = deg2rad(50.0)
+
+rho = deg2rad(10.0)
+colat = deg2rad(90.0)
 
 interp = true
-exact_edges = false
+exact_edges = true
 
 
-########
 function spotr(t, phi, theta,
                        stheta, delta,
                        X, Xob, Osb)
@@ -29,21 +31,38 @@ function spotr(t, phi, theta,
     zeta2 = beta*((4/3)*0.5*(3*cos(theta)^2 - 1) - 1/3)
     Rgm, dR = Rgmf(theta, X, Osb)
 
-    enu = (1-Xob/2)/(1+Xob/2)*exp(nu2*Xob^3)
+    #enu = (1-Xob/2)/(1+Xob/2)*exp(nu2*Xob^3)
     B = (1-Xob/2)*(1+Xob/2) + B2*Xob^2
     ezeta = (1-Xob/2)*(1+Xob/2)*exp(zeta2*Xob^2)
+
+    enu = 1.0
+    #B = 1.0
+    #ezeta = 1.0
 
     w = wp*Xob^3*(1-3*Xob) /(G*M/c^3) #into rad/seconds
     vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
     bz = R*vz/c
     gamma = 1/sqrt(1 - bz^2)
+    #gamma = 1.0
+
+    rho=(1/enu)
+    bet=ezeta/B
+    the = theta
 
     #spot center
     phi1 = 0.0
-    the1 = delta
+    the1 = stheta
     x1 = cos(phi1)*sin(the1)
     y1 = sin(phi1)*sin(the1)
     z1 = cos(the1)
+    
+    #projected
+    x1p = x1*(bet^2*cos(the)^2 + rho^2*sin(the)^2) + z1*(rho^2 - bet^2)*cos(the)*sin(the)
+    y1p = y1*gamma^2
+    z1p = z1*(rho^2*cos(the)^2 + bet^2*sin(the)^2) + x1*(rho^2-bet^2)*cos(the)*sin(the)
+    #x1p = x1
+    #y1p = y1
+    #z1p = z1
 
     #photon location
     phi2 = phi
@@ -51,12 +70,14 @@ function spotr(t, phi, theta,
     x2 = cos(phi2)*sin(the2)
     y2 = sin(phi2)*sin(the2)
     z2 = cos(the2)
+    x2p = x2*(bet^2*cos(the)^2 + rho^2*sin(the)^2) + z2*(rho^2 - bet^2)*cos(the)*sin(the)
+    y2p = y2*gamma^2
+    z2p = z2*(rho^2*cos(the)^2 + bet^2*sin(the)^2) + x2*(rho^2-bet^2)*cos(the)*sin(the)
 
-    #r1.gab.r2
-    r1r2 = (1/enu^2)*((enu^2)*ezeta^2 * (x1*cos(theta) - z1*sin(theta))*(x2*cos(theta)-z2*sin(theta)) + B^2 *((enu^2)*y1*y2*gamma^2 + (z1*cos(theta)+x1*sin(theta))*(z2*cos(theta)+x2*sin(theta)))/B^2
-
-    r1r1 = (1/enu^2)*((enu^2)*ezeta^2 *(x1*cos(theta)-z1*sin(theta))^2 + B^2*((enu^2)*y1*y1*gamma^2 + (z1*cos(theta)+x1*sin(theta))^2))/B^2
-    r2r2 = (1/enu^2)*((enu^2)*ezeta^2 *(x2*cos(theta)-z2*sin(theta))^2 + B^2*((enu^2)*y2*y2*gamma^2 + (z2*cos(theta)+x2*sin(theta))^2))/B^2
+    #dot product
+    r1r2= x1p*x2p + y1p*y2p + z1p*z2p
+    r1r1 = x1p^2 + y1p^2 + z1p^2 
+    r2r2 = x2p^2 + y2p^2 + z2p^2 
 
     d = acos(r1r2/sqrt(r1r1)/sqrt(r2r2))
 
@@ -68,13 +89,14 @@ function spotr(t, phi, theta,
 end
 
 
-function spot(t, phi, theta;
+function spot(gamma, phi, theta;
               stheta = deg2rad(50.0), #spot latitude
               delta = deg2rad(30.0) #spot half-opening angle
               )
 
     #Circular spot
-    d = great_circle_dist(0.0, phi, stheta, theta)
+    d = great_circle_dist_rel(0.0, phi, stheta, theta, gamma)
+    #d = great_circle_dist(0.0, phi, stheta, theta)
     if abs(d) < delta
         return true
     end
@@ -93,7 +115,7 @@ end
 img4 = zeros(Ny_dense, Nx_dense) #debug array
 
 #Spot image frame size
-N_frame = 20
+N_frame = 50
 
 N_frame_chi = 500
 N_frame_rad = 100
@@ -163,7 +185,7 @@ function dF(rad, chi, dS, yy)
         Xob = Xs_interp[rad,chi]
         time = time_interp[rad,chi]
         cosa = cosa_interp[rad,chi]
-        dtau = dtau_interp[rad,chi]
+        #dtau = dtau_interp[rad,chi]
         #hit = hits_interp[rad,chi] #test if we hit the surface
     
         #println(phi," ",theta," ",Xob," ",time," ",cosa," ",hit)
@@ -180,20 +202,23 @@ function dF(rad, chi, dS, yy)
         phi = phi - (t - dt)*fs*2*pi
         phi = mod2pi(phi)
 
-        inside = spotr(0.0, phi, theta,
-                       stheta, delta,
-                       X, Xob, Osb)
+        EEd, delta, gamma = radiation(rad, chi,
+                                     phi, theta, cosa,
+                                     X, Xob, Osb, sini)
 
-        #inside = spot(0.0, phi, theta,
+        inside = spotr(0.0, phi, theta,
+                       colat, rho,
+                       X, Xob, Osb)
+        #inside = spot(gamma, phi, theta,
         #              stheta = colat,
         #              delta = rho
-        #              )
+        #             )
         if inside
     
             if interp
-                delta = delta_interp[rad,chi]
-                EEd = reds_interp[rad,chi]
-            #println(EEd, " ", delta)
+                unity = delta_interp[rad,chi]
+                #EEd = reds_interp[rad,chi]
+                #println(EEd, " ", delta)
             else
     
                 # update subimage corners; they might no be up-to-date
@@ -204,14 +229,14 @@ function dF(rad, chi, dS, yy)
                 #old_subframe[4] = frame_x2 < x ? x : frame_x2 #right max
     
                 
-                EEd, delta, dtau = radiation(rad, chi,
-                                             phi, theta, cosa,
-                                             X, Xob, Osb, sini)
+                #EEd, delta, dtau = radiation(rad, chi,
+                #                             phi, theta, cosa,
+                #                             X, Xob, Osb, sini)
             end
             #println(EEd, " ", delta)
             #println()
     
-            if exact_edges && delta < 0.98
+            if exact_edges && unity < 0.9999
                 #println("exact edge for $rad")
                 time, phi, theta, Xob, hit, cosa = bender3p(rad, chi, sini,
                                                             X, Osb, beta, quad, wp, Rg)
@@ -219,48 +244,51 @@ function dF(rad, chi, dS, yy)
                 dt = time*G*M/c^3
                 phi = phi - (t - dt)*fs*2*pi
                 phi = mod2pi(phi)
-
-                inside = spotr(0.0, phi, theta,
-                       stheta, delta,
-                       X, Xob, Osb)
-                #inside = spot(0.0, phi, theta,
-                #              stheta = colat,
-                #              delta = rho)
-                if inside && hit
-                    EEd, delta, dtau = radiation(rad, chi,
+                
+		EEd, delta, gamma = radiation(rad, chi,
                                                  phi, theta, cosa,
                                                  X, Xob, Osb, sini)
-    
+                #inside = spot(gamma, phi, theta,
+                #              stheta = colat,
+                #              delta = rho)
+                inside = spotr(0.0, phi, theta,
+                       colat, rho,
+                       X, Xob, Osb)
+
+                if inside && hit
+   			#exact edge 
                 else
                     EEd = 1.0
                     delta = 1.0
                     dtau = 0.0
+                    gamma = 1.0
                 end
             end
     
             dfluxE, dfluxNE, dfluxNB, dfluxB = bbfluxes(EEd, delta, cosa)
 
-            dfluxB *= dtau*dS
-            dfluxNB *= dtau*dS
-            for ie = 1:3
-               dfluxE[ie] *= dtau*dS
-               dfluxNE[ie] *= dtau*dS
-            end
+    
+            #dfluxB *= gamma
+            #dfluxNB *= gamma
+            #for ie = 1:3
+            #   dfluxE[ie] *= gamma 
+            #   dfluxNE[ie] *= gamma
+            #end
     
         end #inside spot
     end#hiti
 
     #println(dfluxB)
-    yy[1] = dfluxE[1]
-    yy[2] = dfluxE[2]
-    yy[3] = dfluxE[3]
+    yy[1] = dS*dfluxE[1]
+    yy[2] = dS*dfluxE[2]
+    yy[3] = dS*dfluxE[3]
 
-    yy[4] = dfluxNE[1]
-    yy[5] = dfluxNE[2]
-    yy[6] = dfluxNE[3]
+    yy[4] = dS*dfluxNE[1]
+    yy[5] = dS*dfluxNE[2]
+    yy[6] = dS*dfluxNE[3]
 
-    yy[7] = dfluxNB
-    yy[8] = dfluxB
+    yy[7] = dS*dfluxNB
+    yy[8] = dS*dfluxB
 
     #yy[:] = [dfluxE[1],dfluxE[2],dfluxE[3],
     #         dfluxNE[1],dfluxNE[2],dfluxNE[3],
@@ -278,17 +306,29 @@ end
 #Polar integration
 
 #create thick radius grid
-Nrad_frame = 1000
-rad_diffs = 1 ./ exp(linspace(0.0, 1.5, Nrad_frame-1).^2)
-rad_grid_d = rmax * cumsum(rad_diffs) / sum(rad_diffs)
-unshift!(rad_grid_d, 0.0)
+#Nrad_frame = 1000
+#rad_diffs = 1 ./ exp(linspace(0.0, 1.5, Nrad_frame-1).^2)
+#rad_grid_d = rmax * cumsum(rad_diffs) / sum(rad_diffs)
+#unshift!(rad_grid_d, 0.0)
 
 chi_sweep = zeros(Nchi)
 
+old_subframe = [y_grid_d[1],
+                y_grid_d[end],
+                x_grid_d[end],
+                x_grid_d[1]
+                ]
+
+t = 0.0
+frame_dxdy = 1.0
+
 tic()
-#for k = 1:Nt
-for k = 2:1
+for k = 1:Nt
+#for k = 7:8
+#for k = 2:1
     t = times[k]
+    println(" ")
+    println("t: $t k: $k")
 
     jradmin = Nrad
     jradmax = 1
@@ -316,7 +356,7 @@ for k = 2:1
                 phi = Phis[j, i]
                 theta = Thetas[j, i]
                 time = Times[j, i]
-                #Xob = Xs_interp[rad,chi]
+                Xob = Xs_interp[rad,chi]
 
                 #rotate star
                 dt = time*G*M/c^3
@@ -324,7 +364,7 @@ for k = 2:1
                 phi = mod2pi(phi)
 
                 inside = spotr(0.0, phi, theta,
-                       stheta, delta,
+                       colat, rho,
                        X, Xob, Osb)
 
                 #inside = spot(0.0, phi, theta,
@@ -357,19 +397,21 @@ for k = 2:1
         chi_sweep[i] = located_spot_chi ? 1.0 : 0.0
     end#chi
 
+    if !located_spot
+    	continue
+    end
     
     #bounding box limits
-    #jradmin = jradmin == 1 ? 1 : jradmin - 1
-    #jradmax = jradmax == Nrad ? Nrad : jradmax + 1
-    jradmin = max(1, jradmin - 2)
-    jradmax = min(Nrad, jradmax + 2)
+    jradmin = max(1, jradmin - 4)
+    jradmax = min(Nrad, jradmax + 4)
     println("radmin: $(rad_grid[jradmin]) radmax: $(rad_grid[jradmax])")
     #println("chimin: $(chi_grid[ichimin]) chimax: $(chi_grid[ichimax])")
 
     #build chi limits for bounding box
+    polar_integration = true
     if jradmin == 1 #full circle
-        #ichimax = Nchi-1
-        #ichimin = 2
+        polar_integration = false
+
         chimin = 0.0
         chimax = 2.0pi
     else #pizza slices
@@ -410,10 +452,18 @@ for k = 2:1
         end
     end
     
+    #make pizza slize bigger
+    chimin -= 0.01
+    chimax += 0.01
 
     
     #plot in cartesian coords
     img4[:,:] = 0.0
+
+    frame_y2 = y_grid_d[1]
+    frame_y1 = y_grid_d[end]
+    frame_x1 = x_grid_d[end]
+    frame_x2 = x_grid_d[1]
     
     for j = y1s:y2s
         y = y_grid_d[j]
@@ -429,6 +479,7 @@ for k = 2:1
                 phi = phi_interp_atan(rad,chi)
                 theta = theta_interp[rad,chi]
                 time = time_interp[rad,chi]
+                cosa = cosa_interp[rad,chi]
                 Xob = Xs_interp[rad,chi]
             
                 #rotate star
@@ -436,10 +487,14 @@ for k = 2:1
                 phi = phi - (t - dt)*fs*2*pi
                 phi = mod2pi(phi)
       
+        	EEd, delta, gamma = radiation(rad, chi,
+                                     phi, theta, cosa,
+                                     X, Xob, Osb, sini)
+
                 img4[j,i] = painter(phi, theta)/2.0
                 
                 inside = spotr(0.0, phi, theta,
-                       stheta, delta,
+                       colat, rho,
                        X, Xob, Osb)
 
                 #inside = spot(0.0, phi, theta,
@@ -447,11 +502,12 @@ for k = 2:1
                 #              delta = rho
                 #              )
              
-                if inside #&& y > -5
+                if inside
+                    frame_y2 = frame_y2 < y ? y : frame_y2 #top #max
+                    frame_y1 = frame_y1 > y ? y : frame_y1 #bottom #min
+                    frame_x1 = frame_x1 > x ? x : frame_x1 #left min
+                    frame_x2 = frame_x2 < x ? x : frame_x2 #right max
 
-                    cosa = cosa_interp[rad,chi]
-                    delta = delta_interp[rad,chi]
-                    EEd = reds_interp[rad,chi]
                     dfluxE, dfluxNE, dfluxNB, dfluxB = bbfluxes(EEd, delta, cosa)
                     img4[j,i] += dfluxB * dxdy * imgscale*1.0e7
                 end #if inside            
@@ -459,7 +515,53 @@ for k = 2:1
         end# for x
     end#for y
     
+    if !located_spot
+        println("hidden spot")
+        frame_y2 = old_subframe[1]
+        frame_y1 = old_subframe[2]
+        frame_x1 = old_subframe[3]
+        frame_x2 = old_subframe[4]
+    end
     
+    #expand image a bit
+    #########
+    frame_expansion_x = abs(x_grid_d[8] - x_grid_d[1])
+    frame_expansion_y = abs(y_grid_d[8] - y_grid_d[1])
+    frame_y2 += frame_expansion_y
+    frame_y1 -= frame_expansion_y
+    frame_x1 -= frame_expansion_x
+    frame_x2 += frame_expansion_x
+
+    #Exapand image a bit keeping the aspect ratio
+    ##########
+    frame_expansion_x2 = abs(frame_x2 - frame_x1)
+    frame_expansion_y2 = abs(frame_y2 - frame_y1)
+
+    frame_xs = abs(frame_x2 - frame_x1)/N_frame
+    frame_ys = abs(frame_y2 - frame_y1)/N_frame
+
+
+    println("x1: $frame_x1  x2: $frame_x2  y1: $frame_y1 y2: $frame_y2")  
+    println("x = $frame_xs y = $frame_ys")
+
+    #pick smaller
+    if frame_xs > frame_ys
+        Nx_frame = N_frame
+        Ny_frame = max(round(Int, (frame_ys*N_frame/frame_xs)), 2)
+    else
+        Ny_frame = N_frame
+        Nx_frame = max(round(Int, (frame_xs*N_frame/frame_ys)), 2)
+    end
+
+    println("Nx= $Nx_frame Ny = $Ny_frame")
+
+    frame_xgrid = collect(linspace(frame_x1, frame_x2, Nx_frame))
+    frame_ygrid = collect(linspace(frame_y1, frame_y2, Ny_frame))
+    frame_dxx = 1.0*(frame_xgrid[2] - frame_xgrid[1])
+    frame_dyy = 1.0*(frame_ygrid[2] - frame_ygrid[1])
+    frame_dxdy = frame_dxx*frame_dyy #*X^2
+
+
     #Plot large image with bounding box for the spot
     p10a = plot2d(img4, x_grid_d, y_grid_d, 0, 0, 2, "Blues")
     #add time stamp
@@ -501,25 +603,88 @@ for k = 2:1
     #integrate
     Ndelta = 0.0
 
+
+    #Cartesian subgrid integration
+    img5 = zeros(Ny_frame, Nx_frame) #subgrid img
+    Ndelta = 0.0
+
+    old_subframe = [frame_y2,
+                    frame_y1,
+                    frame_x1,
+                    frame_x2
+                    ]
+
+    iters[1] = 0
+    for j = 1:Ny_frame
+        y = frame_ygrid[j]
+        for i = 1:Nx_frame
+            x = frame_xgrid[i]
+
+            dFs = zeros(8)
+            istat = dFcart([x,y], dFs) 
+            dFs *= imgscale * frame_dxdy
+
+            sfluxE[k, 1] += dFs[1]
+            sfluxE[k, 2] += dFs[2]
+            sfluxE[k, 3] += dFs[3]
+
+            sfluxNE[k, 1] += dFs[4]
+            sfluxNE[k, 2] += dFs[5]
+            sfluxNE[k, 3] += dFs[6]
+
+            sfluxNB[k] += dFs[7]
+            sfluxB[k] += dFs[8]
+
+            img5[j,i] += dFs[8] * frame_dxdy * imgscale * 5.0e5
+        end #x
+    end#y
+    println("Riemann integral iterations: $(iters[1])")
+    println("num flux $(sfluxNB[k])")
+
+    #plot subcartesian grid
+    p10b = plot2d(img5, frame_xgrid, frame_ygrid, 0, 0, 0, "Blues")
+
+    #add time stamp
+    xs = frame_xgrid[1] + 0.84*(frame_xgrid[end]-frame_xgrid[1])
+    ys = frame_ygrid[1] + 0.93*(frame_ygrid[end]-frame_ygrid[1])
+    Winston.add(p10b, Winston.DataLabel(xs, ys, "$(k)"))
+    #display(p10)
+
+    Winston.add(p10b, Curve(frame_xs, frame_ys,
+                            linestyle="solid"))
+    Winston.add(p10b, Curve([frame_xs[1], frame_xs2[1]],
+                            [frame_ys[1], frame_ys2[1]],
+                            linestyle="solid",
+                            color="black"))
+    Winston.add(p10b, Curve([frame_xs[end], frame_xs2[end]],
+                            [frame_ys[end], frame_ys2[end]],
+                            linestyle="solid",
+                            color="red"))
+    Winston.add(p10b, Curve(frame_xs2, frame_ys2,
+                            linestyle="solid", color="red"))
+
+
+
+
     #linear chi grid with thick spacing
-    chi_grid2 = linspace(chimin, chimax, N_frame_chi)
-    chi_diff2 = zeros(N_frame_chi)
-    
-    chi_diff2[2:N_frame_chi] = 0.5 * abs(diff(chi_grid2))
-    chi_diff2[1:N_frame_chi-1] .+= 0.5 * abs(diff(chi_grid2))
+    #chi_grid2 = linspace(chimin, chimax, N_frame_chi)
+    #chi_diff2 = zeros(N_frame_chi)
+    #
+    #chi_diff2[2:N_frame_chi] = 0.5 * abs(diff(chi_grid2))
+    #chi_diff2[1:N_frame_chi-1] .+= 0.5 * abs(diff(chi_grid2))
 
-    chi_diff2[1] = 0.5 * abs(chi_grid2[2] - chi_grid[1])
-    chi_diff2[N_frame_chi] = 0.5 * abs(chi_grid2[N_frame_chi] - chi_grid2[N_frame_chi-1])
+    #chi_diff2[1] = 0.5 * abs(chi_grid2[2] - chi_grid[1])
+    #chi_diff2[N_frame_chi] = 0.5 * abs(chi_grid2[N_frame_chi] - chi_grid2[N_frame_chi-1])
 
-    #weighted rad grid with double spacing
-    rad_diff2 = zeros(Nrad)
+    ##weighted rad grid with double spacing
+    #rad_diff2 = zeros(Nrad)
 
-    rad_diff2[2:Nrad] = 0.5 * abs(diff(rad_grid))
-    rad_diff2[1:Nrad-1] .+= 0.5 * abs(diff(rad_grid))
+    #rad_diff2[2:Nrad] = 0.5 * abs(diff(rad_grid))
+    #rad_diff2[1:Nrad-1] .+= 0.5 * abs(diff(rad_grid))
 
-    rad_diff2[1] = 0.5 * abs(rad_grid[2] - rad_grid[1])
-    rad_diff2[Nrad] = 0.5 * abs(rad_grid[Nrad] - rad_grid[Nrad-1])
-    println(chi_grid2)
+    #rad_diff2[1] = 0.5 * abs(rad_grid[2] - rad_grid[1])
+    #rad_diff2[Nrad] = 0.5 * abs(rad_grid[Nrad] - rad_grid[Nrad-1])
+    #println(chi_grid2)
 
     #for i = 1:N_frame_chi
     #    chi = mod2pi(chi_grid2[i])
@@ -529,17 +694,39 @@ for k = 2:1
     #    end
     #end
 
+
+
     tic()
     iters[1] = 0
+    vals = zeros(8)
+ 
+    if located_spot 
+    if polar_integration
+    #polar cubature integration
+    println(" Polar Cubature integration")
+
     (vals, errs) = pcubature(8,
                             dFpol,
                             [rad_grid[jradmin], chimin],
                             [rad_grid[jradmax], chimax],
-                            reltol = 1.0e-3,
+                            reltol = 1.0e-4,
                             abstol = 0.0,
                             maxevals=0)
+
+    else #cartesian
+    println(" Cartesian Cubature integration")
+    (vals, errs) = pcubature(8,
+                           dFcart,
+                           [frame_x1, frame_y1],
+                           [frame_x2, frame_y2],
+                           reltol = 1.0e-4,
+                           abstol = 0.0,
+                           maxevals=0)
+
+    end #if-else polar/cartesian
     println("Cubature iterations: $(iters[1])")
     toc()
+    end
 
     vals *= imgscale
     errs = errs ./ vals #transform into relative err
@@ -578,8 +765,13 @@ for k = 2:1
     itersv[k] = iters[1]
     p10d = plot(phase, itersv, "b-")
 
+    tt1 = Table(1,2)
+    tt1[1,1] = p10a
+    tt1[1,2] = p10b
+
     tt = Table(3,1)
-    tt[1,1] = p10a
+    #tt[1,1] = p10a
+    tt[1,1] = tt1
     tt[2,1] = p10c
     tt[3,1] = p10d
     display(tt)
@@ -600,8 +792,8 @@ t = 0.0
 frame_dxdy = 1.0
 
 
-for k = 1:Nt
-#for k = 2:1
+#for k = 1:Nt
+for k = 2:1
     img4[:,:] = 0.0
     
     t = times[k]
@@ -633,8 +825,8 @@ for k = 1:Nt
                 phi = phi_interp_atan(rad,chi)
                 theta = theta_interp[rad,chi]
                 time = time_interp[rad,chi]
-                dtau = dtau_interp[rad,chi]
-                Xob = Xs_interp[rad,chi]
+                cosa = cosa_interp[rad,chi]
+        	Xob = Xs_interp[rad,chi]
                 
                 #rotate star
                 dt = time*G*M/c^3 #time shift
@@ -646,10 +838,14 @@ for k = 1:Nt
                 #img4[j,i] = -4.0*painter(phi, theta)/2.0
                 img4[j,i] = painter(phi, theta)/2.0
                 
+        	EEd, delta, gamma = radiation(rad, chi,
+                                     phi, theta, cosa,
+                                     X, Xob, Osb, sini)
+
                 inside = spotr(0.0, phi, theta,
-                       stheta, delta,
+                       colat, rho,
                        X, Xob, Osb)
-                #inside = spot(0.0, phi, theta,
+                #inside = spot(gamma, phi, theta,
                 #              stheta = colat,
                 #              delta = rho
                 #              )
@@ -671,11 +867,10 @@ for k = 1:Nt
                     #println()
                      
                     #Time shifts for differnt parts
-                    time = time_interp[rad,chi]
-                    cosa = cosa_interp[rad,chi]
-    
-                    delta = delta_interp[rad,chi]
-                    EEd = reds_interp[rad,chi]
+                    #time = time_interp[rad,chi]
+                    #cosa = cosa_interp[rad,chi]
+                    #delta = delta_interp[rad,chi]
+                    #EEd = reds_interp[rad,chi]
                         
                     dfluxE, dfluxNE, dfluxNB, dfluxB = bbfluxes(EEd, delta, cosa)
                         
@@ -754,7 +949,7 @@ for k = 1:Nt
 
 
 
-    img5 = zeros(Ny_frame, Nx_frame) #debug array
+    img5 = zeros(Ny_frame, Nx_frame) #subgrid img
 
     Ndelta = 0.0
 
@@ -786,6 +981,8 @@ for k = 1:Nt
 
             sfluxNB[k] += dFs[7]
             sfluxB[k] += dFs[8]
+
+            img5[j,i] += dFs[8] * frame_dxdy * imgscale * 5.0e5
         end #x
     end#y
     println("Riemann integral iterations: $(iters[1])")
@@ -794,13 +991,18 @@ for k = 1:Nt
     #println("bol flux: $(sfluxB[k]) | num flux $(sfluxNB[k])")
     println("num flux $(sfluxNB[k])")
 
+    #start cubature integration only if we see the spot
+
+    val = 0.0
+    if (sfluxNB[k] > 0)
+
     tic()
     iters[1] = 0
     (vals, errs) = pcubature(8,
                            dFcart,
                            [frame_x1, frame_y1],
                            [frame_x2, frame_y2],
-                           reltol = 1.0e-3,
+                           reltol = 1.0e-4,
                            abstol = 0.0,
                            maxevals=0)
     println("Cubature iterations: $(iters[1])")
@@ -825,8 +1027,10 @@ for k = 1:Nt
     sfluxNB[k] = vals[7]
     sfluxB[k] = vals[8]
 
+    end #end of cubature integration
+
     println("num flux $val $err $merr")
-    p10b = plot2d(img5, frame_xgrid, frame_ygrid, 0, 0, 2, "Blues")
+    p10b = plot2d(img5, frame_xgrid, frame_ygrid, 0, 0, 0, "Blues")
 
     #add time stamp
     xs = frame_xgrid[1] + 0.84*(frame_xgrid[end]-frame_xgrid[1])
@@ -879,7 +1083,7 @@ end#for t
 
 
 #write to file
-opath = "out_cub/"
+opath = "out/"
 #opath = "out2/"
 #opath = "out2/cadeau+morsink/"
 #opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))n/"

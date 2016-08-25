@@ -3,8 +3,8 @@ include("bender.jl")
 
 
 #grid setup
-Nrad = 100
-Nchi = 100
+Nrad = 2000
+Nchi = 2000
 
 #Nrad = 100
 #Nchi = 100
@@ -12,7 +12,7 @@ Nchi = 100
 rmin = 0.0
 rmax = 12.0
 
-dchi_edge = 0.01
+dchi_edge = 0.001
 chimin = 0.0 - dchi_edge
 chimax = 2.0pi + dchi_edge
 #chimin = -pi
@@ -31,7 +31,7 @@ for i = 1:length(chis)
     rmaxi = rmax
     rmid = 0.0
     
-    Nbi = 10
+    Nbi = 20
     N = 1
     while N <= Nbi
         rmid = (rmini + rmaxi)/2.0
@@ -51,7 +51,7 @@ end
 
 #set new maximum rad limit
 #rscale = maximum(rlims)
-rmax = maximum(rlims)*1.005
+rmax = maximum(rlims)*1.001
 println("max edge: $rmax")
 
 #Create edge function to get the exact shape of the outline

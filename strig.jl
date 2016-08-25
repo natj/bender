@@ -2,7 +2,7 @@
 ######################
 
 #Spherical radial function
-function Rgmf(theta, X, Osb)
+function Rgmf2(theta, X, Osb)
     return 1.0, 0.0
 end
 
@@ -17,7 +17,7 @@ end
 
 #Radial function by AlGendy & Morsink 2014
 #Circumferential (isoradial) radius
-function Rgmf2(theta, X, Osb)
+function Rgmf(theta, X, Osb)
     const o20 = -0.788
     const o21 = 1.030
 
@@ -132,6 +132,49 @@ function great_circle_dist(lon1, lon2, col1, col2)
     return atan2(sqrt(xx), yy)
 end
 
+function great_circle_dist_rel(lon1, lon2, col1, col2, gamma)
+
+    #lat1 = pi/2 - col1
+    #lat2 = pi/2 - col2
+    lat1 = col1
+    lat2 = col2
+    dlon = abs(lon2 - lon1)
+    dlat = abs(lat2 - lat1)
+
+    #relativistic law of cosines 
+    gamma1 = gamma
+    gamma2 = gamma
+    norm1=cos(lat1)^2 + (sin(lat1)^2)*(cos(lon1)^2 + (gamma1*sin(lon1))^2)
+    norm2=cos(lat2)^2 + (sin(lat2)^2)*(cos(lon2)^2 + (gamma2*sin(lon2))^2)
+    t1=cos(lat1)*cos(lat2) + sin(lat1)*sin(lat2)*(cos(lon1)*cos(lon2) + gamma1*gamma2*sin(lon1)*sin(lon2))
+    return acos(t1/sqrt(norm1)/sqrt(norm2))
+
+
+    #relativistic haversine
+    gamma1 = gamma
+    gamma2 = gamma
+    t1=(-cos(lat2)*cos(lon1)*sin(lat1) + cos(lat1)*cos(lon2)*sin(lat2))^2
+
+    t2=(gamma1*cos(lat2)*sin(lat1)*sin(lon1) - gamma2*cos(lat1)*sin(lat2)*sin(lon2))^2
+    
+    t3 = (sin(lat1)*sin(lat2)*(-gamma1*cos(lon2)*sin(lon1) + gamma2*cos(lon1)*sin(lon2)))^2
+
+    #t3=(gamma1*cos(lon2)*sin(lat1)*sin(lat2)*sin(lon1) - 
+    #    gamma2*cos(lon1)*sin(lat1)*sin(lat2)*sin(lon2))^2
+
+    norm1=cos(lat1)^2 + (sin(lat1)^2)*(cos(lon1)^2 + (gamma1*sin(lon1))^2)
+    norm2=cos(lat2)^2 + (sin(lat2)^2)*(cos(lon2)^2 + (gamma2*sin(lon2))^2)
+    return asin(sqrt(t1+t2+t3)/sqrt(norm1)/sqrt(norm2))
+
+    
+    #haversine formula
+    #return 2.0*asin(sqrt(sin(dlat/2)^2 + cos(lat1)*cos(lat2)*sin(dlon/2)^2))
+
+    #vincenty's
+    xx = (cos(lat2)*sin(dlon))^2 + (cos(lat1)*sin(lat2) - sin(lat1)*cos(lat2)*cos(dlon))^2
+    yy = sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2)*cos(dlon)
+    #return atan2(sqrt(xx), yy)
+end
 #Great circle distance (on an ellipsoid)
 #uses general Vincenty's formula for oblate spheroids
 function great_circle_dist2(lon1, lon2, col1, col2)
