@@ -56,8 +56,8 @@ path_JP = "../../out/"
 tsize = 10.0
 
 
-nu = '1'
-#nu = '400'
+#nu = '1'
+nu = '400'
 
 
 fig.text(0.5, 0.92, '$\\nu = '+nu+'$ Hz  blackbody  $\\rho = 1^{\circ}$',  ha='center', va='center', size=tsize)
@@ -91,6 +91,7 @@ for j in range(4):
 
     #read JN data
     phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2 = read_JN_files(fname2) 
+    phase2s = phase2
 
     if (j == 0) or (j == 2):
         phase3, flux3 = read_PP_files(fname3)
@@ -136,6 +137,7 @@ for j in range(4):
              flux  = Fbol
              flux2 = Fbol2
              
+         #phase2 = phase2s - 0.00008
 
          #JP data
          ax1.plot(phase, flux, 'k-')
@@ -147,7 +149,7 @@ for j in range(4):
          if i == 3:
             if (j == 0) or (j == 2):
                 phase3 = phase3 - 0.0007
-                ax1.plot(phase3, flux3, 'b--', linewidth=0.4)
+                #ax1.plot(phase3, flux3, 'b--', linewidth=0.4)
          
          #frame for the error panel
          ax2 = subplot(gs[(mfiglim+panelh):(mfiglim+panelh+epanelh), i])
@@ -167,23 +169,22 @@ for j in range(4):
          ax2.plot([xmin, xmax], [0.0, 0.0], 'r--', linewidth=0.3)
 
 
-         #interpolate error
+         #interpolate error from JN
          #fluxi2 = griddata(phase2, flux2, (phase), method='cubic')
-         fluxi2 = griddata(phase2, flux2, (phase), method='linear')
+         #fluxi2 = griddata(phase2, flux2, (phase), method='linear')
+         #err = (flux/fluxi2 - 1)*100
+         #ax2.plot(phase, err, 'k-', linewidth = 0.4)
          
-         #err = (fluxi(phase2)/flux2 - 1)*100
-         err = (flux/fluxi2 - 1)*100
-
-         #flux2i = interp1d(phase2, flux2, kind='cubic', fill_value='extrapolate')
-         #err = (flux/flux2i(phase) - 1)*100
-
-         ax2.plot(phase, err, 'k-', linewidth = 0.4)
-         
+         #interpolate error from JP
+         #fluxi = griddata(phase, flux, (phase2), method='linear')
+         fluxi = griddata(phase, flux, (phase2), method='cubic')
+         err = (fluxi/flux2 - 1)*100
+         ax2.plot(phase2, err, 'k-', linewidth = 0.4)
 
          if (j == 0) or (j == 2):
              fluxi3 = griddata(phase3, flux3, (phase), method='linear')
              err3 = (flux/fluxi3 - 1)*100
-             ax2.plot(phase, err3, 'b-', linewidth = 0.4)
+             #ax2.plot(phase, err3, 'b-', linewidth = 0.4)
 
 
     mfiglim += panelh+epanelh+skiph
@@ -191,5 +192,5 @@ for j in range(4):
     
 
 
-savefig('fig2a.pdf', bbox_inches='tight')
-#savefig('fig2b.pdf', bbox_inches='tight')
+#savefig('fig2a.pdf', bbox_inches='tight')
+savefig('fig2b.pdf', bbox_inches='tight')

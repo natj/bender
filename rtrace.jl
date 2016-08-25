@@ -4,7 +4,7 @@ include("bender.jl")
 
 #grid setup
 Nrad = 2000
-Nchi = 4000
+Nchi = 2000
 
 #Nrad = 100
 #Nchi = 100

@@ -19,14 +19,14 @@ const Msun = 1.98892e33
 const km = 1.0e5
 const ergkev = 6.2415e8
 const cm_parsec =  3.2404e-23
-#const constbb = 5.0396173e22 
+const constbb = 5.0396173e22 
 
 
 #initial parameters in physical units
-incl = deg2rad(60.0)
-M    = 1.6Msun
+incl = deg2rad(45.0)
+M    = 1.4Msun
 R    = 12.0km
-fs   = 400
+fs   = 700
 
 #Dist = 1.0*cm_parsec
 

@@ -12,14 +12,80 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-rho = deg2rad(1.0)
-colat = deg2rad(50.0)
+rho = deg2rad(10.0)
+colat = deg2rad(90.0)
 
 interp = true
 exact_edges = true
 
 
-########
+function spotr(t, phi, theta,
+                       stheta, delta,
+                       X, Xob, Osb)
+
+    nu2   = beta/3.0 - quad*0.5*(3*cos(theta)^2-1)
+    B2    = beta
+    zeta2 = beta*((4/3)*0.5*(3*cos(theta)^2 - 1) - 1/3)
+    Rgm, dR = Rgmf(theta, X, Osb)
+
+    #enu = (1-Xob/2)/(1+Xob/2)*exp(nu2*Xob^3)
+    B = (1-Xob/2)*(1+Xob/2) + B2*Xob^2
+    ezeta = (1-Xob/2)*(1+Xob/2)*exp(zeta2*Xob^2)
+
+    enu = 1.0
+    #B = 1.0
+    #ezeta = 1.0
+
+    w = wp*Xob^3*(1-3*Xob) /(G*M/c^3) #into rad/seconds
+    vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
+    bz = R*vz/c
+    gamma = 1/sqrt(1 - bz^2)
+    #gamma = 1.0
+
+    rho=(1/enu)
+    bet=ezeta/B
+    the = theta
+
+    #spot center
+    phi1 = 0.0
+    the1 = stheta
+    x1 = cos(phi1)*sin(the1)
+    y1 = sin(phi1)*sin(the1)
+    z1 = cos(the1)
+    
+    #projected
+    x1p = x1*(bet^2*cos(the)^2 + rho^2*sin(the)^2) + z1*(rho^2 - bet^2)*cos(the)*sin(the)
+    y1p = y1*gamma^2
+    z1p = z1*(rho^2*cos(the)^2 + bet^2*sin(the)^2) + x1*(rho^2-bet^2)*cos(the)*sin(the)
+    #x1p = x1
+    #y1p = y1
+    #z1p = z1
+
+    #photon location
+    phi2 = phi
+    the2 = theta
+    x2 = cos(phi2)*sin(the2)
+    y2 = sin(phi2)*sin(the2)
+    z2 = cos(the2)
+    x2p = x2*(bet^2*cos(the)^2 + rho^2*sin(the)^2) + z2*(rho^2 - bet^2)*cos(the)*sin(the)
+    y2p = y2*gamma^2
+    z2p = z2*(rho^2*cos(the)^2 + bet^2*sin(the)^2) + x2*(rho^2-bet^2)*cos(the)*sin(the)
+
+    #dot product
+    r1r2= x1p*x2p + y1p*y2p + z1p*z2p
+    r1r1 = x1p^2 + y1p^2 + z1p^2 
+    r2r2 = x2p^2 + y2p^2 + z2p^2 
+
+    d = acos(r1r2/sqrt(r1r1)/sqrt(r2r2))
+
+    if abs(d) <= delta
+        return true
+    end
+
+    return false
+end
+
+
 function spot(gamma, phi, theta;
               stheta = deg2rad(50.0), #spot latitude
               delta = deg2rad(30.0) #spot half-opening angle
@@ -68,6 +134,7 @@ spot_flux2 = zeros(Nt)
 sdelta = zeros(Nt)
 sdelta2 = zeros(Nt)
 sdelta3 = zeros(Nt)
+itersv = zeros(Nt)
 
 sfluxE = zeros(Nt, 3)
 sfluxNE = zeros(Nt, 3)
@@ -77,20 +144,37 @@ sfluxNB = zeros(Nt)
 
 iters = zeros(1)
 
-function dF(xx, yy)
+function dFcart(xx, yy)
+    x = xx[1]
+    y = xx[2]
+    ##println("dF: x:$x y:$y $imgscale $t")
+
+    rad = hypot(x,y)
+    chi = mod2pi(pi/2 - atan2(y,x))
+    
+    dS = 1.0
+
+    return dF(rad, chi, dS, yy)
+end
+
+function dFpol(xx, yy)
+    rad = xx[1]
+    chi = mod2pi(xx[2])
+
+    #println("rad $rad chi $chi")
+
+    dS = rad
+    
+    return dF(rad, chi, dS, yy)
+end
+
+
+function dF(rad, chi, dS, yy)
 
     dfluxNB = 0.0
     dfluxB = 0.0
     dfluxE = zeros(3)
     dfluxNE = zeros(3)
-
-
-    x = xx[1]
-    y = xx[2]
-    #println("dF: x:$x y:$y $imgscale $t")
-
-    rad = hypot(x,y)
-    chi = mod2pi(pi/2 - atan2(y,x))
 
     if interp
         phi = phi_interp_atan(rad,chi)
@@ -119,10 +203,13 @@ function dF(xx, yy)
                                      phi, theta, cosa,
                                      X, Xob, Osb, sini)
 
-        inside = spot(gamma, phi, theta,
-                      stheta = colat,
-                      delta = rho
-                     )
+        inside = spotr(0.0, phi, theta,
+                       colat, rho,
+                       X, Xob, Osb)
+        #inside = spot(gamma, phi, theta,
+        #              stheta = colat,
+        #              delta = rho
+        #             )
         if inside
     
             if interp
@@ -158,9 +245,13 @@ function dF(xx, yy)
 		EEd, delta, gamma = radiation(rad, chi,
                                                  phi, theta, cosa,
                                                  X, Xob, Osb, sini)
-                inside = spot(gamma, phi, theta,
-                              stheta = colat,
-                              delta = rho)
+                #inside = spot(gamma, phi, theta,
+                #              stheta = colat,
+                #              delta = rho)
+                inside = spotr(0.0, phi, theta,
+                       colat, rho,
+                       X, Xob, Osb)
+
                 if inside && hit
    			#exact edge 
                 else
@@ -184,12 +275,23 @@ function dF(xx, yy)
         end #inside spot
     end#hiti
 
+    #println(dfluxB)
+    yy[1] = dfluxE[1]
+    yy[2] = dfluxE[2]
+    yy[3] = dfluxE[3]
 
-    yy[:] = [dfluxE[1],dfluxE[2],dfluxE[3],
-            dfluxNE[1],dfluxNE[2],dfluxNE[3],
-            dfluxNB,
-            dfluxB
-            ]
+    yy[4] = dfluxNE[1]
+    yy[5] = dfluxNE[2]
+    yy[6] = dfluxNE[3]
+
+    yy[7] = dfluxNB
+    yy[8] = dfluxB
+
+    #yy[:] = [dfluxE[1],dfluxE[2],dfluxE[3],
+    #         dfluxNE[1],dfluxNE[2],dfluxNE[3],
+    #         dfluxNB,
+    #         dfluxB
+    #        ]
 
     iters[1] += 1
 
@@ -197,6 +299,318 @@ function dF(xx, yy)
 end
 
 
+###################################
+#Polar integration
+
+#create thick radius grid
+Nrad_frame = 1000
+rad_diffs = 1 ./ exp(linspace(0.0, 1.5, Nrad_frame-1).^2)
+rad_grid_d = rmax * cumsum(rad_diffs) / sum(rad_diffs)
+unshift!(rad_grid_d, 0.0)
+
+chi_sweep = zeros(Nchi)
+
+tic()
+for k = 1:Nt
+#for k = 2:1
+    t = times[k]
+
+    jradmin = Nrad
+    jradmax = 1
+    ichimin = Nchi
+    ichimax = 1
+
+    located_spot = false
+    
+    for i = 2:Nchi-1
+        chi = chi_grid[i]
+
+        #avoid double integrating angle edges
+        #if chi <= 0; continue; end
+        #if chi >= 2pi; continue; end
+        
+        #if mod(i,10) == 0; println("chi: $(round(chi/2pi,2))"); end
+
+        located_spot_chi = false
+        for j = 2:Nrad-1
+            rad = rad_grid[j]
+
+            if rad <= edge_interp(chi)
+                
+                #Ray traced photons
+                phi = Phis[j, i]
+                theta = Thetas[j, i]
+                time = Times[j, i]
+                #Xob = Xs_interp[rad,chi]
+
+                #rotate star
+                dt = time*G*M/c^3
+                phi = phi - (t - dt)*fs*2*pi
+                phi = mod2pi(phi)
+
+                inside = spotr(0.0, phi, theta,
+                       colat, rho,
+                       X, Xob, Osb)
+
+                #inside = spot(0.0, phi, theta,
+                #              stheta = colat,
+                #              delta = rho
+                #              )
+
+            
+                if inside
+                    located_spot = true
+                    located_spot_chi = true
+                    
+                    #println("inside")
+                    jradmax = rad > rad_grid[jradmax] ? j : jradmax
+                    jradmin = rad < rad_grid[jradmin] ? j : jradmin
+                    
+                    #time = Times[j, i]
+                    #Xob = Xs[j, i]
+                    #cosa = cosas[j, i]
+                    #dF = dFlux[j, i]
+                    #dE = Reds[j, i]
+
+
+                    #drdchi = abs(rad_grid[j+1] - rad_grid[j-1])*abs(chi_grid[i+1] - chi_grid[i-1])*rad_grid[j]
+                    #spot_flux2[kd] += dF * drdchi
+                end#inside spot
+            end#inside star
+        end#rad
+
+        chi_sweep[i] = located_spot_chi ? 1.0 : 0.0
+    end#chi
+
+    
+    #bounding box limits
+    #jradmin = jradmin == 1 ? 1 : jradmin - 1
+    #jradmax = jradmax == Nrad ? Nrad : jradmax + 1
+    jradmin = max(1, jradmin - 2)
+    jradmax = min(Nrad, jradmax + 2)
+    println("radmin: $(rad_grid[jradmin]) radmax: $(rad_grid[jradmax])")
+    #println("chimin: $(chi_grid[ichimin]) chimax: $(chi_grid[ichimax])")
+
+    #build chi limits for bounding box
+    if jradmin == 1 #full circle
+        #ichimax = Nchi-1
+        #ichimin = 2
+        chimin = 0.0
+        chimax = 2.0pi
+    else #pizza slices
+        #println(chi_sweep)
+
+        if chi_sweep[Nchi-1] == 1 #splitted spot 
+            #ichimin = minimum(findin(chi_sweep, [1]))
+            #ichimax = maximum(findin(chi_sweep, [1]))
+
+            #get end of the spot sweep
+            q1 = 2
+            while chi_sweep[q1] == 1
+                q1 += 1
+            end
+            q1 += 1
+            
+            #get start of the spot sweep
+            q2 = Nchi-1
+            while chi_sweep[q2] == 1
+                q2 -= 1
+            end
+            q2 -= 1
+
+            chimin = chi_grid[q2] - 2.0pi
+            chimax = chi_grid[q1]
+            
+        else
+            #find limits
+            ichimin = minimum(findin(chi_sweep, [1]))
+            ichimax = maximum(findin(chi_sweep, [1]))
+
+            #expand
+            ichimin = ichimin == 1 ? 1 : ichimin - 1
+            ichimax = ichimax == Nchi ? Nchi : ichimax + 1
+
+            chimin = chi_grid[ichimin]
+            chimax = chi_grid[ichimax]
+        end
+    end
+    
+
+    
+    #plot in cartesian coords
+    img4[:,:] = 0.0
+    
+    for j = y1s:y2s
+        y = y_grid_d[j]
+        for i = x1s[j]:x2s[j]
+            x = x_grid_d[i]
+
+            rad = hypot(x,y)
+            chi = mod2pi(pi/2 - atan2(y,x))
+
+            if rad <= edge_interp(chi)
+            
+                #trace back to star
+                phi = phi_interp_atan(rad,chi)
+                theta = theta_interp[rad,chi]
+                time = time_interp[rad,chi]
+                Xob = Xs_interp[rad,chi]
+            
+                #rotate star
+                dt = time*G*M/c^3 #time shift
+                phi = phi - (t - dt)*fs*2*pi
+                phi = mod2pi(phi)
+      
+                img4[j,i] = painter(phi, theta)/2.0
+                
+                inside = spotr(0.0, phi, theta,
+                       colat, rho,
+                       X, Xob, Osb)
+
+                #inside = spot(0.0, phi, theta,
+                #              stheta = colat,
+                #              delta = rho
+                #              )
+             
+                if inside
+
+                    cosa = cosa_interp[rad,chi]
+                    delta = delta_interp[rad,chi]
+                    EEd = reds_interp[rad,chi]
+                    dfluxE, dfluxNE, dfluxNB, dfluxB = bbfluxes(EEd, delta, cosa)
+                    img4[j,i] += dfluxB * dxdy * imgscale*1.0e7
+                end #if inside            
+            end #hiti
+        end# for x
+    end#for y
+    
+    
+    #Plot large image with bounding box for the spot
+    p10a = plot2d(img4, x_grid_d, y_grid_d, 0, 0, 2, "Blues")
+    #add time stamp
+    xs = x_grid_d[1] + 0.84*(x_grid_d[end] - x_grid_d[1])
+    ys = y_grid_d[1] + 0.93*(y_grid_d[end] - y_grid_d[1])
+    Winston.add(p10a, Winston.DataLabel(xs, ys, "$(k) ($(round(times[k]*fs,3)))"))
+
+    frame_Nchi = 20
+    frame_chis = linspace(chimin, chimax, frame_Nchi)
+    frame_xs = zeros(frame_Nchi)
+    frame_ys = zeros(frame_Nchi)
+    frame_xs2 = zeros(frame_Nchi)
+    frame_ys2 = zeros(frame_Nchi)
+    
+    for i = 1:frame_Nchi
+        chi = frame_chis[i]
+
+        #transform to cartesian
+        frame_xs[i] = rad_grid[jradmax]*sin(chi) 
+        frame_ys[i] = rad_grid[jradmax]*cos(chi)
+
+        frame_xs2[i] = rad_grid[jradmin]*sin(chi) 
+        frame_ys2[i] = rad_grid[jradmin]*cos(chi)
+    end
+        
+    Winston.add(p10a, Curve(frame_xs, frame_ys,
+                            linestyle="solid"))
+    Winston.add(p10a, Curve([frame_xs[1], frame_xs2[1]],
+                            [frame_ys[1], frame_ys2[1]],
+                            linestyle="solid",
+                            color="black"))
+    Winston.add(p10a, Curve([frame_xs[end], frame_xs2[end]],
+                            [frame_ys[end], frame_ys2[end]],
+                            linestyle="solid",
+                            color="red"))
+    Winston.add(p10a, Curve(frame_xs2, frame_ys2,
+                            linestyle="solid", color="red"))
+    
+    #integrate
+    Ndelta = 0.0
+
+    #linear chi grid with thick spacing
+    chi_grid2 = linspace(chimin, chimax, N_frame_chi)
+    chi_diff2 = zeros(N_frame_chi)
+    
+    chi_diff2[2:N_frame_chi] = 0.5 * abs(diff(chi_grid2))
+    chi_diff2[1:N_frame_chi-1] .+= 0.5 * abs(diff(chi_grid2))
+
+    chi_diff2[1] = 0.5 * abs(chi_grid2[2] - chi_grid[1])
+    chi_diff2[N_frame_chi] = 0.5 * abs(chi_grid2[N_frame_chi] - chi_grid2[N_frame_chi-1])
+
+    #weighted rad grid with double spacing
+    rad_diff2 = zeros(Nrad)
+
+    rad_diff2[2:Nrad] = 0.5 * abs(diff(rad_grid))
+    rad_diff2[1:Nrad-1] .+= 0.5 * abs(diff(rad_grid))
+
+    rad_diff2[1] = 0.5 * abs(rad_grid[2] - rad_grid[1])
+    rad_diff2[Nrad] = 0.5 * abs(rad_grid[Nrad] - rad_grid[Nrad-1])
+    println(chi_grid2)
+
+    #for i = 1:N_frame_chi
+    #    chi = mod2pi(chi_grid2[i])
+    #    for j = jradmin:jradmax
+    #        rad = rad_grid[j]
+    #        end
+    #    end
+    #end
+
+    tic()
+    iters[1] = 0
+    (vals, errs) = pcubature(8,
+                            dFpol,
+                            [rad_grid[jradmin], chimin],
+                            [rad_grid[jradmax], chimax],
+                            reltol = 1.0e-4,
+                            abstol = 0.0,
+                            maxevals=0)
+    println("Cubature iterations: $(iters[1])")
+    toc()
+
+    vals *= imgscale
+    errs = errs ./ vals #transform into relative err
+    errs *= imgscale
+
+    val = vals[7]
+    err = errs[7]
+    #merr = (sfluxNB[k] - val)/val
+
+    sfluxE[k, 1] = vals[1]
+    sfluxE[k, 2] = vals[2]
+    sfluxE[k, 3] = vals[3]
+
+    sfluxNE[k, 1] = vals[4]
+    sfluxNE[k, 2] = vals[5]
+    sfluxNE[k, 3] = vals[6]
+
+    sfluxNB[k] = vals[7]
+    sfluxB[k] = vals[8]
+
+    println("num flux $val $err")
+
+
+    #plot
+    #bol flux
+    p10c = plot(phase, sfluxB, "k-")
+    p10c = oplot([phase[k]], [sfluxB[k]], "ko")
+
+    #doppler factor
+    sdelta[k] = sdelta3[k]/Ndelta
+    sdelta2[k] = sdelta3[k]/Ndelta
+    sdelta3[k] = sdelta3[k]/Ndelta
+    sdelta3[k] = Ndelta
+
+    #p10d = plot(phase, sdelta3, "b-")
+    itersv[k] = iters[1]
+    p10d = plot(phase, itersv, "b-")
+
+    tt = Table(3,1)
+    tt[1,1] = p10a
+    tt[2,1] = p10c
+    tt[3,1] = p10d
+    display(tt)
+    
+end#time
+toc()
 
 
 #Cartesian integration
@@ -211,9 +625,8 @@ t = 0.0
 frame_dxdy = 1.0
 
 
-#for k = 11:23
-for k = 1:Nt
-#for k = 1:1
+#for k = 1:Nt
+for k = 2:1
     img4[:,:] = 0.0
     
     t = times[k]
@@ -245,7 +658,6 @@ for k = 1:Nt
                 phi = phi_interp_atan(rad,chi)
                 theta = theta_interp[rad,chi]
                 time = time_interp[rad,chi]
-                #dtau = dtau_interp[rad,chi]
                 cosa = cosa_interp[rad,chi]
         	Xob = Xs_interp[rad,chi]
                 
@@ -263,10 +675,13 @@ for k = 1:Nt
                                      phi, theta, cosa,
                                      X, Xob, Osb, sini)
 
-                inside = spot(gamma, phi, theta,
-                              stheta = colat,
-                              delta = rho
-                              )
+                inside = spotr(0.0, phi, theta,
+                       colat, rho,
+                       X, Xob, Osb)
+                #inside = spot(gamma, phi, theta,
+                #              stheta = colat,
+                #              delta = rho
+                #              )
              
                 if inside 
                     located_spot = true
@@ -386,7 +801,7 @@ for k = 1:Nt
             x = frame_xgrid[i]
 
             dFs = zeros(8)
-            istat = dF([x,y], dFs) 
+            istat = dFcart([x,y], dFs) 
             dFs *= imgscale * frame_dxdy
 
             sfluxE[k, 1] += dFs[1]
@@ -409,10 +824,15 @@ for k = 1:Nt
     #println("bol flux: $(sfluxB[k]) | num flux $(sfluxNB[k])")
     println("num flux $(sfluxNB[k])")
 
+    #start cubature integration only if we see the spot
+
+    val = 0.0
+    if (sfluxNB[k] > 0)
+
     tic()
     iters[1] = 0
     (vals, errs) = pcubature(8,
-                           dF,
+                           dFcart,
                            [frame_x1, frame_y1],
                            [frame_x2, frame_y2],
                            reltol = 1.0e-4,
@@ -440,6 +860,8 @@ for k = 1:Nt
     sfluxNB[k] = vals[7]
     sfluxB[k] = vals[8]
 
+    end #end of cubature integration
+
     println("num flux $val $err $merr")
     p10b = plot2d(img5, frame_xgrid, frame_ygrid, 0, 0, 0, "Blues")
 
@@ -459,10 +881,12 @@ for k = 1:Nt
 
     sdelta[k] = sfluxNB[k]/val
 
-    p10d = plot(phase, sdelta, "b-",
-                xrange=[0.0, 1.0],
-                yrange=[0.8, 1.2])
+    #p10d = plot(phase, sdelta, "b-",
+    #            xrange=[0.0, 1.0],
+    #            yrange=[0.8, 1.2])
 
+    itersv[k] = iters[1]
+    p10d = plot(phase, itersv, "b-")
 
 
 
@@ -492,8 +916,8 @@ end#for t
 
 
 #write to file
-opath = "out/"
-#opath = "out2/"
+#opath = "out/"
+opath = "out2/"
 #opath = "out2/cadeau+morsink/"
 #opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))n/"
 #opath = "out3/HT/"
@@ -501,8 +925,8 @@ opath = "out/"
 
 mkpath(opath)
 
-#fname = "f$(round(Int,fs))pbbr$(round(Int,R/1e5))m$(round(M/Msun,1))d$(round(Int,rad2deg(colat)))i$(int((rad2deg(incl))))x$(round(Int,rad2deg(rho))).csv"
-fname = "f$(round(Int,fs))phopfr$(round(Int,R/1e5))m$(round(M/Msun,1))d$(round(Int,rad2deg(colat)))i$(int((rad2deg(incl))))x$(round(Int,rad2deg(rho))).csv"
+fname = "f$(round(Int,fs))pbbr$(round(Int,R/1e5))m$(round(M/Msun,1))d$(round(Int,rad2deg(colat)))i$(int((rad2deg(incl))))x$(round(Int,rad2deg(rho))).csv"
+#fname = "f$(round(Int,fs))phopfr$(round(Int,R/1e5))m$(round(M/Msun,1))d$(round(Int,rad2deg(colat)))i$(int((rad2deg(incl))))x$(round(Int,rad2deg(rho))).csv"
 
 
 wmatr = zeros(Nt, 9)
