@@ -78,8 +78,8 @@
 \begin{document}
 \title{Radiation from rotating oblate neutron stars}
 
-\author{J. N\"attil\"a\altaffilmark{1,2}\thanks{nattila.joonas@gmail.com},
-  P. Pihajoki\altaffilmark{3}}
+\author{J. N\"attil\"a\altaffilmark{1,2}\thanks{nattila.joonas@gmail.com} \textit{et al.} }
+%  P. Pihajoki\altaffilmark{3}}
 %  J. Poutanen\altaffilmark{1,2}}
 
 \affil{}
@@ -89,38 +89,50 @@
 
 
 \begin{abstract}
-Formulas and a robust framework are derived for emission from and around compact rotating objects.
-We focus on the emission from rotating neutron stars and describe the surrounding spacetime metric that is second-order in rotation.
-Similarly, we take the second order effect of the oblate shape of the star into account.
+Fully relativistic framework is derived for emission originating from around compact rotating objects.
+We specialize the formulas for rotating oblate neutron stars and describe the surrounding metric up to second order in rotation.
 Whole framework is derived in a fully general relativistic way, hence acting also as a validation tool for previous ad-hoc special relativistic formulations.
-As an application - and a validation -  we then use the machinery to calculate accurate pulse profiles from hot spots around fastly rotating neutron stars.
+We give a detailed descriptions of the numerical algorithms used and provide an open source implementation of the framework freely available from \textsc{http://github.com/natj/bender}.
+As an application of the code, we calculate accurate pulse profiles from hot spots on top of rapidly rotating accreting millisecond pulsars.
 \end{abstract}
-\keywords{stars: neutron}
+\keywords{gravitation - methods: numerical --- radiative transfer --- stars: neutron}
 
 \section{Introduction}
 Accurately modelling the emission from and around a compact objects is a complicated combination of radiative processes and relativity.
-Not only is the object bending the spacetime around it, and hence affecting the trajectory of photons, but also affecting the apparent observed radiation by its fast rotation and relativistic surface velocities.
-Applications for such accurate analysis of the radiation range from numerous black hole disk emission studies to neutron star (NS) pulse profile analysis.
-Emission around rotating (Kerr) black holes has been very nicely formulated by the publicly available \textsc{geokerr} code.
-On the other hand, a further complication with neutron stars is that the emission is not only originating from the viscinity of the object but from the surface of the star itself.
-Hence, computing accurate pulse profiles from e.g. hot spots rotating around fastly spinning neutron stars has been under a lot of scrutinity recently, because of many upcoming or planned new spaceborne observatories like ESA's \textit{XIPE} or NASA's \textit{NICER} X-ray missions.
-With accurate pulse profile observations there is a lot of hope for constraining, for example, the still unknown equation of state of neutron stars from the information encoded to the radiation from the surrounding spacetime of the object.
+Not only is the object bending the spacetime around it, and hence affecting the trajectory of photons, but also affecting the apparent observed radiation because the emitting surface can move with relativistic velocities.
+Applications for such accurate analysis of the radiation range from numerous black hole disk emission studies to neutron star pulse profile analysis.
+Here we focus on the emission from neutron stars and refer to the excellent and publicly available \textsc{geokerr}~ code for applications considering radiation from rotating (Kerr) black holes.
+
+When compared to black holes, a further complication with neutron stars is that the emission is not only originating from the viscinity of the object but from the surface of the star itself that is rapidly rotating.
+This introduces additional complications to the radiative tranfer problem as we have general relativistic effect like bending of photon trajectories in addition to special relativistic effects like Doppler boosting and abberration of the observed angles.
+Combining all of these effects is both theoretically and numerically a challenging task.
+Current and future observations, on the other hand, demand a high accuracy from the modelled radiation.
+Hence, computing e.g. accurate pulse profiles from hot spots on top of spinning neutron stars has been under a lot of scrutinity recently, because of many upcoming or planned new spaceborne observatories like ESA's \textit{XIPE} or NASA's \textit{NICER} X-ray missions.
+The upside is, that with accurate pulse profile observations there is a lot of hope of constraining, for example, the still unknown equation of state (EoS) of the dense matter inside neutron stars from the information encoded to the radiation.
+
+Here we focus mainly on the X-ray emission from accreting millisecond pulsars (AMPs).
+We, however, stress that the whole framework presented in this paper is general enough to be applied to any form of radiation originating from the visicinity of rotating compact objects. %, even though from here on we focus on the extreme case of AMPs.
+The radiation here emerges from hot spots on top of a rapidly rotating neutron star as the infalling accreted material is being channeled to the magnetic poles heating soem patch of the star's surface
+The magnetical axis does not need to coincide with the rotational axis of the star and hence pulsations can be observed from the spots that are rotating around the star.
+Accretion can also spin up these objects into extreme rotational velocities: spin frequencies up to 620 Hz have been verified (4U 1608$-$52; \red{ref Muno}) whereas even a typical source usually has a period somewhere around 400 Hz.
+This can complicate the modelling of radiation further as the emitting surface itself can become oblate \red{ref AlGendy Morsink, Cook 1994}.
+Not only does this oblate surface then complicate the radiating surface but also breaks the spherical symmetry of the surrounding spacetime as tidal forces are being introduces to the metric.
 
 
 
 
-intro 
-    - applications
-literature
-    - forward-in-time
-    - backwads-
-the gap
-why?
-    physics check
-    GR gives correct results
-    - slower but faster than full 2nd order geodesic eq
-    visualization
-paper outline
+%intro 
+%    - applications
+%literature
+%    - forward-in-time
+%    - backwads-
+%the gap
+%why?
+%    physics check
+%    GR gives correct results
+%    - slower but faster than full 2nd order geodesic eq
+%    visualization
+%paper outline
 
 
 \clearpage
@@ -525,8 +537,8 @@ The total (monochromatic) flux as a function of observer's time $F_E(t)$ can the
 F_E(t) = \int I_{E}(t) ~d\Omega_o = \int\int \frac{I'_{E'}(t_*, \alpha')}{(1+z)^3}  ~bdb \, d\chi,
 \ee
 %\end{split}\end{align}
-where $t_* = t - \Delta t$ is the time when the photon was originally emitted and can be computed when we know the total travel time $\Delta t$ against some reference photon, for example the one with the shortest path to us.
-\red{discussion about rotating the star and invariance of dt*dphi}
+where $t_* = t - \Delta t$ is the time when the photon was originally emitted and can be computed when we know the total travel time $\Delta t$ against some reference photon. %, for example the one with the shortest path to us.
+%\red{discussion about rotating the star and invariance of dt*dphi}
 
 All of these quantities on the star's spherical coordinate system $(\theta, \phi)$ are then mapped to the observers polar image coordinates $(b, \chi)$ via raytracing.
 This mapping $(b, \chi) \rightarrow (\theta, \phi)$ allows us to then evaluate the physical quantities
@@ -575,8 +587,8 @@ Hence, the co-rotating observer has a Cartesian metric
 \begin{align}\begin{split}
 %&\hat{g}_{ij} dx^i dx^j &= \frac{\partial(r, \theta, \phi_*)}{\partial{(x, y, z)} h_{ab} dx^a dx^b  \\
 & \hat{g}_{ij} d\hat{x}^i d\hat{x}^j = \frac{\partial x^a \partial x^b}{\partial \hat{x}^i \partial \hat{x}^j} h_{ab} dx^a dx^b  \\
-&= \gamma_L^2 dy^2 + \frac{1}{2} ( (1+\mathcal{B}^2)(dx^2 + dz^2) \\
-&+ (\mathcal{B}^2 - 1)(dx-dz)(dx + dz) \cos(2\theta) - 2dx dz \sin(2\theta) ) \\
+&= \gamma_L^2 dy^2 + \frac{1}{2} [ (1+ \frac{e^{2\zetab}}{\Bb^2})(dx^2 + dz^2) \\
+&+ (\frac{e^{2\zetab}}{\Bb^2} - 1)(dx-dz)(dx + dz) \cos(2\theta) - 2dx dz \sin(2\theta) ] \\
 & = dx^2 + \gamma_L^2 dy^2 + dz^2 + \mathcal{O}(\Omega^2)
 \end{split}\end{align}
 From here it is then easy to obtain the great circle distance (on a unit sphere) as measured by the co-rotating observer by using the generalized inner-product \eqref{eq:gen_angle} to get an angle
@@ -740,17 +752,6 @@ No large deviation between isotropic and Hopf profile is detected either, indica
 
 \subsection{Oblate Schwarzchild $+$ Doppler}
 
-Next we compare emission from oblate surfaces.
-The surface here is defined using the radius function \eqref{eq:radf} but the star is still embbed in a symmetric \sch spacetime.
-The parameters used are equatorial radius $R_{\mathrm{eq}} = 12~\mathrm{km}$ (in the usual \sch metric), star mass of $M = 1.4~\Msun$, extreme rotational frequency $\nu = 700~\mathrm{Hz}$, observer inclination $i=45^{\circ}$, and spot angular size of $\rho = 10^{\circ}$
-Effective temperature of the radiation is again taken to be $T_{\mathrm{eff}} = 2~\mathrm{keV}$ and the distance $D = 10~\mathrm{kpc}$.
-Here the spot size is again defined in the co-rotating \textit{spherical} coordinate system on top of a unit sphere and is then projected to the oblate inclined surface.
-To trace the effects of the changing surface we consider the spot in three different locations at colatitudes of $\theta_{\mathrm{S}} = 18^{\circ}$, $45^{\circ}$, and $90^{\circ}$.
-Additionally for $\theta_{\mathrm{S}} = 90^{\circ}$ when the spot is on the equator we observer a full eclipse in the light curve.
-This imposes a serious test for both of the codes as the gradually more and more blocked spot is also seen from a very shallow angle before disappearing and appearing again.
-We note that when integrating flux from the spot in the image plane, a polar subgrid is extremely useful just before the eclipse as the impact parameter can vary only by a $\sim1\%$ before the spot is hidden behind the star.
-Attaining a similar resolution in a Cartesian subgrid would then need far more integrand evaluations as the spot is seen from a very shallow angle.
-
 %\begin{figure*}
 %\centering
 %\includegraphics[width=16cm]{figs/fig3.pdf}
@@ -768,17 +769,29 @@ Attaining a similar resolution in a Cartesian subgrid would then need far more i
 \centering
 \includegraphics[width=18cm]{figs/fig4.pdf}
 \caption{\label{fig:osch_comp700}
-  Light curve comparisons for oblate Schwarzchild spacetimes with three different spot colatitudes: $\theta_{\mathrm{c}} = 18^{\circ}$, $45^{\circ}$ and $90^{\circ}$.
+  Light curve comparisons for oblate Schwarzchild spacetimes with three different spot colatitudes: $\theta_{\mathrm{s}} = 18^{\circ}$, $45^{\circ}$ and $90^{\circ}$.
+  Additionally, the bottom row shows comparison of pulse profile for electron scattering atmosphere for $\theta_{\mathrm{S}} = 45^{\circ}$.
   Parameters of the star, spot and observer are: $R_{\mathrm{eq}} = 12.0~\mathrm{km}$, $M = 1.4~\Msun$, $\nu = 700~\mathrm{Hz}$, $i = 45^{\circ}$ and $\rho = 10^{\circ}$.
   Otherwise the parameters and symbols are the same is in Fig.~\ref{fig:sch_comp1}.
   }
 \end{figure*}
 
+Next we compare emission from oblate surfaces.
+The surface here is defined using the radius function \eqref{eq:radf} but the star is still embbed in a symmetric \sch spacetime.
+The parameters used are equatorial radius $R_{\mathrm{eq}} = 12~\mathrm{km}$ (in the usual \sch metric), star mass of $M = 1.4~\Msun$, extreme rotational frequency $\nu = 700~\mathrm{Hz}$, observer inclination $i=45^{\circ}$, and spot angular size of $\rho = 10^{\circ}$
+Effective temperature of the radiation is again taken to be $T_{\mathrm{eff}} = 2~\mathrm{keV}$ and the distance $D = 10~\mathrm{kpc}$.
+Here the spot size is again defined in the co-rotating \textit{spherical} coordinate system on top of a unit sphere and is then projected to the oblate inclined surface.
+To trace the effects of the changing surface we consider the spot in three different locations at colatitudes of $\theta_{\mathrm{S}} = 18^{\circ}$, $45^{\circ}$, and $90^{\circ}$.
+Additionally, we consider a spot with emission angle-dependent intensity.
+This is done for electron scattering atmosphere with $\theta_{\mathrm{S}} = 45^{\circ}$.
+%Additionally for $\theta_{\mathrm{S}} = 90^{\circ}$ when the spot is on the equator we observer a full eclipse in the light curve.
+%This imposes a serious test for both of the codes as the gradually more and more blocked spot is also seen from a very shallow angle before disappearing and appearing again.
+%We note that when integrating flux from the spot in the image plane, a polar subgrid is extremely useful just before the eclipse as the impact parameter can vary only by a $\sim1\%$ before the spot is hidden behind the star.
+%Attaining a similar resolution in a Cartesian subgrid would then need far more integrand evaluations as the spot is seen from a very shallow angle.
+
 Comparison of the oblate lightcurves are shown in Fig.~\ref{fig:osch_comp700}.
-
-
-
-
+Again we obtain excellent agreement with forward-in-time method with similar resolution as in the spherical case (relative error $< 0.2\%$).
+This agreement is, of course, expected since our method is general and does not depend on the shape of the emitting surface.
 
 
 \subsection{Hartle-Thorne -like spacetimes}

@@ -111,15 +111,15 @@ HnAFL(mu) = 0.42822 + 0.92236.*mu - 0.085751.*mu.^2
 p = oplot(mus, HnAFL(mus), "b--")
 errFL = (HnAFL(mus)) ./ refval -1
 
-p2 = plot(xrange=[0,1],
-          yrange=[-0.05, 0.05],
-          xlabel="mu",
-          ylabel="ratio-1")
-p2 = oplot(mus, erre, "k-")
-p2 = oplot(mus, err1, "m-")
-p2 = oplot(mus, err2, "g-")
-p2 = oplot(mus, errFL, "b-")
-display(p2)
+#p2 = plot(xrange=[0,1],
+#          yrange=[-0.05, 0.05],
+#          xlabel="mu",
+#          ylabel="ratio-1")
+#p2 = oplot(mus, erre, "k-")
+#p2 = oplot(mus, err1, "m-")
+#p2 = oplot(mus, err2, "g-")
+#p2 = oplot(mus, errFL, "b-")
+#display(p2)
 
 
 
