@@ -63,7 +63,7 @@
 \newcommand{\mub}{\ensuremath{\bar{\mu}}}
 
 \newcommand{\vw}{\ensuremath{v_{\omega}}}
-\newcommand{\vz}{\ensuremath{v_{\mathrm{Z}}}}
+\newcommand{\vz}{\ensuremath{v_{\mathrm{z}}}}
 
 \newcommand{\Msun}{\ensuremath{M_{\odot}}}
 \newcommand{\lgamma}{\gamma_{\text{L}}}
@@ -136,6 +136,15 @@ Not only does this oblate surface then complicate the radiating surface but also
 %    - slower but faster than full 2nd order geodesic eq
 %    visualization
 %paper outline
+
+% TODO
+% finish intro
+% HT comparison
+% Applications:
+%   Images
+%   Line profiles
+%   Pulse profiles
+% Summary
 
 
 \clearpage
@@ -674,17 +683,94 @@ implemented using the \textsc{Cubature} package.
 
 
 %%%%%%%%%%%%
-\section{Comparison \& accuracy}
+\section{Applications \& Validation}
 
-\subsection{Schwarzchild $+$ Doppler}
+Next we present some applications of the framework to some simple physical problems related to neutron stars to showcase the possibilities that one can utilize the code to.
+The examples are also meant to act as a further validation as we provide comparison of the results, when possible.
+Most notably, we employ an extensive comparison against AMP pulse profiles computed with a code that propagates photons forward in time as presented in \citealt{PB06}.
+As such, our code serves as a great validation tool for these kind of special relativistic formulations because our framework is fully general relativistic and propagates photons backwards in time from the observer to the surface.
 
-To validate the accuracy of the code we did several comparisons with
-other methods found in the literature.
-The comparison codes propagate photons forward in time, from the surface to the
-observer. As such, our code serves a great validation tool for these
-codes, since in our code, the photons are propagated backwards in
-time.
 
+
+\subsection{Images of neutron stars}
+
+\begin{figure*}
+\centering
+\includegraphics[clip, trim=0.0cm 0.5cm 0.0cm 2.0cm, width=8cm]{figs/fig10a.pdf}
+\includegraphics[width=7cm]{figs/fig10b.pdf}
+\caption{\label{fig:image}
+  Formation of an image in curved spacetime.
+  Left panel shows a 3D visualization of the photon trajectories in the curved spacetime starting from the star and ending to the observers image plane.
+  Right panel shows the image that the observer sees using the Cartesian $\hat{x}$ and $\hat{y}$ coordinates.
+  For illustrative purposes the neutron star surface is covered with a chess board pattern.
+  }
+\end{figure*}
+
+
+As a first application of the code, we can determine the photon trajectories using the ray tracing algorithm and produce an image of the neutron star as seen by the observer.
+This also shows how we can connect the Cartesian coordinates $\hat{x}$ and $\hat{y}$ of the observer to the coordinates $\phi_e$ and $\theta_e$ of the star.
+Left panel in Fig.~\ref{fig:image} shows the trajectory of the photons using also a third $\hat{z}$ dimensions along the Cartesian image plane coordinates.
+The star is chosen to have $R=12~\mathrm{km}$ and $M=1.5~\Msun$, whereas the observer is located at the equator with an inclination of $i = 90^{\circ}$.
+Here the photons originate from the image plane located at $\hat{z} = 20$ and are then propagated backwards in time until they intersect with the surface of the star (located at $\hat{z} = 0$) , visualized with a spherical see-through wiregrid frame.
+Right panel of the figure shows the projected image as seen by a distant observer.
+Here the star is covered with a chess board pattern to show the varying $\phi_e$ and $\theta_e$ coordinates.
+
+
+\subsection{Accuracy of the splitted Hamilton-Jacobi propagator}
+
+\begin{figure*}
+\centering
+\includegraphics[width=18cm]{figs/popiha/casual_400pts_16m_12km_400hz_15inc.pdf}
+\includegraphics[width=18cm]{figs/popiha/casual_400pts_16m_12km_400hz_45inc.pdf}
+\includegraphics[width=18cm]{figs/popiha/casual_400pts_16m_12km_400hz_75inc.pdf}
+\includegraphics[width=18cm]{figs/popiha/extreme_400pts_14m_15km_600hz_15inc.pdf}
+\includegraphics[width=18cm]{figs/popiha/extreme_400pts_14m_15km_600hz_45inc.pdf}
+\includegraphics[width=18cm]{figs/popiha/extreme_400pts_14m_15km_600hz_75inc.pdf}
+\caption{\label{fig:H_C1_C2}
+  Error in ray tracing.
+  }
+\end{figure*}
+
+Next, we study the accuracy of the splitted Hamilton-Jacobi propagator by comparing the results against accurate geodesic solver \textsc{arcmancer}.
+The employd comparison solver solves the full second order geodesic equation
+\be
+\frac{d^2 x^{\mu}}{ds^2} = -\Gamma^{\mu}_{\alpha \beta} \frac{dx^{\alpha}}{ds} \frac{dx^{\beta}}{ds},
+\ee
+where $s$ is the scalar parameter of the motion e.g. the proper time and $\Gamma^{\mu}_{\alpha \beta}$ are the Christoffel symbols.
+Blaablaa...
+
+We also note that for very precise ray tracing problems it is possible to easily switch to using the \textsc{arcmancer} as a photon propagator.
+
+
+
+
+
+\subsection{Line profiles}
+
+\begin{figure}
+%\centering
+\includegraphics[width=8cm]{figs/fig9a.pdf}
+\includegraphics[width=8cm]{figs/fig9b.pdf}
+\caption{\label{fig:line_profiles}
+  Observed line profiles from a star with $R=10~\mathrm{km}$ and $M=1.4~\Msun$ rotating with a frequency of $700~\mathrm{Hz}$.
+  }
+\end{figure}
+
+
+As a next step, we can study the energy dependent flux from the star by computing the observed energy distribution $E$ for a delta injection of energy $E'$ from the surface.
+Because of the varying redshift along the surface of the star, the observer then sees a range of energies in her detector.
+
+
+
+
+
+\subsection{AMPs pulse profiles}
+
+From here on, we move to time-dependent ray tracing problems by considering pulse profiles from AMPs.
+Here some hot spot on top of the suface is emitting and the star is seen to rotate with frequency of $\Omega$.
+
+
+%\subsubsection{Schwarzchild $+$ Doppler}
 
 First, a general comparison of the ray tracing algorithm with the so-called Schwarzchild $+$ Doppler approximation \citep[see e.g.][]{PB06} was done.  
 For simplicity, only spherical stars were considered here.
@@ -727,7 +813,7 @@ Overall agreement of the two different methods is excellent and from here a base
 Similarly, when rotation is increased and special relativistic effects start to play a role we are able to reproduce the pulse profiles usually down to $<0.3\%$ relative error.
 No large deviation between isotropic and Hopf profile is detected either, indicating that the emission angle is also computed correctly.
 
-\subsection{Oblate Schwarzchild $+$ Doppler}
+%\subsection{Oblate Schwarzchild $+$ Doppler}
 
 %\begin{figure*}
 %\centering
@@ -771,8 +857,7 @@ Again we obtain excellent agreement against the forward-in-time method with simi
 This agreement is, of course, expected since our method is general and does not depend on the shape of the emitting surface.
 
 
-\subsection{Hartle-Thorne -like spacetimes}
-
+%\subsection{Hartle-Thorne -like spacetimes}
 %\begin{figure*}
 %\centering
 %\includegraphics[width=18cm]{figs/fig5.pdf}
@@ -782,30 +867,18 @@ This agreement is, of course, expected since our method is general and does not 
 %\end{figure*}
 
 
-
-\subsection{Carter's constant splitting}
-
-\begin{figure*}
-\centering
-\includegraphics[width=18cm]{figs/popiha/casual_400pts_16m_12km_400hz_15inc.pdf}
-\includegraphics[width=18cm]{figs/popiha/casual_400pts_16m_12km_400hz_45inc.pdf}
-\includegraphics[width=18cm]{figs/popiha/casual_400pts_16m_12km_400hz_75inc.pdf}
-\includegraphics[width=18cm]{figs/popiha/extreme_400pts_14m_15km_600hz_15inc.pdf}
-\includegraphics[width=18cm]{figs/popiha/extreme_400pts_14m_15km_600hz_45inc.pdf}
-\includegraphics[width=18cm]{figs/popiha/extreme_400pts_14m_15km_600hz_75inc.pdf}
-\caption{\label{fig:H_C1_C2}
-  Error in ray tracing.
-  }
-\end{figure*}
+\subsection{Burst oscillations}
 
 
 
-
-
-
+\section{Summary}
 
 %\section{Conclusions}
 \section*{Acknowledgments}
+
+
+
+
 
 \bibliographystyle{apj}
 \bibliography{allbib}
