@@ -42,8 +42,8 @@ gs = GridSpec(1, 1)
 
 lsize = 10.0
 
-xmin = 0.69
-xmax = 0.82
+xmin = 0.68
+xmax = 0.95
 
 #error window limits
 eymin = -0.5
@@ -51,7 +51,7 @@ eymax = 0.5
 
 
 #path to files
-path_JN = "../../out3/lines/"
+path_JN = "../../out3/lines/sweep/"
 
 #labels size
 tsize = 10.0
@@ -68,7 +68,7 @@ nu = '700'
 ax1 = subplot(gs[0,0])
 ax1.minorticks_on()
 ax1.set_xlim(xmin, xmax)
-ax1.set_ylim(0.0, 30)
+#ax1.set_ylim(0.0, 15)
 
 ax1.set_ylabel('Normalized flux',size=lsize)
 ax1.set_xlabel('Energy $E/E\'$',size=lsize)
@@ -97,56 +97,57 @@ cols = ["black",
         "red",
         "magenta"]
 
+files_JN = [
+'lineprof_obl_HTq1_f700pbbr10m1.4i20.csv',
+'lineprof_obl_HTq1_f700pbbr11m1.4i20.csv',
+'lineprof_obl_HTq1_f700pbbr12m1.4i20.csv',
+'lineprof_obl_HTq1_f700pbbr13m1.4i20.csv',
+'lineprof_obl_HTq1_f700pbbr14m1.4i20.csv',
+'lineprof_obl_HTq1_f700pbbr15m1.4i20.csv',
+'lineprof_obl_HTq1_f700pbbr16m1.4i20.csv']
+#'lineprof_obl_HTq1_f700pbbr17m1.4i20.csv']
+
+files_JN2 = [
+#'lineprof_obl_HTq1_f700pbbr9m1.1i20.csv ',
+'lineprof_obl_HTq1_f700pbbr10m1.1i20.csv',
+'lineprof_obl_HTq1_f700pbbr11m1.1i20.csv',
+'lineprof_obl_HTq1_f700pbbr12m1.1i20.csv',
+'lineprof_obl_HTq1_f700pbbr13m1.1i20.csv',
+'lineprof_obl_HTq1_f700pbbr14m1.1i20.csv',
+'lineprof_obl_HTq1_f700pbbr15m1.1i20.csv',
+'lineprof_obl_HTq1_f700pbbr16m1.1i20.csv']
+#'lineprof_obl_HTq1_f700pbbr17m1.1i20.csv']
+
+
 i = 0
 for file_name in files_JN:
-
     xx, yy = read_lineprof(path_JN+file_name)
-    ax1.plot(xx, yy, color=cols[i], linestyle="solid")
+    #yy = yy + 3*i
+    ax1.plot(xx, yy, color='black', linestyle="solid")
     i += 1
 
-xx, yy = read_lineprof(path_JN+"lineprof_obl_HTq4_f700pbbr10m1.4i20.csv")
-ax1.plot(xx, yy, color="red", linestyle="dashed")
-
-
-
-files_Bau = [
-"sch+dopp.csv",
-"sch+dopp+obl.csv",
-"HT.csv",
-"HT_obl.csv"]
 
 
 #i = 0
-#for file_name in files_Bau:
-#
-#    xx, yy = read_csv(path_JN+file_name)
-#
-#    #rescale xx for correct scaling
-#    xx = (xx-0.72)/(0.89-0.72)*(0.8-0.72) + 0.72
-#    ax1.plot(xx, yy, color=cols[i], linestyle="dashed")
+#for file_name in files_JN2:
+#    xx, yy = read_lineprof(path_JN+file_name)
+#    #yy = yy + 3*i
+#    yy = -1.0 * yy
+#    ax1.plot(xx, yy, color='red', linestyle="solid")
 #    i += 1
 
+ax1.text(0.805, 3, "$R=10$ km", rotation=-85, ha='center', va='center', size=8)
+ax1.text(0.832, 3, "$R=11$ km", rotation=-85, ha='center', va='center', size=8)
+ax1.text(0.854, 3, "$R=12$ km", rotation=-83, ha='center', va='center', size=8)
+ax1.text(0.872, 3, "$R=13$ km", rotation=-82, ha='center', va='center', size=8)
+ax1.text(0.887, 3, "$R=14$ km", rotation=-81, ha='center', va='center', size=8)
+ax1.text(0.9, 3, "$R=15$ km", rotation=-78, ha='center', va='center', size=8)
+ax1.text(0.912, 3, "$R=16$ km", rotation=-77, ha='center', va='center', size=8)
 
 
-
-############ q's
-#xx3, yy3 = read_lineprof(path_JN+'lineprof_obl_HTq1_f700pbbr10m1.4i20.csv')
-#ax1.plot(xx3, yy3, "k-", label="$q = -0.268$")
-#
-#xx4, yy4 = read_lineprof(path_JN+'lineprof_obl_HTq2_f700pbbr10m1.4i20.csv')
-#ax1.plot(xx4, yy4, "r-", label="$q \\times 2$")
-#
-#xx5, yy5 = read_lineprof(path_JN+'lineprof_obl_HTq3_f700pbbr10m1.4i20.csv')
-#ax1.plot(xx5, yy5, "g-", label="$q \\times 3$")
-#
-#xx6, yy6 = read_lineprof(path_JN+'lineprof_obl_HTq4_f700pbbr10m1.4i20.csv')
-#ax1.plot(xx6, yy6, "b-", label="$q \\times 4$")
-#
-#xx7, yy7 = read_lineprof(path_JN+'lineprof_obl_HTq5_f700pbbr10m1.4i20.csv')
-#ax1.plot(xx7, yy7, "m-", label="$q \\times 5$")
 #
 #legend = ax1.legend(loc='upper left', shadow=False, labelspacing=0.1)
 #for label in legend.get_texts():
 #    label.set_fontsize('x-small')
 
-savefig('fig9.pdf', bbox_inches='tight')
+savefig('fig9c.pdf', bbox_inches='tight')

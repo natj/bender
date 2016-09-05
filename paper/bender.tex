@@ -253,10 +253,10 @@ x = \frac{G M}{c^2 \Req}.
 \ee
 Note that both of these parameters are defined via the equatorial circumferential radius $\Req$ defined in the usual \sch radial coordinate system.
 To the lowest order, these approximations are
-\be
+\be\label{eq:quad}
 q = -0.11 \frac{\Ob^2}{x^2},
 \ee
-\be
+\be\label{eq:beta}
 \beta = 0.4454 \Ob^2 x,
 \ee
 and
@@ -720,12 +720,18 @@ Here the star is covered with a chess board pattern to show the varying $\phi_e$
 
 \begin{figure*}
 \centering
-\includegraphics[width=18cm]{figs/popiha/casual_400pts_16m_12km_400hz_15inc.pdf}
-\includegraphics[width=18cm]{figs/popiha/casual_400pts_16m_12km_400hz_45inc.pdf}
-\includegraphics[width=18cm]{figs/popiha/casual_400pts_16m_12km_400hz_75inc.pdf}
-\includegraphics[width=18cm]{figs/popiha/extreme_400pts_14m_15km_600hz_15inc.pdf}
-\includegraphics[width=18cm]{figs/popiha/extreme_400pts_14m_15km_600hz_45inc.pdf}
-\includegraphics[width=18cm]{figs/popiha/extreme_400pts_14m_15km_600hz_75inc.pdf}
+\includegraphics[width=16cm]{figs/popiha/fig_casual_15.pdf}
+\includegraphics[width=16cm]{figs/popiha/fig_casual_45.pdf}
+\includegraphics[width=16cm]{figs/popiha/fig_casual_75.pdf}
+\includegraphics[width=16cm]{figs/popiha/fig_extreme_15.pdf}
+\includegraphics[width=16cm]{figs/popiha/fig_extreme_45.pdf}
+\includegraphics[width=16cm]{figs/popiha/fig_extreme_75.pdf}
+%\includegraphics[width=18cm]{figs/popiha/casual_400pts_16m_12km_400hz_15inc.pdf}
+%\includegraphics[width=18cm]{figs/popiha/casual_400pts_16m_12km_400hz_45inc.pdf}
+%\includegraphics[width=18cm]{figs/popiha/casual_400pts_16m_12km_400hz_75inc.pdf}
+%\includegraphics[width=18cm]{figs/popiha/extreme_400pts_14m_15km_600hz_15inc.pdf}
+%\includegraphics[width=18cm]{figs/popiha/extreme_400pts_14m_15km_600hz_45inc.pdf}
+%\includegraphics[width=18cm]{figs/popiha/extreme_400pts_14m_15km_600hz_75inc.pdf}
 \caption{\label{fig:H_C1_C2}
   Error in ray tracing.
   }
@@ -750,12 +756,23 @@ We also note that for very precise ray tracing problems it is possible to easily
 \begin{figure}
 %\centering
 \includegraphics[width=8cm]{figs/fig9a.pdf}
-\includegraphics[width=8cm]{figs/fig9b.pdf}
+%\includegraphics[width=8cm]{figs/fig9b.pdf}
 \caption{\label{fig:line_profiles}
   Observed line profiles from a star with $R=10~\mathrm{km}$ and $M=1.4~\Msun$ rotating with a frequency of $700~\mathrm{Hz}$.
+  A normal spherical star with \sch spacetime is shown with a black line while an oblate ($R_{\mathrm{e}}=10~\mathrm{km}$) star in a same spacetime is shown with a blue line.
+  Oblate star with a non-zero quadrupole moment is presented with a red solid line while the red dashed line shows the line profile of a star with an artificially enhanced quadrupole moment of $q \times 5$.
   }
 \end{figure}
 
+
+\begin{figure}
+%\centering
+\includegraphics[width=8cm]{figs/fig9c.pdf}
+\caption{\label{fig:line_profiles}
+  Observed line profiles from stars with $M = 1.4~\Msun$ and a varying radius for a rotational frequency of $700~\mathrm{Hz}$.
+  Star's oblate shape is computed according to \eqref{eq:radf} and the spacetime has non-zero quadrupole moments as given by \eqref{eq:quad}\ and \eqref{eq:beta}.
+  }
+\end{figure}
 
 As a next step, we can study the energy dependent flux from the star by computing the observed energy distribution $E$ for a delta injection of energy $E'$ from the surface.
 Because of the varying redshift along the surface of the star, the observer then sees a range of energies in her detector.
@@ -767,7 +784,7 @@ Because of the varying redshift along the surface of the star, the observer then
 \subsection{AMPs pulse profiles}
 
 From here on, we move to time-dependent ray tracing problems by considering pulse profiles from AMPs.
-Here some hot spot on top of the suface is emitting and the star is seen to rotate with frequency of $\Omega$.
+Here some hot spot on top of the suface is emitting and the star is seen to rotate with a frequency of $\Omega$.
 
 
 %\subsubsection{Schwarzchild $+$ Doppler}
