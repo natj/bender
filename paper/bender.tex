@@ -118,7 +118,7 @@ We, however, stress that the whole framework presented in this paper is general 
 The radiation here emerges from hot spots on top of a rapidly rotating neutron star as the infalling accreted material is being channeled to the magnetic poles heating soem patch of the star's surface
 The magnetical axis does not need to coincide with the rotational axis of the star and hence pulsations can be observed from the spots that are rotating around the star.
 Accretion can also spin up these objects into extreme rotational velocities: spin frequencies up to 620 Hz have been verified (4U 1608$-$52; \red{ref Muno}) whereas even a typical source usually has a period somewhere around 400 Hz.
-This can complicate the modelling of radiation further as the emitting surface itself can become oblate \red{ref AlGendy Morsink, Cook 1994}.
+This can complicate the modelling of radiation further as the emitting surface itself can become oblate \citep{aGM14,CST94}.
 Not only does this oblate surface then complicate the radiating surface but also breaks the spherical symmetry of the surrounding spacetime as tidal forces are being introduces to the metric.
 
 
@@ -768,8 +768,8 @@ We also note that for very precise ray tracing problems it is possible to easily
 \begin{figure}
 %\centering
 \includegraphics[width=8cm]{figs/fig9c.pdf}
-\caption{\label{fig:line_profiles}
-  Observed line profiles from stars with $M = 1.4~\Msun$ and a varying radius for a rotational frequency of $700~\mathrm{Hz}$.
+\caption{\label{fig:line_profiles_sweep}
+  Observed line profiles from stars with $M = 1.4~\Msun$, $i = 20^{\circ}$, and a varying radius for a rotational frequency of $700~\mathrm{Hz}$.
   Star's oblate shape is computed according to \eqref{eq:radf} and the spacetime has non-zero quadrupole moments as given by \eqref{eq:quad}~ and \eqref{eq:beta}.
   }
 \end{figure}
@@ -801,7 +801,14 @@ For an oblate star, we need $q \times (4-5)$ for the line profile to produce a n
 Here the large difference between the spherical configuration is explained by the increasing eccentricity of the star that acts as a countering force because it strengthens the gravitational part of the $g_{tt}$ component due to the star being more compressed, and hence more compact, around the poles.
 
 On the other hand, by adopting $M = 1.4~\Msun$, $j = 0.357$ and $\nu = 700~\mathrm{Hz}$, our radius is fixed to be $R_{\mathrm{e}} \approx 11.8~\mathrm{km}$.
-This results in an eccentricity of $\epsilon \approx 0.444$, $\beta = 0.013$, $q = -0.612$, roughly consistent with the values given by the FPS EoS as tabulated by \citealt{LP99}.
+This results in an eccentricity of $\epsilon \approx 0.444$, $\beta = 0.013$, and $q = -0.612$, consistent with the values given by the FPS EoS as tabulated by \citealt{LP99} for $q$ and by \citealt{CST94} for the rest of the parameters.
+Note also that $R_0 = 10.85~\mathrm{km}$ for $M=1.4~\Msun$ with a stiffness given by the FPS EoS \citep{CST94}.
+No narrow core is seen to form in this case either as it is always the increasing gravitational part of the $g_{tt}$ near the compressed poles that counters the increasing quadrupole moment with increasing eccentricity.
+In fact, no narrow core is ever seen to form with our consistent way of calculating the resulting oblateness and quadrupole moments.
+To validate this, we compute line profiles for a range of $R_{\mathrm{e}}$ ranging from $10$ to $16$ km as shown in Fig.~\ref{fig:line_profiles_sweep} for $M=1.4~\Msun$.
+No deviations from the overall rather smooth profile is seen even for the extreme case of $M = 1.1~\Msun$ where we expect to maximize the quadrupole moment of the configuration.
+
+
 
 \subsection{AMPs pulse profiles}
 
@@ -906,7 +913,45 @@ This agreement is, of course, expected since our method is general and does not 
 %\end{figure*}
 
 
-\subsection{Burst oscillations}
+\begin{figure*}
+%\centering
+\includegraphics[width=18cm]{figs/fig7.pdf}
+\caption{\label{fig:skymap}
+    Skymaps of the emitted radiation as produces by rapidly rotating, oblate AMP with one or two antipodal spots.
+    Star is taken to have $R_{\mathrm{e}} = 15~\mathrm{km}$, $M=1.6~\Msun$, and $\nu = 600~\mathrm{Hz}$.
+    Spot sizes are $\rho = 10^{\circ}$ and the emission is coming from an isotropic black body with $T_{\mathrm{eff}} = 2~\mathrm{keV}$.
+    Red curves enclose the area where eclipses are observed.
+  }
+\end{figure*}
+
+\begin{figure*}
+%\centering
+\includegraphics[width=18cm]{figs/fig8.pdf}
+\caption{\label{fig:pulsefracs}
+    Pulse fractions observed from rapidly rotating oblate AMP.
+    Parameters of the star and the spot(s) are the same as in Fig.~\ref{fig:skymap}.
+  }
+\end{figure*}
+
+
+As a last example, after the comparisons, we calculate full sky maps of the emerging radiation from rapidly rotating oblate AMPs as shown in Fig.~\ref{fig:skymap}
+The emission from the AMP is shown for all possible observers and is mapped to the y-axis by using the observer's inclination angle $i$.
+X-axis of the map is the usual pulse phase.
+The brightness of the sky map is proportional to the received bolometric photon number flux.
+Cutting the sky map from one particular $i$ produces the light curve as seen by the observer.
+Calculations here are done for an extreme case of a NS with $R_{\mathrm{e}} = 15~\mathrm{km}$, $M=1.6~\Msun$, and $\nu = 600~\mathrm{Hz}$.
+Spot size of $\rho = 10^{\circ}$ is considered (defined in the spherical co-rotating coordinate system), with a varying co-latitude ranging from near the pole at $\theta_{\mathrm{s}} = 10^{\circ}$ to a spot in the equator at $\theta_{\mathrm{s}} = 90^{\circ}$.
+We consider both, one and two (antipodal) spots with isotropic beaming and black body emission with $T_{\mathrm{eff}} = 2~\mathrm{keV}$.
+
+
+We also show the corresponding strength of the observed pulsations for each inclination and spot co-latitude combinations in Fig.~\ref{fig:pulsefracs}.
+Here the color of the image corresponds to the pulse fraction computed by
+\be
+f_p = \frac{I_{\mathrm{max}} - I_{\mathrm{min}}}{I_{\mathrm{max}} + I_{\mathrm{min}}},
+\ee
+where $I_{\mathrm{min}}$ and $I_{\mathrm{max}}$ are the minimum and maximum values in the bolometric light curves, respectively.
+
+
 
 
 
@@ -918,6 +963,7 @@ This agreement is, of course, expected since our method is general and does not 
 
 
 
+\clearpage
 
 \bibliographystyle{apj}
 \bibliography{allbib}
