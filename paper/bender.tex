@@ -239,7 +239,7 @@ The zeroth terms of the series expansions ($\Ob = 0$) are the familiar isotropic
 The first order expansion in rotation ($\Ob^1$) is formally related to Kerr metric.
 In this case we introduce an angular velocity term of the local inertial frame $\wb$ that accounts for the frame-dragging effects. %\red{rcs:13}
 Up to first order, this can be defined as
-\be
+\be\label{eq:wbar}
 \wb = \frac{2c^4j}{G^2M}\ub^3,
 \ee
 where the dimensionless quantity $j=\mathcal{J}/M^2$ and $\mathcal{J} = I \Omega$ is the star's angular momentum with moment of inertia $I(M,\Omega)$.
@@ -770,16 +770,38 @@ We also note that for very precise ray tracing problems it is possible to easily
 \includegraphics[width=8cm]{figs/fig9c.pdf}
 \caption{\label{fig:line_profiles}
   Observed line profiles from stars with $M = 1.4~\Msun$ and a varying radius for a rotational frequency of $700~\mathrm{Hz}$.
-  Star's oblate shape is computed according to \eqref{eq:radf} and the spacetime has non-zero quadrupole moments as given by \eqref{eq:quad}\ and \eqref{eq:beta}.
+  Star's oblate shape is computed according to \eqref{eq:radf} and the spacetime has non-zero quadrupole moments as given by \eqref{eq:quad}~ and \eqref{eq:beta}.
   }
 \end{figure}
 
 As a next step, we can study the energy dependent flux from the star by computing the observed energy distribution $E$ for a delta injection of energy $E'$ from the surface.
-Because of the varying redshift along the surface of the star, the observer then sees a range of energies in her detector.
+Because of the varying redshift along the surface of the star due to Doppler boosting, the observer then sees a range of energies in her detector.
+Example of line profiles are shown in Fig.~\ref{fig:line_profiles} for different spacetimes and star configurations.
+The flux is normalized so that the emitted bolometric flux is unity, i.e. the area encapsulated by the profile is one.
+In each case, the star is taken to have $\nu = 700~\mathrm{Hz}$, $R = 10~\mathrm{km}$, and $M=1.4~\Msun$.
+Observer inclination is $i=20^{\circ}$ and emission is taken to be proportional to $(E/E')^3$ with an isotropic beaming for simplicity.
+We consider \sch spacetime for spherical and oblate stars (radius given by eq. \eqref{eq:radf}), in addition to a full second-order spacetime with quadrupole moments and oblate surfaces.
 
+The obtained profiles can be compared to the ones in fig.~2 of \citealt{BPO13} where the \sch results are seen to match well with our calculations.
+For the second-order metric we see a deviation due to the differing value of the quadrupole moments:
+In the Hartle-Thorne metric the quadrupole moment is given by $q = -a^2 (1 + \eta)$, where $a$ is the dimensionless spin parameter (see eq. \eqref{eq:wbar} and our $j$) and $\eta$ is the strength of the deviation from a spherical potential ($\eta = 0$ reduces to Kerr-like spacetime).
+In the paper, \citealt{BPO13}~ select $\eta=3.3$ that is a typical value given by the FPS EoS \citep{FPS} for a star with $M\approx1.4~\Msun$ \citep[see ][]{LP99}.
+For the angular momentum they adopt $a = 0.357$, again, as given by the FPS EoS at $\nu \approx 700~\mathrm{Hz}$.
+With the aforementioned value, their quadrupole moment is then $q \approx -0.548$.
 
+The quadrupole moment is larger for a stiffer EoS, because a stiffer EoS produces a larger star and the quadrupole moment scales with the square of the radius.
+For us, this scaling is taken into account by the relations \eqref{eq:quad} and \eqref{eq:beta} that are obtained by fitting a large library of EoSs \citep[see][]{aGM14} to yield us a consistent quadrupole moment at any given mass, radius (i.e. stiffness) and angular velocity.
+This scaling also hides the difference between the non-rotating and rotating radii because it is formulated using the equatorial radius $R_{\mathrm{e}}$.
+Alternatively, one could always consider the corresponding $R_0$ of a non-rotating configuration for which $R_0 \le R_{\mathrm{e}}$ for any given $\Ob$.
+For a $M=1.4~\Msun$, $R_{\mathrm{e}}=10~\mathrm{km}$, and $\nu = 700~\mathrm{Hz}$ we obtain $j \approx 0.275$, $q \approx -0.268$, and $\beta \approx 0.010$.
+Additionally, a star like this with $\Ob \approx 0.323$ has an eccentricity $\epsilon \approx 0.341$ as given by the radius function \eqref{eq:radf}.
+Line profile emerging from a star like this is shown with a red solid line in Fig.~\ref{fig:line_profiles} and is not seen to develop a narrow core because the quadrupole moment is not strong enough to dominate over the gravitational part $e^{\nub_0}$ in the $g_{tt}$ component of the metric.
+By artificially enhancing the quadrupole moment to be $q \times 2$, roughly consistent with the value used by \citealt{BPO13}, we do reproduce the narrow feature in the blue part of the line profile for a spherical star.
+For an oblate star, we need $q \times (4-5)$ for the line profile to produce a narrow core as seen by the red dashed line in Fig.~\ref{fig:line_profiles}.
+Here the large difference between the spherical configuration is explained by the increasing eccentricity of the star that acts as a countering force because it strengthens the gravitational part of the $g_{tt}$ component due to the star being more compressed, and hence more compact, around the poles.
 
-
+On the other hand, by adopting $M = 1.4~\Msun$, $j = 0.357$ and $\nu = 700~\mathrm{Hz}$, our radius is fixed to be $R_{\mathrm{e}} \approx 11.8~\mathrm{km}$.
+This results in an eccentricity of $\epsilon \approx 0.444$, $\beta = 0.013$, $q = -0.612$, roughly consistent with the values given by the FPS EoS as tabulated by \citealt{LP99}.
 
 \subsection{AMPs pulse profiles}
 
