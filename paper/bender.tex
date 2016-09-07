@@ -67,6 +67,7 @@
 
 \newcommand{\Msun}{\ensuremath{M_{\odot}}}
 \newcommand{\lgamma}{\gamma_{\text{L}}}
+\newcommand{\qinv}{\ensuremath{q_{\mathrm{inv}}}}
 %%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -111,49 +112,50 @@ When compared to black holes, a further complication with neutron stars is that 
 This introduces additional complications to the radiative tranfer problem as we have general relativistic effect like bending of photon trajectories in addition to special relativistic effects like Doppler boosting and abberration of the observed angles.
 Combining all of these effects is both theoretically and numerically a challenging task.
 Current and future observations, on the other hand, demand a high accuracy from the modelled radiation.
-Hence, computing e.g. accurate pulse profiles from hot spots on top of spinning neutron stars has been under a lot of scrutinity recently, because of many upcoming or planned new spaceborne observatories like ESA's \textit{XIPE} or NASA's \textit{NICER} X-ray missions.
-The upside is, that with accurate pulse profile observations there is a lot of hope of constraining, for example, the still unknown equation of state (EoS) of the dense matter inside neutron stars from the information encoded to the radiation.
+Hence, computing e.g. accurate pulse profiles from hot spots on top of spinning neutron stars has been under a lot of scrutinity recently, because of many upcoming or planned new spaceborne X-ray observatories like ESA's \textit{XIPE} \citep{XIPE}, CNSA's \textit{eXTP} \citep{eXTP}, and NASA's \textit{NICER} \citep{NICER} or the already deployed ISRO's \textit{Astrosat} \citep{Astrosat}
+The upside is, that with accurate pulse profile observations there is a lot of hope of constraining, for example, the still unknown equation of state (EoS) of the dense matter inside neutron stars from the information encoded to the radiation \citep[see e.g.,][]{LMB13}.
 
-Here we focus mainly on the X-ray emission from accreting millisecond pulsars (AMPs).
+Previous studies of emission from NSs are mainly formulated in special relativistic ways \citep[see e.g.,][]{PFC83, P95, WM01, PB06}. %and propagate photons starting from the star itself.
+Spacetimes in these studies were also typically described by the spherically symmetric \sch metric.
+As it has turned out, fast rotation can, however, play a serious role when considering the observed emission.
+First of all, due to a finite pressure supporting the rotating star, the initially spherical star squeezes into an oblate spheroid when the rotation rates increase \citep[see e.g.,][]{CST94, MLC07, aGM14}.
+This bulge in the equator will then distort the gravitational field outside the star.
+In Newtonian theory, the next order correction to a non-spherical object (with azimuthal rotational symmetry and reflection symmetry along the equatorial plane) is defined by the quadrupole moment (see e.g., \citealt{LP99}; but also \citealt{PA12}).
+%\citep[see e.g.,][]{LP99}.
+Introduction of rapid rotation will then not only break the spherical symmetry of the object but also the latitudinal symmetry of the spacetime.
+Pioneering work of computing pulse profiles from such objects has been made by \citealt{CL05, CML07}.
+Recently, a general ray tracing formulation in Hartle-Thorne metric-variant was also done by \citealt{PJ12, BPO12} and was used to compute accurate pulse profiles by \citealt{PO14}.
+Here we seek to provide a similar, but open and publicly available formulation of the same problem.
+Moreover, because our formulation is fully general relativistic, we can validate the previous special relativistic calculations and provide a solid theoretical basis for the theory of radiation from and around compact rotating objects.
+
+
+We focus mainly on the X-ray emission from accreting millisecond pulsars (AMPs) \citep{WvdK98, PW12} and nuclear-powered millisecond pulsars \citep{Watts12}.
 We, however, stress that the whole framework presented in this paper is general enough to be applied to any form of radiation originating from the visicinity of rotating compact objects. 
-The radiation from AMPs  emerges from hot spots on top of a rapidly rotating neutron star as the infalling accreted material is being channeled to the magnetic poles heating soem patch of the star's surface
+The radiation from AMPs  emerges from hot spots on top of a rapidly rotating neutron star as the infalling accreted material is being channeled to the magnetic poles heating some patch of the star's surface
 The magnetical axis does not need to coincide with the rotational axis of the star and hence pulsations can be observed from the spots that are rotating around the star.
-Accretion can also spin up these objects into extreme rotational velocities: spin frequencies up to 620 Hz have been verified (4U 1608$-$52; \red{ref Muno}) whereas even a typical source usually has a period somewhere around 400 Hz.
-This can complicate the modelling of radiation further as the emitting surface itself can become oblate \citep{aGM14,CST94}.
-Not only does this oblate surface then complicate the radiating surface but also breaks the spherical symmetry of the surrounding spacetime as quadrupole potentials are being introduced to the surrounding spacetime.
+In the case of nuclear-powered millisecond pulsars a quasi-coherent oscillations are observed during thermonuclear type I X-ray.
+Mechanism that produces the pulses is, however, very similar to the AMPs case as there is some asymmetric bright patch in the burning surface layer that is the origin of the pulsation seen.
+Accretion can also spin up these objects into extreme rotational velocities: spin frequencies up to 620 Hz have been verified (4U 1608$-$52; \citealt{MC02}) whereas even a typical source usually has a period somewhere around $400-500$ Hz \citep{Watts12, PTR14}
+Hence, if accurate emission is to be studied from these sources, one has to take the oblate shape and (in some cases) the second-order effects of the spacetime into account.
+
+The paper is structured as follows.
+In Section \ref{sect:theory} we introduce the framework of formula and the theoretical background needed to compute the emission.
+We also describe the numerical methods used to solve the system of equations and present the publicly available \textsc{bender}%
+\footnote{\textsc{bender}~ is available from a public git repository hosted at http://github.com/natj/bender.}
+code that implements this framework.
+Next, in Section \ref{sect:appl} we apply the code to various physical problems, mostly related to AMPs.
+We also employ a thorough comparison of the results when possible to validate our calculations.
+Finally, in Section \ref{sect:summary} we summarize the work done.
 
 
-
-
-%intro 
-%    - applications
-%literature
-%    - forward-in-time
-%    - backwads-
-%the gap
-%why?
-%    physics check
-%    GR gives correct results
-%    - slower but faster than full 2nd order geodesic eq
-%    visualization
-%paper outline
 
 % TODO
-% finish intro
-% HT comparison
 % Applications:
-%   Images
-%   Line profiles
 %   Pulse profiles
-% Summary
-
-
-\clearpage
-
-
+%      Explain last two figures
 
 %________________________________________________________________
-\section{Theory}
+\section{Theory}\label{sect:theory}
 
 \subsection{Space-time metric}\label{sect:spacetime}
 
@@ -245,8 +247,12 @@ Up to first order, this can be defined as
 \ee
 where the dimensionless quantity $j=\mathcal{J}/M^2$ and $\mathcal{J} = I \Omega$ is the star's angular momentum with moment of inertia $I(M,\Omega)$.
 
-Finally, the second order expansion ($\Ob^2$) correspond to a similar approximation as the Hartle-Throne slow-rotation spacetime, which introduces quadrupole moments into the metric.  
+Finally, the second order expansion ($\Ob^2$) correspond to a similar approximation as the Hartle-Throne slow-rotation spacetime \citep{HT68}, which introduces quadrupole moments into the metric.  
 These second order multipole moments can be defined via dimensionless quantities $q$ and $\beta$ that are the dimensionless moments of energy density and pressure.  
+Coordinate invariant quadrupole moment, on the other hand, is a combination of these two factors and is given as \citep{PA12}
+\be
+\qinv = \left( q + \frac{4}{3} \beta \right).
+\ee
 \citet{aGM14} defined an approximate relation for these parameters based on their computations of rotating NSs with various different EoSs.  
 Due to the NS spacetime being almost hairless we can parameterize these quantities with great accuracy by using only the dimensionless angular velocity $\Ob$ and compactness factor
 \be
@@ -776,7 +782,7 @@ We also note that for very precise ray tracing problems it is possible to easily
 \end{figure}
 
 As a next step, we can study the energy dependent flux from the star by computing the observed energy distribution $E$ for a delta injection of energy $E'$ from the surface.
-Because of the varying redshift along the surface of the star due to Doppler boosting, the observer then sees a range of energies in her detector.
+Because of the varying redshift along the surface of the star due to Doppler boosting, the observer then sees a range of energies in her detector \citep{OP03,BML06,CMB06}.
 Example of line profiles are shown in Fig.~\ref{fig:line_profiles} for different spacetimes and star configurations.
 The flux is normalized so that the emitted bolometric flux is unity, i.e. the area encapsulated by the profile is one.
 In each case, the star is taken to have $\nu = 700~\mathrm{Hz}$, $R = 10~\mathrm{km}$, and $M=1.4~\Msun$.
@@ -785,7 +791,7 @@ We consider \sch spacetime for spherical and oblate stars (radius given by eq. \
 
 The obtained profiles can be compared to the ones in fig.~2 of \citealt{BPO13} where the \sch results are seen to match well with our calculations.
 For the second-order metric we see a deviation due to the differing value of the quadrupole moments:
-In the Hartle-Thorne metric the quadrupole moment is given by $q = -a^2 (1 + \eta)$, where $a$ is the dimensionless spin parameter (see eq. \eqref{eq:wbar} and our $j$) and $\eta$ is the strength of the deviation from a spherical potential ($\eta = 0$ reduces to Kerr-like spacetime).
+In the Hartle-Thorne metric \citep{HT68} the quadrupole moment is given by $q = -a^2 (1 + \eta)$, where $a$ is the dimensionless spin parameter (see eq. \eqref{eq:wbar} and our $j$) and $\eta$ is the strength of the deviation from a spherical potential ($\eta = 0$ reduces to Kerr-like spacetime).
 In the paper, \citealt{BPO13}~ select $\eta=3.3$ that is a typical value given by the FPS EoS \citep{FPS} for a star with $M\approx1.4~\Msun$ \citep[see ][]{LP99}.
 For the angular momentum they adopt $a = 0.357$, again, as given by the FPS EoS at $\nu \approx 700~\mathrm{Hz}$.
 With the aforementioned value, their quadrupole moment is then $q \approx -0.548$.
@@ -794,7 +800,7 @@ The quadrupole moment is larger for a stiffer EoS, because a stiffer EoS produce
 For us, this scaling is taken into account by the relations \eqref{eq:quad} and \eqref{eq:beta} that are obtained by fitting a large library of EoSs \citep[see][]{aGM14} to yield us a consistent quadrupole moment at any given mass, radius (i.e. stiffness) and angular velocity.
 This scaling also hides the difference between the non-rotating and rotating radii because it is formulated using the equatorial radius $R_{\mathrm{e}}$.
 Alternatively, one could always consider the corresponding $R_0$ of a non-rotating configuration for which $R_0 \le R_{\mathrm{e}}$ for any given $\Ob$.
-For a $M=1.4~\Msun$, $R_{\mathrm{e}}=10~\mathrm{km}$, and $\nu = 700~\mathrm{Hz}$ we obtain $j \approx 0.275$, $q \approx -0.268$, and $\beta \approx 0.010$.
+For a $M=1.4~\Msun$, $R_{\mathrm{e}}=10~\mathrm{km}$, and $\nu = 700~\mathrm{Hz}$ we obtain $j \approx 0.275$, $q \approx -0.268$, and $\beta \approx 0.010$ that then give $\qinv \approx -0.255$.
 Additionally, a star like this with $\Ob \approx 0.323$ has an eccentricity $\epsilon \approx 0.341$ as given by the radius function \eqref{eq:radf}.
 Line profile emerging from a star like this is shown with a red solid line in Fig.~\ref{fig:line_profiles} and is not seen to develop a narrow core because the quadrupole moment is not strong enough to dominate over the gravitational part $e^{\nub_0}$ in the $g_{tt}$ component of the metric.
 By artificially enhancing the quadrupole moment to be $q \times 2$, roughly consistent with the value used by \citealt{BPO13}, we do reproduce the narrow feature in the blue part of the line profile for a spherical star.
@@ -802,7 +808,7 @@ For an oblate star, we need $q \times (4-5)$ for the line profile to produce a n
 Here the large difference between the spherical configuration is explained by the increasing eccentricity of the star that acts as a countering force because it strengthens the gravitational part of the $g_{tt}$ component due to the star being more compressed, and hence more compact, around the poles.
 
 On the other hand, by adopting $M = 1.4~\Msun$, $j = 0.357$ and $\nu = 700~\mathrm{Hz}$, our radius is fixed to be $R_{\mathrm{e}} \approx 11.8~\mathrm{km}$.
-This results in an eccentricity of $\epsilon \approx 0.444$, $\beta = 0.013$, and $q = -0.612$, consistent with the values given by the FPS EoS as tabulated by \citealt{LP99} for $q$ and by \citealt{CST94} for the rest of the parameters.
+This results in an eccentricity of $\epsilon \approx 0.444$, $\beta \approx 0.013$, $q \approx -0.613$, and $\qinv \approx -0.595$, consistent with the values given by the FPS EoS as tabulated by \citealt{LP99} for $q$ and by \citealt{CST94} for the rest of the parameters.
 Note also that $R_0 = 10.85~\mathrm{km}$ for $M=1.4~\Msun$ with a stiffness given by the FPS EoS \citep{CST94}.
 No narrow core is seen to form in this case either as it is always the increasing gravitational part of the $g_{tt}$ near the compressed poles that counters the increasing quadrupole moment with increasing eccentricity.
 In fact, no narrow core is ever seen to form with our consistent way of calculating the resulting oblateness and quadrupole moments.
@@ -956,7 +962,7 @@ where $I_{\mathrm{min}}$ and $I_{\mathrm{max}}$ are the minimum and maximum valu
 
 
 
-\section{Summary}
+\section{Summary}\label{sect:summary}
 We have made a detailed study of radiation emerging from and near rotating compact objects.
 Framework of formulas were derived in a fully general relativistic manner and were then specialized to NSs.
 
@@ -994,7 +1000,7 @@ Lastly, and for the first time, we compute full sky maps of radiation emerging f
 %\section{Conclusions}
 \section*{Acknowledgments}
 
-We offer sincere thanks to various people that helped to improve the formulation of the theory and the actual paper by engaging the authors to useful discussions: Most notably we would like to thank Cole Miller, Fred Lamb and Sharon Morsink for their help and input.
+We offer sincere thanks to various people that helped to improve the formulation of the theory and the actual paper by engaging the authors to engaging discussions: Most notably we would like to thank Cole Miller, Fred Lamb and Sharon Morsink for their help and comments.
 We also offer special thanks to Tuomo Salmi for producing us the pulse profiles for the code comparison.
 JN acknowledges support from the University of Turku Graduate School in Physical and Chemical Sciences.
 \red{PP thanks..}
