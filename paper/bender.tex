@@ -71,13 +71,13 @@
 
 
 \slugcomment{ }
-\shorttitle{Radiation from rotating oblate neutron stars}
+\shorttitle{Radiation from neutron stars}
 \shortauthors{N\"attil\"a \& Pihajoki}
 
 \voffset=-1cm
 
 \begin{document}
-\title{Radiation from rotating oblate neutron stars}
+\title{Radiation from rapidly rotating oblate neutron stars}
 
 %\author{J. N\"attil\"a\altaffilmark{1,2}\thanks{nattila.joonas@gmail.com} \textit{et al.} }
 \author{J. N\"attil\"a\altaffilmark{1,2}\thanks{nattila.joonas@gmail.com}
@@ -95,7 +95,8 @@ Fully relativistic framework of formulae is derived for emission originating fro
 We specialize the formulae for rotating oblate neutron stars and describe the surrounding metric up to second order in rotation.
 The entire framework is derived in a fully general relativistic manner, and as such we also validate previous ad-hod special relativistic formulations during the derivation.
 We give a detailed descriptions of the numerical algorithms used and provide an open source implementation of the framework freely available from \textsc{http://github.com/natj/bender}.
-As an application, we calculate accurate pulse profiles from hot spots on top of rapidly rotating accreting millisecond pulsars.
+As an application, we study line profiles from rapidly rotating oblate stars and conclude that no narrow features in the energy distribution is seen for physically realistic parameter combinations.
+We also calculate accurate pulse profiles and observer sky maps of emissions from hot spots on top of accreting millisecond pulsars.
 \end{abstract}
 \keywords{gravitation - methods: numerical --- radiative transfer --- stars: neutron}
 
@@ -115,11 +116,11 @@ The upside is, that with accurate pulse profile observations there is a lot of h
 
 Here we focus mainly on the X-ray emission from accreting millisecond pulsars (AMPs).
 We, however, stress that the whole framework presented in this paper is general enough to be applied to any form of radiation originating from the visicinity of rotating compact objects. 
-The radiation here emerges from hot spots on top of a rapidly rotating neutron star as the infalling accreted material is being channeled to the magnetic poles heating soem patch of the star's surface
+The radiation from AMPs  emerges from hot spots on top of a rapidly rotating neutron star as the infalling accreted material is being channeled to the magnetic poles heating soem patch of the star's surface
 The magnetical axis does not need to coincide with the rotational axis of the star and hence pulsations can be observed from the spots that are rotating around the star.
 Accretion can also spin up these objects into extreme rotational velocities: spin frequencies up to 620 Hz have been verified (4U 1608$-$52; \red{ref Muno}) whereas even a typical source usually has a period somewhere around 400 Hz.
 This can complicate the modelling of radiation further as the emitting surface itself can become oblate \citep{aGM14,CST94}.
-Not only does this oblate surface then complicate the radiating surface but also breaks the spherical symmetry of the surrounding spacetime as tidal forces are being introduces to the metric.
+Not only does this oblate surface then complicate the radiating surface but also breaks the spherical symmetry of the surrounding spacetime as quadrupole potentials are being introduced to the surrounding spacetime.
 
 
 
@@ -154,7 +155,7 @@ Not only does this oblate surface then complicate the radiating surface but also
 %________________________________________________________________
 \section{Theory}
 
-\subsection{Space-time metric}
+\subsection{Space-time metric}\label{sect:spacetime}
 
 \begin{table*}[ht!]
   \label{tab:coeffs}
@@ -279,7 +280,7 @@ Since the series expansions of the metric coefficients are expanded using the is
 However, in some cases we will simplify the equations into more intuitive form by using the areal $r$ coordinate.
 
 
-\subsection{Oblate shape of the neutron star}
+\subsection{Oblate shape of the neutron star}\label{sect:oblate}
 
 \begin{figure}
 \centering
@@ -318,7 +319,7 @@ Then the normal to the surface can be defined using the radial vector $\vec{r}$ 
 See also Fig.~\ref{fig:geom} for a clarification of the angles.
 From here it is again clear how the angles transform easily in the isotropic metric while the quantities related to the area are simplified in the usual \sch metric.
 
-\subsection{Geodesic motion through Hamilton-Jacobi equation}
+\subsection{Geodesic motion through Hamilton-Jacobi equation}\label{sect:hamjac}
 Geodesic motion in space-time characterized by a metric $g_{ij}$ is governed by Hamilton-Jacobi equation
 \be\label{eq:hamjac}
 2\frac{\pd S}{\pd \tau} = g^{ij} \frac{\pd S}{\pd x^i}\frac{\pd S}{\pd x^j},
@@ -366,7 +367,7 @@ Similarly, the components of a local tetrad frame are
 where $e^{\hat{\mu}}_{(a)}$ with index $a = t, \rb, \theta$ and $\phi$ are the tetrads of metric \eqref{eq:BWmetric}.
 
 
-\subsection{Ray tracing photons}
+\subsection{Ray tracing photons}\label{sect:raytracing}
 Radiation is emitted from the surface of a star at an emission point $(r_e,\theta_e,\phi_e)$.  
 The radiation travels along a geodesic with a specific intensity $I_{E}$ as measured by an observer co-moving with the emission point.  
 The radiation is observed at an image plane situated at a radial distance $r$, with $r\rightarrow\infty$.  
@@ -424,7 +425,7 @@ The constants of motion, combined with the geodesic null condition $p^\mu p_\mu 
 As the final step we can substitute the four-momentum components and image-plane coordinates into \eqref{eq:deltatime}--\eqref{eq:deltaphi} and solve the system of three first-order differential equations (in terms of $t$, $\theta$ and $\phi$) with $\rb$ as a variable.
 
 
-\subsection{Redshift and emission angle}
+\subsection{Redshift and emission angle}\label{sect:redshift_angle}
 It is most convenient to define all radiative processes in the co-rotating frame of the star.
 We denote variables defined in a frame that is momentarily comoving with the stellar surface with a prime.  
 On the other hand, our observer is stationary and moving along the timelike Killing vector.  
@@ -469,7 +470,7 @@ Here it suffices to notice that we are only interested in the emission angle val
 The result here is similar to the emission angle obtained with a special-relativistic approach, using flat-space trigonometry and Lorentz-boosting to the rotating frame \citep[see e.g.][]{PB06}.
 
 
-\subsection{Emission}
+\subsection{Emission}\label{sect:emission}
 Observed flux at photon energy $E$ from a small area on an image plane is
 \be
 dF_E = I_E d\Omega_o,
@@ -508,7 +509,7 @@ Note that the original longitudinal coordinate of the emission is easily obtaine
 %in the observers plane for the flux calculations.
 
 
-\subsection{Coordinates in the co-rotating frame}
+\subsection{Coordinates in the co-rotating frame}\label{sect:coords}
 If the emission originates from the surface of a neutron star then all of the radiative processes are defined in the local co-rotating frame of the star.
 Because of this, it is natural to define the shape of the emitting region using the coordinate system of the co-rotating observer.  
 In practice, this then gives us the integration limits of equation \eqref{eq:fluxint}.
@@ -585,7 +586,7 @@ Hence, if we define our coordinates in the static frame and then integrate over 
 %\end{split}\end{align}
 %In the limit of \sch space-time $e^{\zetab}/B \approx 1 + \mathcal{O}(\Omega^2)$ and so we obtain a standard result where the latitudinal direction is just Lorentz contracted with $\gamma = (1-v^2)^{-1/2}$ as $v_Z = v + \mathcal{O}(\Omega)$.
 
-\subsection{Angular distribution of radiation}
+\subsection{Angular distribution of radiation}\label{sect:angular_distr}
 \subsubsection{Isotropic radiation}
 
 For pulse profile calculations the simplest angular distribution of radiation is given by the Lambert law.  
@@ -627,7 +628,7 @@ with a starting guess of
 We also note that even the simple polynomial expansion \eqref{eq:apprx_hopf} already has an accuracy better than $<2\%$, and as such it can be used in approximate solutions with corresponding first moment of $\alpha_1 = 1.19167$.
 
 
-\subsection{Method of solution}
+\subsection{Method of solution}\label{sect:num_methods}
 
 
 \begin{figure}
@@ -683,7 +684,7 @@ implemented using the \textsc{Cubature} package.
 
 
 %%%%%%%%%%%%
-\section{Applications \& Validation}
+\section{Applications \& Validation}\label{sect:appl}
 
 Next we present some applications of the framework to some simple physical problems related to neutron stars to showcase the possibilities that one can utilize the code to.
 The examples are also meant to act as a further validation as we provide comparison of the results, when possible.
@@ -956,10 +957,49 @@ where $I_{\mathrm{min}}$ and $I_{\mathrm{max}}$ are the minimum and maximum valu
 
 
 \section{Summary}
+We have made a detailed study of radiation emerging from and near rotating compact objects.
+Framework of formulas were derived in a fully general relativistic manner and were then specialized to NSs.
+
+Firstly, in Section \ref{sect:spacetime} we give a detailed description of the second-order in rotation spacetime metrics that was used.
+The spacetime is no longer described by a spherically symmetric \sch metric but has non-zero quadrupole moments similar to Hartle-Thorne metric.
+The quadrupole moments $q$ and $\beta$ can then be defined via approximative relations for a wide span of NS masses, radii and spins \citep{aGM14}.
+When the rotation increases, the star also starts to deviate from a sphere due to the weakening of the gravitational force on the equator because of the increasing centrifugal force.
+An approximative relation for the resulting oblate spheroidal shape of the star can, however, again be obtained \citep{MLC07, aGM14} and was implemented in Section \ref{sect:oblate} for an easy but consistent description of the surface.
+
+Secondly, we derived, a new ray tracing formulation using a so-called splitted Hamilton-Jacobi (also known as super-Hamiltonian) method.
+This derivation is presented and discussed in detail in Sections \ref{sect:hamjac} and \ref{sect:raytracing}.
+Instead of using the geodesic equation that is a second-order differential equation we separate the Hamilton-Jacobi equation using a third constant of motion known as Carter's constant.
+The method is exact up to first-order in rotation (Kerr-like spacetime with frame-dragging effects) but remains sufficiently accurate also for second order in rotation because deviations by the quadrupole moments are small.
+Formulating the components of the four-momentum vector like this has the useful feature that the polarization of the radiation can easily be taken into account \citep[see e.g.][]{cha, dexter2016}
+
+Thirdly, we give a thorough description of the calculations related to the actual emission of the radiation.
+Effects like redshift, Doppler boosting and emission angle of the photon are discussed in a fully general relativistic manner in Sections \ref{sect:redshift_angle} and \ref{sect:emission}, hence also validating the previous ad-hoc special relativistic formulations \citep[see e.g.][]{PG03, PB06}.
+In the special relativistic formulation by \citealt{PB06} the calculations are done in flat spacetime and then Lorentz boosted to the rotating relativistic frame.
+In Section \ref{sect:coords}, we derive a connection to this method by introducing a way to measure the (angle-)size of a pattern in the co-rotating frame.
+Most notably, this leads to a difference of $\lgamma$ (i.e. a simple Lorentz contraction in \sch metric) on the observed flux, depending on if the emitting pattern is defined in the non-rotating or in the co-rotating frame.
+We also briefly discuss the actual intensity of the emerging radiation and derive an exact solution (along an approximative polynomial expansion) to an angle-dependent electron scattering atmosphere in Section \ref{sect:angular_distr}.
+Numerical methods to solve all of the presented equations are then laid out in Section \ref{sect:num_methods}.
+
+Finally, in Section \ref{sect:appl} we present some applications of the framework.
+Connection to previous work in the literature is also made, when possible.
+As a first simple example, we show how the image of NS is formed in a curved spacetime.
+Next, we studied the energy dependent emission by considering the emerging line profiles.
+Most notably we conclude that when our consistent formulation of increasing eccentricity of the star is coupled with the related quadrupole moments, no narrow features are ever seen in the line profiles.
+We then employ an extensive and thorough study of AMP pulse profiles and exhaustively compare them to previous special relativistic calculations.
+Here the agreement between the two methods is seen to be excellent.
+Lastly, and for the first time, we compute full sky maps of radiation emerging from rapidly rotating AMPs taking into account the oblate shape of the star and the quadrupole moments of the spacetime metric.
+
+
 
 %\section{Conclusions}
 \section*{Acknowledgments}
 
+We offer sincere thanks to various people that helped to improve the formulation of the theory and the actual paper by engaging the authors to useful discussions: Most notably we would like to thank Cole Miller, Fred Lamb and Sharon Morsink for their help and input.
+We also offer special thanks to Tuomo Salmi for producing us the pulse profiles for the code comparison.
+JN acknowledges support from the University of Turku Graduate School in Physical and Chemical Sciences.
+\red{PP thanks..}
+This work benefited from discussions at the International Symposium on Neutron Stars in the Multi-Messenger Era in May 2016 supported by the National Science Foundation under Grant No. PHY-1430152 (JINA Center for the Evolution of the Elements).
+\red{INT2b-16 pre-print number}
 
 
 
