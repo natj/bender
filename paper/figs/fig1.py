@@ -2,11 +2,7 @@ import numpy as np
 import math
 from pylab import *
 import matplotlib.patches as patches
-from scipy.optimize import brentq
 from scipy.optimize import minimize_scalar
-
-
-from palettable.wesanderson import Zissou_5 as wsZ
 
 
 ## Plot
@@ -39,8 +35,8 @@ ax.set_ylim(ymin, ymax)
 
 
 #variables
+#incl = pi/8
 incl = pi/2.5
-#incl = pi/4
 req = 1
 u = 0.0
 rg = u*req
@@ -64,7 +60,6 @@ def cosg(theta):
 
 def sing(theta):
     return fa(theta)*cosg(theta)
-
 
 def mu(phi, theta):
     return cos(incl)*cos(theta)+cos(phi)*sin(incl)*sin(theta)
@@ -253,6 +248,60 @@ def draw_normal(ax, phi, theta,
     
     return ax
 
+
+def draw_observer(ax, xx, yy, angle, sangle=0.3, alen=0.2, 
+                  fmt={'color':'k','linestyle':'solid','lw':1.0}):
+
+    x1 = xx + alen*cos(angle-sangle/2)
+    y1 = yy + alen*sin(angle-sangle/2)
+
+    x2 = xx + alen*cos(angle+sangle/2)
+    y2 = yy + alen*sin(angle+sangle/2)
+
+    ax.plot([xx,x1],[yy,y1],**fmt)
+    ax.plot([xx,x2],[yy,y2],**fmt)
+
+    xsegm = []
+    ysegm = []
+    for theta in np.linspace(angle-sangle/2-0.1, angle+sangle/2+0.1, 10):
+        xsegm.append(xx + alen*0.7*cos(theta))
+        ysegm.append(yy + alen*0.7*sin(theta))
+    ax.plot(xsegm, ysegm, **fmt)
+
+    return ax
+
+def draw_spot(ax, sphi, stheta, rho,
+              fmt={'facecolor':'k', 'alpha':0.3,}):
+
+    #TODO check visibility using mu
+
+    xx = []
+    yy = []
+    for chi in np.linspace(0, 2*pi, 30):
+
+        #transform from spot centric-coordinate system into the standard spherical coord
+        xs = cos(rho)*cos(sphi)*sin(stheta)+sin(rho)*(cos(stheta)*cos(sphi)*cos(chi)-sin(sphi)*sin(chi))
+        ys = cos(rho)*sin(stheta)*sin(sphi)+sin(rho)*(cos(stheta)*cos(chi)*sin(sphi)+cos(sphi)*sin(chi))
+        zs = cos(stheta)*cos(rho)-cos(chi)*sin(stheta)*sin(rho)
+
+        #transform to phi, theta
+        phi = arctan2(ys,xs)
+        theta = arccos(zs/sqrt(xs**2 + ys**2 + zs**2))
+
+        #ax.plot([y(phi,theta)], [z(phi,theta)], "b.")
+
+        xx.append(y(phi, theta))
+        yy.append(z(phi, theta))
+
+    #ax.plot(xx, yy, "b-")
+    ax.add_patch(Polygon(zip(xx,yy),
+                      closed=True, 
+                      #facecolor='black',alpha=0.5))
+                      **fmt))
+
+    return ax
+
+
 #--------------------------------------------------------------------------------
 
 
@@ -261,7 +310,8 @@ def draw_normal(ax, phi, theta,
 spot_theta=pi/5
 spot_phi=0.67
 
-obs_theta=incl
+#obs_theta=incl
+obs_theta=pi/2.7
 obs_phi=-pi/1.5
 
 #default front and back line styles
@@ -274,7 +324,27 @@ fmtb = {'color':'k','linestyle':'dotted',}
 #draw xyz axis
 ax = draw_axis(ax, obs_phi,      pi/2, rfac=1.4)
 ax = draw_axis(ax, obs_phi+pi/2, pi/2, rfac=1.4)
-ax = draw_axis(ax, 0.0,          0.0 , rfac=1.6)
+ax = draw_axis(ax, 0.0,          0.0 , rfac=1.8)
+
+#rotation direction, i.e. curly arrow
+phistart=-pi/2-0.8
+phistop=pi/2+0.5
+wsize=0.15
+wheight=1.2
+ax=draw_latitude(ax, wsize, fmt=fmt, start=phistart, stop=phistop, rfac=wheight)
+yy1=y(phistop,wsize)*wheight
+zz1=z(phistop,wsize)*wheight
+
+yy2 = -0.01
+zz2 = 0.002
+
+fmta= {'color':'black', 'linestyle':'solid', 'lw':1.0, 'head_width': 0.02, 'head_length': 0.04,}
+ax.add_patch(patches.FancyArrow(
+            yy1, zz1,
+            yy2, zz2,
+            **fmta
+            ))
+
 
 
 #-----------------------------------------------------
@@ -336,6 +406,16 @@ ax=draw_longitude(ax, spot_phi, fmt=fmt, start=0, stop=spot_theta, rfac=0.17, ba
 ax = draw_radial(ax, spot_phi, pi/2, fmt)
 
 
+#circular spot
+rho = 0.1
+ax = draw_spot(ax, spot_phi, spot_theta, rho)
+
+#ax=draw_longitude(ax, spot_phi-rho, fmt=fmt)
+#ax=draw_longitude(ax, spot_phi+rho, fmt=fmt)
+#ax=draw_radial(ax, spot_phi, spot_theta+rho, fmt)
+#ax=draw_radial(ax, spot_phi, spot_theta-rho, fmt)
+
+
 #-----------------------------------------------------
 #observer
 fmti = {'color':'k','linestyle':'dashed',}
@@ -345,37 +425,30 @@ ax=draw_radial(ax, obs_phi, pi/2, fmt=fmti)
 
 ax=draw_longitude(ax, obs_phi, fmt=fmt, start=0, stop=obs_theta, rfac=0.1) #incl angle
 ax=draw_longitude(ax, obs_phi, fmt=fmt, start=0, stop=obs_theta, rfac=0.1, backside=True) #incl angle
-#add(ax, PlotLabel(.47, .55, "<i>i</i>"))
 
 
 ax=draw_latitude(ax, pi/2, fmt=fmt, start=spot_phi, stop=obs_phi, rfac=0.15) #phi angle
 ax=draw_latitude(ax, pi/2, fmt=fmt, start=spot_phi, stop=obs_phi, rfac=0.15, backside=True) #phi angle
-#add(ax, PlotLabel(.47, .45, "<i>\\phi</i>"))
+
+obspx = y(obs_phi, obs_theta)*1.8
+obspy = z(obs_phi, obs_theta)*1.8
+#ax = draw_observer(ax, -1.5, 0.8, angle=-0.45, sangle=0.4, alen=0.15)
+ax = draw_observer(ax, obspx, obspy, angle=obs_theta-pi/2-0.16, sangle=0.4, alen=0.15)
 
 
-def draw_observer(ax, xx, yy, angle, sangle=0.3, alen=0.2, 
-                  fmt={'color':'k','linestyle':'solid','lw':1.0}):
+#observer axis
+fmt_obs= {'color':'k', 
+        'linestyle':'solid', 
+        'lw':1.5, 
+        'head_width': 0.02, 
+        'head_length': 0.04,}
 
-    x1 = xx + alen*cos(angle-sangle/2)
-    y1 = yy + alen*sin(angle-sangle/2)
+obspx = y(obs_phi, obs_theta)*1.25
+obspy = z(obs_phi, obs_theta)*1.25
+ax = draw_axis(ax, obs_phi,      obs_theta,      rfac=0.2, startp=(obspx, obspy),fmt=fmt_obs)
+ax = draw_axis(ax, obs_phi+pi/2, pi/2,           rfac=0.2, startp=(obspx, obspy),fmt=fmt_obs)
+ax = draw_axis(ax, obs_phi,      obs_theta-pi/2, rfac=0.2, startp=(obspx, obspy),fmt=fmt_obs)
 
-    x2 = xx + alen*cos(angle+sangle/2)
-    y2 = yy + alen*sin(angle+sangle/2)
-
-    ax.plot([xx,x1],[yy,y1],**fmt)
-    ax.plot([xx,x2],[yy,y2],**fmt)
-
-    xsegm = []
-    ysegm = []
-    for theta in np.linspace(angle-sangle/2-0.1, angle+sangle/2+0.1, 10):
-        xsegm.append(xx + alen*0.7*cos(theta))
-        ysegm.append(yy + alen*0.7*sin(theta))
-    ax.plot(xsegm, ysegm, **fmt)
-
-    return ax
-
-print "incl:", incl-pi
-ax = draw_observer(ax, -1.5, 0.8, angle=-0.45, sangle=0.4, alen=0.15)
 
 #texts
 #-----------------------------------------------------
@@ -385,11 +458,15 @@ ax.text(0.06, 0.2, "$\\theta$", va='center', ha='center', size=lsize)
 ax.text(-0.05, 0.15, "$i$", va='center', ha='center', size=lsize)
 
 ax.text(-0.6, -0.4, "$x$", va='center', ha='center', size=lsize)
-ax.text(0.06, 1.0, "$y$", va='center', ha='center', size=lsize)
-ax.text(-1.3, 0.35, "$z$", va='center', ha='center', size=lsize)
+ax.text(0.06, 1.1, "$y$", va='center', ha='center', size=lsize)
+ax.text(-1.3, 0.1, "$z$", va='center', ha='center', size=lsize)
+#ax.text(-0.1, 0.9, "$\\hat{\\Omega}$", va='center', ha='center', size=lsize)
 
 ax.text(0.55, 0.96, "$\\hat{r}$", va='center', ha='center', size=lsize)
 ax.text(0.38, 0.92, "$\\hat{n}$", va='center', ha='center', size=lsize)
 
+ax.text(-1.15, 0.5, "$\\hat{x}$", va='center', ha='center', size=lsize)
+ax.text(-0.83, 0.88,  "$\\hat{y}$", va='center', ha='center', size=lsize)
+#ax.text(-1.2, 0.8,  "$\\hat{z}$", va='center', ha='center', size=lsize)
 
 savefig('fig1.pdf', bbox_inches='tight')

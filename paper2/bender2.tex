@@ -1,0 +1,184 @@
+\documentclass[iop, usenatbib]{emulateapj}
+
+%\usepackage[varg]{txfonts}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{epsfig}
+\usepackage{graphics}
+\usepackage{amsmath}
+\usepackage{color}
+%\usepackage{xifthen}
+
+%Debug addition for collaborators
+%\usepackage[switch, displaymath, modulo]{lineno}
+%\linenumbers
+%%\renewcommand\linenumberfont{\color{red}\normalfont\tiny\sffamily}
+%\renewcommand\linenumberfont{\normalfont\tiny\sffamily}
+%\usepackage{natbib,twoopt}
+
+
+%Collides with emulateapj
+%%%%%%%%%
+%\usepackage{siunitx}
+% Units
+%\DeclareSIUnit{\erg}{erg}
+%%%%%%%%%
+
+
+%Commands
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+%\newcommand{\bea}{\begin{eqnarray}}
+%\newcommand{\eea}{\end{eqnarray}}
+%\newcommand{\bea}{\begin{align}\begin{split}}
+%\newcommand{\eea}{\end{split}\end{align}}
+\newcommand{\ud}{\text{d}}
+
+%normal 3-vectors
+%\renewcommand{\vec}[1]{\ensuremath{\mathbf{#1}}}
+\renewcommand{\vec}[1]{\ensuremath{\boldsymbol{#1}}​}
+
+%four-vectors
+\makeatletter
+\def\fvec#1{\underline{\sbox\tw@{$#1$}\dp\tw@\z@\box\tw@}}
+\makeatother
+
+%higlight color
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+
+%general shortcuts
+\newcommand{\pd}{\ensuremath{\partial}} %partial derivative
+\newcommand{\rg}{\ensuremath{r_{\mathrm{g}}}}
+\newcommand{\Req}{\ensuremath{R_{\mathrm{e}}}}
+\newcommand{\sch}{Schwarzschild }
+\newcommand{\Ca}{\ensuremath{\mathcal{C}}}
+\newcommand{\kpw}{\ensuremath{\kappa_{\mathrm{PW}}}}
+
+\newcommand{\rb}{\ensuremath{\bar{r}}}
+\renewcommand{\ub}{\ensuremath{\bar{u}}}
+\newcommand{\wb}{\ensuremath{\bar{\omega}}}
+\newcommand{\Ob}{\ensuremath{\hat{\Omega}}}
+\newcommand{\nub}{\ensuremath{\bar{\nu}}}
+\newcommand{\zetab}{\ensuremath{\bar{\zeta}}}
+\newcommand{\Bb}{\ensuremath{\bar{B}}}
+\newcommand{\mub}{\ensuremath{\bar{\mu}}}
+
+\newcommand{\vw}{\ensuremath{v_{\omega}}}
+\newcommand{\vz}{\ensuremath{v_{\mathrm{z}}}}
+
+\newcommand{\Msun}{\ensuremath{M_{\odot}}}
+\newcommand{\lgamma}{\gamma_{\text{L}}}
+\newcommand{\qinv}{\ensuremath{q_{\mathrm{inv}}}}
+%%%%%%%%%%%%%%%%%%%%%%
+
+
+\slugcomment{ }
+\shorttitle{Polarization from neutron stars}
+\shortauthors{N\"attil\"a \& Pihajoki}
+
+\voffset=-1cm
+
+\begin{document}
+\title{Polarized radiation from rapidly rotating oblate neutron stars}
+
+\author{J. N\"attil\"a\altaffilmark{1,2}\thanks{nattila.joonas@gmail.com} \textit{et al.} }
+%\author{J. N\"attil\"a\altaffilmark{1,2}\thanks{nattila.joonas@gmail.com}
+%  P. Pihajoki\altaffilmark{3}}
+%  J. Poutanen\altaffilmark{1,2}}
+
+\affil{}
+\altaffiltext{1}{Tuorla Observatory, University of Turku}
+\altaffiltext{2}{NORDITA, Stockholm}
+%\altaffiltext{3}{University of Helsinki}
+
+
+\begin{abstract}
+Framework of formuale is derived for a propagation of polarized radiation originating from rapidly rotating oblate neutron stars.
+\end{abstract}
+\keywords{gravitation - methods: numerical --- radiative transfer --- stars: neutron}
+
+\section{Introduction}
+Blaa
+
+
+
+
+
+%________________________________________________________________
+\section{Theory}\label{sect:theory}
+
+Stokes vector is a handy tool to characterize polarized emission.
+For linearly polarized radiation it is given as $(F_I, F_Q, 0, 0)^{\mathrm{T}}$, where $F_I$ is the total flux and $F_Q = P F_I$.
+Here $P$ is the polarization degree of the radiation.
+When the polarization angle $\chi$ is known, this vector can be rotated from an original fluid frame into the main basis by 
+\be
+R(\chi) 
+\begin{pmatrix}
+F_I \\
+F_Q \\
+0   \\
+0   \\
+\end{pmatrix}
+=
+\begin{pmatrix}
+F_I \\
+F_Q \cos 2\chi\\
+F_Q \sin 2\chi  \\
+0   \\
+\end{pmatrix},
+\ee
+with a rotation matrix $R(\chi)$ given as
+\be
+R(\chi) = 
+\begin{pmatrix}
+1 & 0 & 0 & 0 \\
+0 & \cos 2\chi & -\sin 2\chi & 0 \\
+0 & \sin 2\chi & \cos 2\chi & 0 \\
+0 & 0 & 0 & 1 \\
+\end{pmatrix}.
+\ee
+Total properties of the radiation can then be observed by summing over all individual Stokes vectors to obtain
+\be
+\begin{pmatrix}
+\sum_i F_{I,i} \\[0.3em]
+\sum_i \cos 2\chi_i F_{Q,i} \\[0.3em]
+\sum_i \sin 2\chi_i F_{Q,i} \\[0.3em]
+0 \\
+\end{pmatrix}.
+\ee
+
+The degree of polarization is scalar invariant.
+
+
+Given null geodesic (with a given polarization vector) through a point $(t,r,\theta,\phi)$) is charachterized by $L_z$, $E$, $\Ca$, and $\kpw$.
+
+Hughston 1973
+Conformal Killing tensor gives rise to a quadratic first integral for null geodesic orbits. 
+In general this is a tensor of a valence two.
+
+
+
+
+
+%\section{Conclusions}
+\section*{Acknowledgments}
+JN acknowledges support from the University of Turku Graduate School in Physical and Chemical Sciences.
+
+
+
+\clearpage
+
+\bibliographystyle{apj}
+\bibliography{allbib}
+
+%\begin{thebibliography}
+%\end{thebibliography}
+
+
+\clearpage
+\appendix
+
+\section{First blaa}
+Blaa blaa
+
+\end{document}
