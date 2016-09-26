@@ -12,14 +12,14 @@ include("plot2d.jl")
 #Interpolate from raw image and compute radiation processes
 #include("radiation.jl")
 
-#rho = deg2rad(30.0)
-#colat = deg2rad(50.0)
+rho = deg2rad(30.0)
+colat = deg2rad(50.0)
 
-rho = deg2rad(10.0)
-colat = deg2rad(90.0)
+#rho = deg2rad(10.0)
+#colat = deg2rad(90.0)
 
 interp = true
-exact_edges = true
+exact_edges = false
 
 
 function spotr(t, phi, theta,
@@ -31,13 +31,9 @@ function spotr(t, phi, theta,
     zeta2 = beta*((4/3)*0.5*(3*cos(theta)^2 - 1) - 1/3)
     Rgm, dR = Rgmf(theta, X, Osb)
 
-    #enu = (1-Xob/2)/(1+Xob/2)*exp(nu2*Xob^3)
+    enu = (1-Xob/2)/(1+Xob/2)*exp(nu2*Xob^3)
     B = (1-Xob/2)*(1+Xob/2) + B2*Xob^2
     ezeta = (1-Xob/2)*(1+Xob/2)*exp(zeta2*Xob^2)
-
-    enu = 1.0
-    #B = 1.0
-    #ezeta = 1.0
 
     w = wp*Xob^3*(1-3*Xob) /(G*M/c^3) #into rad/seconds
     vz = Rgm*(1/enu)*sin(theta)*(2pi*fs - w) #isoradial zamo
@@ -45,7 +41,11 @@ function spotr(t, phi, theta,
     gamma = 1/sqrt(1 - bz^2)
     #gamma = 1.0
 
-    rho=(1/enu)
+    #if (t/gamma) != 0
+    #    println("gamma comparison $(t/gamma)")
+    #end
+
+    const rho = 1.0
     bet=ezeta/B
     the = theta
 
@@ -56,13 +56,6 @@ function spotr(t, phi, theta,
     y1 = sin(phi1)*sin(the1)
     z1 = cos(the1)
     
-    #projected
-    x1p = x1*(bet^2*cos(the)^2 + rho^2*sin(the)^2) + z1*(rho^2 - bet^2)*cos(the)*sin(the)
-    y1p = y1*gamma^2
-    z1p = z1*(rho^2*cos(the)^2 + bet^2*sin(the)^2) + x1*(rho^2-bet^2)*cos(the)*sin(the)
-    #x1p = x1
-    #y1p = y1
-    #z1p = z1
 
     #photon location
     phi2 = phi
@@ -70,14 +63,11 @@ function spotr(t, phi, theta,
     x2 = cos(phi2)*sin(the2)
     y2 = sin(phi2)*sin(the2)
     z2 = cos(the2)
-    x2p = x2*(bet^2*cos(the)^2 + rho^2*sin(the)^2) + z2*(rho^2 - bet^2)*cos(the)*sin(the)
-    y2p = y2*gamma^2
-    z2p = z2*(rho^2*cos(the)^2 + bet^2*sin(the)^2) + x2*(rho^2-bet^2)*cos(the)*sin(the)
-
-    #dot product
-    r1r2= x1p*x2p + y1p*y2p + z1p*z2p
-    r1r1 = x1p^2 + y1p^2 + z1p^2 
-    r2r2 = x2p^2 + y2p^2 + z2p^2 
+    
+    #dot product (O(Omega^2) in rotation, i.e. only y-dir contracted)
+    r1r2= x1*x2 + gamma*gamma*y1*y2 + z1*z2
+    r1r1 = x1^2 + gamma*gamma*y1^2 + z1^2 
+    r2r2 = x2^2 + gamma*gamma*y2^2 + z2^2 
 
     d = acos(r1r2/sqrt(r1r1)/sqrt(r2r2))
 
@@ -125,7 +115,7 @@ N_frame_rad = 100
 #Ir(cosa) = cosa
 
 #Time parameters
-Nt = 64
+Nt = 128
 
 times = collect(linspace(0, 1/fs, Nt))
 tbin = abs(times[2] - times[1])/2.0 
@@ -197,7 +187,7 @@ function dF(rad, chi, dS, yy)
         #println()
     end
 
-    if rad <= edge_interp(chi)
+    if rad <= edge_interp(chi) -1.0e-2
         dt = time*G*M/c^3
         phi = phi - (t - dt)*fs*2*pi
         phi = mod2pi(phi)
@@ -216,7 +206,7 @@ function dF(rad, chi, dS, yy)
         if inside
     
             if interp
-                unity = delta_interp[rad,chi]
+                unity = unity_interp[rad,chi]
                 #EEd = reds_interp[rad,chi]
                 #println(EEd, " ", delta)
             else
@@ -235,9 +225,10 @@ function dF(rad, chi, dS, yy)
             end
             #println(EEd, " ", delta)
             #println()
-    
-            if exact_edges && unity < 0.9999
+   	    
+            if (exact_edges && unity != 1.0) || (exact_edges && rad <= edge_interp(chi) - 1.0e-3)
                 #println("exact edge for $rad")
+                #print(".")
                 time, phi, theta, Xob, hit, cosa = bender3p(rad, chi, sini,
                                                             X, Osb, beta, quad, wp, Rg)
                 time -= time0
@@ -258,8 +249,8 @@ function dF(rad, chi, dS, yy)
                 if inside && hit
    			#exact edge 
                 else
-                    EEd = 1.0
-                    delta = 1.0
+                    EEd = 0.0
+                    delta = 0.0
                     dtau = 0.0
                     gamma = 1.0
                 end
@@ -268,11 +259,11 @@ function dF(rad, chi, dS, yy)
             dfluxE, dfluxNE, dfluxNB, dfluxB = bbfluxes(EEd, delta, cosa)
 
     
-            #dfluxB *= gamma
-            #dfluxNB *= gamma
+            #dfluxB *= 1/gamma
+            #dfluxNB *= 1/gamma
             #for ie = 1:3
-            #   dfluxE[ie] *= gamma 
-            #   dfluxNE[ie] *= gamma
+            #   dfluxE[ie] *= 1/gamma 
+            #   dfluxNE[ie] *= 1/gamma
             #end
     
         end #inside spot
@@ -324,11 +315,11 @@ frame_dxdy = 1.0
 
 tic()
 for k = 1:Nt
-#for k = 7:8
+#for k = 45:65
 #for k = 2:1
     t = times[k]
     println(" ")
-    println("t: $t k: $k")
+    println("t: $t k: $k phase $(phase[k])")
 
     jradmin = Nrad
     jradmax = 1
@@ -453,8 +444,8 @@ for k = 1:Nt
     end
     
     #make pizza slize bigger
-    chimin -= 0.01
-    chimax += 0.01
+    #chimin -= 0.01
+    #chimax += 0.01
 
     
     #plot in cartesian coords
@@ -606,6 +597,7 @@ for k = 1:Nt
 
     #Cartesian subgrid integration
     img5 = zeros(Ny_frame, Nx_frame) #subgrid img
+    img5[1,1] = 1.0e-5 #prevent plotting from crashing with empty array
     Ndelta = 0.0
 
     old_subframe = [frame_y2,
@@ -706,12 +698,15 @@ for k = 1:Nt
     println(" Polar Cubature integration")
 
     (vals, errs) = pcubature(8,
+    #(vals, errs) = hcubature(8,
                             dFpol,
                             [rad_grid[jradmin], chimin],
                             [rad_grid[jradmax], chimax],
                             reltol = 1.0e-4,
                             abstol = 0.0,
-                            maxevals=0)
+                            #maxevals=int(1e5))
+                            maxevals=int(2e7))
+                            #maxevals=int(2e6))
 
     else #cartesian
     println(" Cartesian Cubature integration")
@@ -721,7 +716,7 @@ for k = 1:Nt
                            [frame_x2, frame_y2],
                            reltol = 1.0e-4,
                            abstol = 0.0,
-                           maxevals=0)
+                           maxevals=int(2e7))
 
     end #if-else polar/cartesian
     println("Cubature iterations: $(iters[1])")
@@ -1083,11 +1078,11 @@ end#for t
 
 
 #write to file
-opath = "out/"
+#opath = "out/"
 #opath = "out2/"
 #opath = "out2/cadeau+morsink/"
 #opath = "out2/f$(round(Int,fs))/r$(round(Int,R/1e5))n/"
-#opath = "out3/HT/"
+opath = "out3/"
 #opath = "out4/"
 
 mkpath(opath)
