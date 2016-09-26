@@ -84,11 +84,11 @@ for j in range(4):
     if j == 0:
         fname = path3 + 'small-1-'
         #fname2 = path3 + 'f400pbbr12m1.6d50i60x1.csv'
-        fname2 = path3 + 'f400pbbr12m1.6d50i60x1_+q.csv'
+        fname2 = '../../out3/HT/f400pbbr12m1.6d50i60x1.csv'
     if j == 1:
         fname = path3 + 'small-30-'
         #fname2 = path3 + 'f400pbbr12m1.6d50i60x30.csv'
-        fname2 = path3 + 'f400pbbr12m1.6d50i60x30_+q.csv'
+        fname2 = path3 + '../../out3/HT/f400pbbr12m1.6d50i60x30.csv'
     if j == 2:
         fname = path3 + 'large-1-'
         #fname2 = path3 + 'f600pbbr15m1.6d50i60x1.csv'

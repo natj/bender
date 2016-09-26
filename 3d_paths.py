@@ -85,9 +85,9 @@ rc('ytick', labelsize='x-small')
 ax = fig.add_subplot(111, projection='3d')
 ax.set_aspect('equal')
 
-ax.set_xlabel("x")
-ax.set_ylabel("y")
-ax.set_zlabel("z")
+ax.set_xlabel("$\hat{z}$")
+ax.set_ylabel("$\hat{x}$")
+ax.set_zlabel("$\hat{y}$")
 
 
 
@@ -95,16 +95,16 @@ ax.set_zlabel("z")
 R = 3.4
 u = np.linspace(0, 2 * np.pi, 100)
 v = np.linspace(0, np.pi, 100)
-#x = R * np.outer(np.cos(u), np.sin(v))
-#y = R * np.outer(np.sin(u), np.sin(v))
-#z = R * np.outer(np.ones(np.size(u)), np.cos(v))
+x = R * np.outer(np.cos(u), np.sin(v))
+y = R * np.outer(np.sin(u), np.sin(v))
+z = R * np.outer(np.ones(np.size(u)), np.cos(v))
 
 #oblate spheroid
-ecc = 0.648
+ecc = 0.9
 eta = 0.5*np.log((2-ecc**2)/ecc**2)
-x = R * np.cosh(eta)*np.outer(np.cos(u), np.sin(v))
-y = R * np.cosh(eta)*np.outer(np.sin(u), np.sin(v))
-z = R * np.sinh(eta)*np.outer(np.ones(np.size(u)), np.cos(v))
+#x = R * np.cosh(eta)*np.outer(np.cos(u), np.sin(v))
+#y = R * np.cosh(eta)*np.outer(np.sin(u), np.sin(v))
+#z = R * np.sinh(eta)*np.outer(np.ones(np.size(u)), np.cos(v))
 
 
 ax.plot_surface(x, y, z,
@@ -129,8 +129,8 @@ for i in range(len(onlyfiles)):
         print fname, xx, yy
 
         rad, theta, phi, err, lvl = read_path(fname)
-        #xs, ys, zs = spher_2_cart(rad, theta, phi, rcutmin=0.0, rcutmax=20)
-        xs, ys, zs = spher_2_cart(rad, theta, phi, rcutmin=19.0, rcutmax=20.0)
+        xs, ys, zs = spher_2_cart(rad, theta, phi, rcutmin=0.0, rcutmax=20)
+        #xs, ys, zs = spher_2_cart(rad, theta, phi, rcutmin=19.0, rcutmax=20.0)
         
         ax.plot(xs, ys, zs, "b", alpha=0.5)
         
@@ -146,28 +146,33 @@ ax.view_init(elev=5., azim=-67)
 #rgrid = np.linspace(0.0, 20.0, 10)
 rgrid = np.logspace(np.log10(0.001), np.log10(20.0), 10)
 
-for q in range(len(rgrid)-1):
 
-    for i in range(len(onlyfiles)):
-        pfile = onlyfiles[i]
+savefig('fig_3d_path.pdf', bbox_inches='tight')
 
-        if 'p_' in pfile:
-            fname = fdir+pfile
 
-            #extract x and y from dirname
-            xx = float(pfile.split('_')[1])
-            yy = float((pfile.split('_')[2]).split('.csv')[0])
-                
-            print fname, xx, yy
 
-            rad, theta, phi, err, lvl = read_path(fname)
-            xs, ys, zs = spher_2_cart(rad, theta, phi,
-                                      rcutmin=rgrid[4-q],
-                                      rcutmax=rgrid[3-q])
-
-            ax.plot(xs, ys, zs, "b", alpha=0.5)
-        
-    set_axes_equal(ax)
-    ax.view_init(elev=5., azim=-67)
-
-    plt.savefig('movie_rtrace/raytrace_'+str(q).zfill(3)+'.png')#, bbox_inches='tight')
+#for q in range(len(rgrid)-1):
+#
+#    for i in range(len(onlyfiles)):
+#        pfile = onlyfiles[i]
+#
+#        if 'p_' in pfile:
+#            fname = fdir+pfile
+#
+#            #extract x and y from dirname
+#            xx = float(pfile.split('_')[1])
+#            yy = float((pfile.split('_')[2]).split('.csv')[0])
+#                
+#            print fname, xx, yy
+#
+#            rad, theta, phi, err, lvl = read_path(fname)
+#            xs, ys, zs = spher_2_cart(rad, theta, phi,
+#                                      rcutmin=rgrid[4-q],
+#                                      rcutmax=rgrid[3-q])
+#
+#            ax.plot(xs, ys, zs, "b", alpha=0.5)
+#        
+#    set_axes_equal(ax)
+#    ax.view_init(elev=5., azim=-67)
+#
+#    plt.savefig('movie_rtrace/raytrace_'+str(q).zfill(3)+'.png')#, bbox_inches='tight')

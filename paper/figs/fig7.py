@@ -33,7 +33,7 @@ gs.update(wspace = 0.34)
 #gs.update(hspace = 0.4)
 
 
-lsize = 7.0
+lsize = 9.0
 
 #phase limits
 xmin = 0.0
@@ -82,8 +82,8 @@ phase_t = np.linspace(0.0, 1.0,  200)
 incls_t = np.linspace(0.0, 90.0, 100)
 
 maxflux = 0.0
-fig.text(0.3, 0.92, 'North pole spot',  ha='center', va='center', size=10)
-fig.text(0.7, 0.92, 'North + south pole spots',  ha='center', va='center', size=10)
+fig.text(0.3, 0.92, 'One spot',  ha='center', va='center', size=10)
+fig.text(0.7, 0.92, 'Two antipodal spots',  ha='center', va='center', size=10)
 
 
 for j in range(5):
@@ -184,7 +184,8 @@ for j in range(5):
                         extent=extent,
                         #cmap='Reds',
                         #cmap='jet',
-                        cmap='YlGnBu',
+                        #cmap='YlGnBu',
+                        cmap='plasma_r',
                         vmin=0.0,
                         vmax=0.6,
                         #vmax=1.0,

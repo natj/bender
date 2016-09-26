@@ -77,16 +77,14 @@ fig.text(0.5, 0.32, '$\\nu = '+nu+'$ Hz  Hopf  $\\rho = 30^{\circ}$',  ha='cente
 for j in range(4):
 
     if j == 0:
-        fname = path_JP + 'iso_sph1.txt'
-        #fname = path_JP + 'nu'+nu+'Hz_blackbody_rho1deg.dat'
+        fname = path_JP + 'nu'+nu+'Hz_blackbody_rho1deg.dat'
         fname2 = path_JP + 'f'+nu+'pbbr12m1.6d50i60x1.csv'
         fname3 = path_JP + 'popiha/flux_'+nu+'hz_1deg.dat'
     if j == 1:
         fname = path_JP + 'nu'+nu+'Hz_hopf_rho1deg.dat'
         fname2 = path_JP + 'f'+nu+'phopfr12m1.6d50i60x1.csv'
     if j == 2:
-        fname = path_JP + 'iso_sph30.txt'
-        #fname = path_JP + 'nu'+nu+'Hz_blackbody_rho30deg.dat'
+        fname = path_JP + 'nu'+nu+'Hz_blackbody_rho30deg.dat'
         fname2 = path_JP + 'f'+nu+'pbbr12m1.6d50i60x30.csv'
         fname3 = path_JP + 'popiha/flux_'+nu+'hz_30deg.dat'
     if j == 3:
@@ -104,11 +102,11 @@ for j in range(4):
     if (j == 0) or (j == 2):
         phase3, flux3 = read_PP_files(fname3)
     
-    for i in range(4):
-
+    #for i in range(4):
+    for i in [3]:
 
          #frame for the main pulse profile fig
-         ax1 = subplot(gs[mfiglim:mfiglim+panelh, i])
+         ax1 = subplot(gs[mfiglim:mfiglim+panelh, 0])
          ax1.minorticks_on()
          #ax1.set_xticklabels([])
          ax1.set_xlim(xmin, xmax)
@@ -120,12 +118,6 @@ for j in range(4):
          formatter.set_powerlimits((0,0))
          ax1.yaxis.set_major_formatter(formatter)
          
-         #not working solutions
-         #ax1.yaxis.set_major_formatter(mtick.FormatStrFormatter('%.1e'))
-         #xmft = ScalarFormatter()
-         #xmft.set_powerlimits((-2,2))
-         #ax1.xaxis.set_major_formatter(xmft)
-
          
          if i == 0:
              ax1.set_ylabel('$N$ (2 keV)\n[ph cm$^{-2}$ s$^{-1}$ keV$^{-1}$]',size=lsize)
@@ -147,29 +139,59 @@ for j in range(4):
              flux2 = Fbol2
              
          #Savitzky-Golay low-pass filtter
-         flux2[-1] = flux2[0]
+         #flux2[-1] = flux2[0]
+         ##flux3 = savgol_filter(flux2, 15, 5, mode='wrap')
          #flux3 = savgol_filter(flux2, 15, 5, mode='wrap')
-         flux3 = savgol_filter(flux2, 15, 5, mode='wrap')
-         flux3[0:9] = flux2[0:9]
-         flux3[-9:-1] = flux2[-9:-1]
-         flux3[-1] = flux2[0]
-         #flux3 = flux2
+         #flux3[0:3] = flux2[0:3]
+         #flux3[-1:-5] = flux2[-1:-5]
+         #flux3[-1] = flux2[0]
 
-         #FFT filtterint
-         #w = scipy.fftpack.rfft(flux2)
-         #f = scipy.fftpack.rfftfreq(len(flux2), phase2[1]-phase2[0])
-         #spectrum = w**2
-         #
-         #cutoff_idx = spectrum < (spectrum.max()/1.0e6)
+         #JP FT
+         w1 = scipy.fftpack.rfft(flux)
+         f1 = scipy.fftpack.rfftfreq(len(flux), phase[1]-phase[0])
+         spectrum1 = w1**2
+
+         #JN FT
+         w2 = scipy.fftpack.rfft(flux2)
+         f2 = scipy.fftpack.rfftfreq(len(flux2), phase2[1]-phase2[0])
+         spectrum2 = w2**2
+
+         #smooth spectrum
+         spectrum2c = savgol_filter(spectrum2, 11, 3)
+         #cutoff_idx = spectrum2 < (spectrum2.max()/1.0e6)
+         cutoff_idx = f2 > 20.0
          #print spectrum
-         #w2 = w.copy()
-         #w2[cutoff_idx] = 0
-         #flux3 = scipy.fftpack.irfft(w2)
-         #ax1.plot(phase2, flux3, "g--")
+         w2c = w2.copy()
+         w2c[cutoff_idx] = 0
+         spectrum2c = w2c**2
+         flux3 = scipy.fftpack.irfft(w2c)
 
-         #if (j == 1) or (j == 3):
-         #   phase2 = phase2s - 0.00005
 
+
+
+         #ax3 = subplot(gs[mfiglim:mfiglim+panelh, 1])
+         ax3 = subplot(gs[mfiglim:(mfiglim+panelh+epanelh), 1:3])
+         #ax2 = subplot(gs[(mfiglim+panelh):(mfiglim+panelh+epanelh), 0])
+         ax3.minorticks_on()
+         #ax3.set_xticklabels([])
+         #ax3.set_xlim(xmin, xmax)
+         ax3.set_xscale('log')
+         ax3.set_yscale('log')
+
+         ax3.plot(f1, spectrum1, 'k-')
+         ax3.plot(f2, spectrum2, 'r-')
+         ax3.plot(f2, spectrum2c, 'g--')
+         #ax3.plot(f1, w1, 'k-')
+         #ax3.plot(f2, w2, 'r-')
+         #ax3.plot(f2, w2c, 'g--')
+
+
+
+         #################################
+         ax1.plot(phase2, flux3, "g--")
+
+
+         #plot actual data
          #JP data
          ax1.plot(phase, flux, 'k-')
 
@@ -185,7 +207,7 @@ for j in range(4):
          ax1.set_yticks(ax1.get_yticks()[1:-1])
          
          #frame for the error panel
-         ax2 = subplot(gs[(mfiglim+panelh):(mfiglim+panelh+epanelh), i])
+         ax2 = subplot(gs[(mfiglim+panelh):(mfiglim+panelh+epanelh), 0])
          ax2.minorticks_on()
          ax2.set_xlim(xmin, xmax)
          ax2.set_ylim(eymin, eymax)
@@ -233,5 +255,4 @@ for j in range(4):
     
 
 
-#savefig('fig2a.pdf', bbox_inches='tight')
-savefig('fig2b.pdf', bbox_inches='tight')
+savefig('figFFT.pdf', bbox_inches='tight')

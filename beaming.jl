@@ -26,15 +26,15 @@ Hns[:] = HnA(mus)
 rvalt = zeros(length(mus))
 amoms = zeros(3)
 
-#p = plot(xrange=[0,1],
-#         yrange=[0.35, 1.3],
-#         xlabel="mu",
-#         ylabel="H(mu)/2a")
+p = plot(xrange=[0,1],
+         yrange=[0.35, 1.3],
+         xlabel="mu",
+         ylabel="H(mu)/2a")
 
-for iter = 1:20
+for iter = 1:10
     
-    println()
-    #println("iter $iter")
+    #println()
+    println("iter $iter")
 
     #make array of H values into function by interpolation
     #println(Hnm1(mus))
@@ -47,7 +47,7 @@ for iter = 1:20
                                 0,1,reltol=1.0e-8,maxevals=0)
         amoms[mom+1] = val0
     end
-    #println("Moments: a0: $(amoms[1]) a1: $(amoms[2]) a2: $(amoms[3])")
+    println("Moments: a0: $(amoms[1]) a1: $(amoms[2]) a2: $(amoms[3])")
     
 
     for i = 1:length(mus)
@@ -64,14 +64,14 @@ for iter = 1:20
                                 0,1,reltol=1.0e-8,maxevals=0)
 
         rvalt[i] = sqrt(1.0 - 2.0*val1) + val2
-        #println("T1: $val1 T2: $val2 I: $(rvalt[i])")
+        println("T1: $val1 T2: $val2 I: $(rvalt[i])")
     end
 
     #Hns[:] = 1.0 ./ rvalt
     Hns[:] = 0.5*((1.0 ./ rvalt) .+ Hns)
 
-    #p = oplot(mus, Hns./2./amoms[2], "k-")
-    #display(p)
+    p = oplot(mus, Hns./2./amoms[2], "k-")
+    display(p)
     #readline(STDIN)
 end    
     
@@ -91,24 +91,24 @@ end
 Hne(mu) = Hnm1(mu)
 momse = Hn_moments(Hne)
 refval = Hne(mus)./(2*momse[2])
-#p = plot(mus, Hne(mus)./(2*momse[2]), "k-")
+p = plot(mus, Hne(mus)./(2*momse[2]), "k-")
 erre = (Hne(mus)./(2*momse[2])) ./ refval -1
 
 #1st order approx
 Hn1(mu) = 1 + 2.06.*mu
 moms1 = Hn_moments(Hn1)
-#p = oplot(mus, Hn1(mus)./(2*moms1[2]), "m--")
+p = oplot(mus, Hn1(mus)./(2*moms1[2]), "m--")
 err1 = (Hn1(mus)./(2*moms1[2])) ./ refval -1
 
 #2nd order approx
 Hn2(mu) = 1 .+ 2.3.*mu .- 0.3*mu.^2
 moms2 = Hn_moments(Hn2)
-#p = oplot(mus, Hn2(mus)./(2*moms2[2]), "g--")
+p = oplot(mus, Hn2(mus)./(2*moms2[2]), "g--")
 err2 = (Hn2(mus)./(2*moms2[2])) ./ refval -1
 
 #FL approx 
 HnAFL(mu) = 0.42822 + 0.92236.*mu - 0.085751.*mu.^2
-#p = oplot(mus, HnAFL(mus), "b--")
+p = oplot(mus, HnAFL(mus), "b--")
 errFL = (HnAFL(mus)) ./ refval -1
 
 #p2 = plot(xrange=[0,1],
