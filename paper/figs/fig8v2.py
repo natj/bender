@@ -23,17 +23,17 @@ def read_JN_files(fname):
 
     
 ## Plot
-fig = figure(figsize=(8,3), dpi=80)
+fig = figure(figsize=(3,5.5), dpi=80)
 rc('font', family='serif')
 rc('xtick', labelsize='xx-small')
 rc('ytick', labelsize='xx-small')
 
-gs = GridSpec(1, 100)
-gs.update(wspace = 0.34)
-#gs.update(hspace = 0.4)
+gs = GridSpec(106,1)
+#gs.update(wspace = 0.34)
+gs.update(hspace = 0.3)
 
 
-lsize = 7.0
+lsize = 8.0
 
 #phase limits
 xmin = 0.0
@@ -81,8 +81,8 @@ phase_t = np.linspace(0.0, 1.0,  200)
 incls_t = np.linspace(0.0, 90.0, 100)
 
 maxflux = 0.0
-fig.text(0.3, 0.92, 'One spot',  ha='center', va='center', size=10)
-fig.text(0.7, 0.92, 'Two antipodal spots',  ha='center', va='center', size=10)
+fig.text(0.75, 0.79, 'One spot',  ha='center', va='center', size=10, color="white")
+fig.text(0.75, 0.4, 'Two spots',  ha='center', va='center', size=10, color="white")
 
 
 #empty matrix
@@ -95,21 +95,21 @@ for k in range(2):
     #ax1 = subplot(gs[mfiglim:mfiglim+panelh, k])
     if k == 0:
         #ax1 = subplot(gs[mfiglim:mfiglim+panelh, 0:46])
-        ax1 = subplot(gs[0, 0:46])
+        ax1 = subplot(gs[5:55,0])
     else:
         #ax1 = subplot(gs[mfiglim:mfiglim+panelh, 49:95])
-        ax1 = subplot(gs[0, 49:95])
+        ax1 = subplot(gs[56:106,0])
 
     ax1.minorticks_on()
     ax1.set_xlim(xmin, xmax)
     ax1.set_ylim(ymin, ymax)
     
-    ax1.set_xlabel('Inclination $i$', size=lsize)
+    ax1.set_ylabel('Spot colatitude $\\theta_s$', size=lsize)
 
     if k == 0:
-        ax1.set_ylabel('Spot colatitude $\\theta_s$', size=lsize)
+        ax1.set_xticklabels([])
     elif k == 1:
-        ax1.set_yticklabels([])
+        ax1.set_xlabel('Inclination $i$', size=lsize)
 
         
     for j in range(5):
@@ -224,18 +224,19 @@ for k in range(2):
 
     print hdata
         
-    if k == 1:
+    if k == 0:
         #mfiglim:mfiglim+panelh, 0:40])
         #cbaxes = fig.add_axes([0.90, (mfiglim+panelh)/500, 0.05, panelh/500.0])
-        cbaxes = subplot(gs[0, 95:97])
+        cbaxes = subplot(gs[0:2, 0])
         cb = colorbar(im,
                       #label='Probability density',
-                      cax=cbaxes)
+                      cax=cbaxes,
+                      orientation='horizontal')
         cb.set_label('Pulse fraction',size=lsize)
-
+        cb.ax.xaxis.set_ticks_position('top')
+        cb.ax.xaxis.set_label_position('top')
 
     #fig.text(0.5, 0.91-j*0.16, '$\\theta_{\mathrm{s}}$ = '+colat,  ha='center', va='center', size=tsize)
-    mfiglim += panelh+skiph
 
     
 

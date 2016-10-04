@@ -45,7 +45,7 @@ img3 = zeros(Ny_dense, Nx_dense) #debug array
 img4 = zeros(Ny_dense, Nx_dense) #debug array
         
 #Flux_cart = zeros(Ny_dense, Nx_dense)
-Delta_cart = zeros(Ny_dense, Nx_dense)
+Dopps_cart = zeros(Ny_dense, Nx_dense)
 Reds_cart = zeros(Ny_dense, Nx_dense)
 
 painter = chess_board
@@ -53,9 +53,9 @@ painter = chess_board
 Ny = 100
 Nx = 100
 
-xmin = -10
+xmin = -11
 xmax = -xmin #+0.005
-ymin = -10
+ymin = -11
 ymax = -ymin #+0.005
 
 x_grid = collect(linspace(xmin,xmax, Nx))
@@ -550,7 +550,9 @@ for j = 1:Ny_dense
             #Flux[j, i] = dF
             #Reds[j, i] = dE
 
-            Delta_cart[j, i] = delta_interp[rad,chi]
+            # add beaming by *Beam(cosa)
+            #Dopps_cart[j, i] = Beam(cosa)*dopps_interp[rad,chi]
+            Dopps_cart[j, i] = Beam(cosa)*(reds_interp[rad,chi])^3
             Reds_cart[j, i] = reds_interp[rad,chi]
 
             end#hiti
@@ -602,7 +604,7 @@ end
 
 #Interpolate flux and redshift
 #flux_interp_cart    = interpolate((y_grid_d , x_grid_d), Flux_cart, method)
-delta_interp_cart    = interpolate((y_grid_d , x_grid_d), Delta_cart, method)
+dopps_interp_cart    = interpolate((y_grid_d , x_grid_d), Dopps_cart, method)
 reds_interp_cart    = interpolate((y_grid_d , x_grid_d), Reds_cart, method)
 #flux_interp = interpolate((y_grid_d , x_grid_d), Flux, method)
 #reds_interp = interpolate((y_grid_d , x_grid_d), Reds, method)
@@ -614,9 +616,11 @@ toc()#end of interpolation into dense grid
 p0 = plot2d(Times_dense, x_grid_d, y_grid_d, 0,0,10.0,"Blues")
 p1 = plot2d(Phis_dense, x_grid_d, y_grid_d)
 p2 = plot2d(Thetas_dense, x_grid_d, y_grid_d)
-p3 = plot2d(img, x_grid_d, y_grid_d, 0, 0, 0, "Blues",
-            xlabel="<i>x</i> (GM/c^2)",
-            ylabel="<i>y</i> (GM/c^2)")
+p3 = plot2d(img, x_grid_d, y_grid_d, 0, 1, 3, "Blues",
+            xlabel="<i>x</i>&#x302; (GM/c^2)",
+            ylabel="<i>y</i>&#x302; (GM/c^2)")
+            #xlabel="<i>x</i> (GM/c^2)",
+            #ylabel="<i>y</i> (GM/c^2)")
            
 
 p4 = plot2d(img2, x_grid_d, y_grid_d, 0, 0, 0, "Blues")
@@ -650,8 +654,8 @@ p6e2 = oplot(img2[:,xslice], zeros(length(y_grid_d)), "k",linestyle="dotted")
 
 #p7 = plot2d(Flux, x_grid_d, y_grid_d, 0,0,0, "RdBu")
 #p8 = plot2d(Reds, x_grid_d, y_grid_d, 0,0,0, "RdBu")
-p7 = plot2d(Delta_cart, x_grid_d, y_grid_d, 0,0,0, "Blues")
-p8 = plot2d(Reds_cart, x_grid_d, y_grid_d, 0,0,0, "Blues")
+p7 = plot2d(Dopps_cart, x_grid_d, y_grid_d, 0,0,1.3, "Blues")
+p8 = plot2d(Reds_cart, x_grid_d, y_grid_d, 0,0.7,0.85, "Blues")
 
 
 #######################
@@ -677,7 +681,7 @@ for i = 2:Nchi-1
     end
 
     #println(const_rad)
-    p3 = Winston.add(p3, Curve(const_rad[:,1], const_rad[:,2]))
+    #p3 = Winston.add(p3, Curve(const_rad[:,1], const_rad[:,2]))
 end
 
 #const chi
@@ -697,7 +701,7 @@ for rad in rad_grid
     end
 
     #println(const_rad)
-    p3 = Winston.add(p3, Curve(const_chi[:,1], const_chi[:,2]))
+    #p3 = Winston.add(p3, Curve(const_chi[:,1], const_chi[:,2]))
 end
 
 #edge
@@ -721,7 +725,7 @@ for chi in linspace(0.0, 2pi, 5*Nchi)
     const_edge[j,2] = y
     j+= 1
 end
-p3 = Winston.add(p3, Curve(const_edge[:,1], const_edge[:,2], sopts))
+#p3 = Winston.add(p3, Curve(const_edge[:,1], const_edge[:,2], sopts))
 #p3 = Winston.setattr(p3, xlabel=
 #p3 = Winston.setattr(p3, ylabel="<i>y</i> (GM/c^2)")
 
@@ -758,8 +762,17 @@ function line_prof(Fluxc, Redsc)
     
     emin = minimum(xarrs)
     emax = maximum(xarrs)
+
+    #r 10-12
+    emin = 0.65
+    emax = 0.88
+
+    # r 12-14
+    #emin = 0.72
+    #emax = 1.0
+
     println("emin=$emin emax=$emax")
-    Nr = 70
+    Nr = 100
     es = collect(linspace(emin, emax, Nr))
     yy2 = zeros(Nr)
     
@@ -775,7 +788,7 @@ function line_prof(Fluxc, Redsc)
         end
     end
     
-    yy2 = yy2./maximum(yy2)
+    #yy2 = yy2./maximum(yy2)
     #add start and end points to make smooth figure
     unshift!(es, es[1])
     unshift!(yy2, 0.0)
@@ -785,11 +798,33 @@ function line_prof(Fluxc, Redsc)
     return es, yy2
 end
 
-#es, yy2 = line_prof(Flux_cart, Reds_cart)
-#p9 = plot(es, yy2, "k-")
-#          #xlabel="E/E_0",
-#          #ylabel="Flux (arb)")
-#          #xrange=[0.7, 0.9])
+
+#flux_linecalc = (Reds_cart.^(3))
+flux_linecalc = Dopps_cart
+
+#es, yy2 = line_prof(Dopps_cart, Reds_cart)
+es, yy2 = line_prof(flux_linecalc, Reds_cart)
+
+#normalize
+des = diff(es)[2]
+yy2 = yy2 ./sum(yy2*des)
+
+p9 = plot(es, yy2, "b-")
+          #xlabel="E/E_0",
+          #ylabel="Flux (arb)")
+          #xrange=[0.7, 0.9])
+savefig(p9, "lineprofile0.png")
+wmatr = zeros(length(es), 2)
+wmatr[:,1] = es
+wmatr[:,2] = yy2
+fbeam = "bb"
+#fbeam = "hopf"
+fname = "lineprof_obl_HTq1_f$(round(Int,fs))p"*fbeam*"r$(round(Int,R/1e5))m$(round(M/Msun,1))i$(int((rad2deg(incl)))).csv"
+writecsv("out/"*fname, wmatr)
+
+savefig(p7, "dopps_"*fbeam*".png")
+savefig(p8, "reds_"*fbeam*".png")
+
 
 
 #collect into table

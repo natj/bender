@@ -3,11 +3,11 @@ include("bender.jl")
 
 
 #grid setup
-Nrad = 2000
-Nchi = 2000
+#Nrad = 2000
+#Nchi = 2000
 
-#Nrad = 100
-#Nchi = 100
+Nrad = 50
+Nchi = 50
 
 rmin = 0.0
 rmax = 12.0
@@ -134,7 +134,7 @@ for i = 1:Nchi
 
         #edge[i] = rad
         #if !hit; break; end
-        if !hit
+        if !hit && (j < Nrad)
             Times[j+1,i] = time
             Phis[j+1,i] = phi
             Thetas[j+1,i] = theta

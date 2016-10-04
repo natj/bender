@@ -132,7 +132,7 @@ function radiation(rad, chi,
     #println("      eta2/eta = ", eta2/eta)
     #println("      gamma2/gamma = ", gamma2/gamma)
 
-    return EEd, 1.0, gamma
+    return EEd, delta, gamma
 
 
     #Old return values
@@ -170,8 +170,9 @@ end
 #Areas = zeros(Nrad, Nchi)
 #dFlux = zeros(Nrad, Nchi)
 Reds   = zeros(Nrad, Nchi)
-Deltas = zeros(Nrad, Nchi)
-Dtaus  = zeros(Nrad, Nchi)
+#Deltas = zeros(Nrad, Nchi)
+Dopps  = zeros(Nrad, Nchi)
+Unitys  = zeros(Nrad, Nchi)
 
 #Additional F_E and F
 #NE = 3
@@ -243,15 +244,16 @@ for i = 2:Nchi-1
         
         #Ir(cosa) = 1.0 #lambertian intensity
         
-        EEd, delta, dtau = radiation(rad, chi,
+        EEd, delta, gamma = radiation(rad, chi,
                                      phi, theta, cosa,
                                      X, Xob, Osb, sini)
 
         
         #dFlux[j, i] = dF
         Reds[j, i] = EEd
-        Deltas[j, i] = delta
-        Dtaus[j, i] = dtau
+        #Deltas[j, i] = delta
+        Unitys[j, i] = 1.0
+        Dopps[j, i] = delta
                 
     end#j over rad
 end#i over chi
@@ -259,16 +261,16 @@ end#i over chi
 #Fill the middle point for r = 0 by taking the mean of surrounding values
 #meanflux = 0.0
 meanreds = 0.0
-meandelta = 0.0
-meandtau = 0.0
+#meandelta = 0.0
+meandopps = 0.0
 #meanarea = 0.0
 meanN = 0
 for i = 1:Nchi
     if Reds[2,i] >0.0
         #meanflux += dFlux[2,i]
         meanreds += Reds[2,i]
-        meandelta += Deltas[2,i]
-        meandtau += Dtaus[2,i]
+        #meandelta += Deltas[2,i]
+        meandopps += Dopps[2,i]
         #meanarea += Areas[2,i]
         meanN += 1
     end
@@ -276,14 +278,16 @@ end
 
 #dFlux[1,:] = meanflux/meanN
 Reds[1,:] = meanreds/meanN
-Deltas[1,:] = meandelta/meanN
-Dtaus[1,:] = meandtau/meanN
+#Deltas[1,:] = meandelta/meanN
+Dopps[1,:] = meandopps/meanN
 #Areas[1,:]= meanarea/meanN
+Unitys[1,:]= 1.0
 
 toc()
 
 #area_interp    = interpolate((rad_grid, chi_grid), Areas, method)
 #flux_interp    = interpolate((rad_grid, chi_grid), dFlux, method)
 reds_interp    = interpolate((rad_grid, chi_grid), Reds, method)
-delta_interp   = interpolate((rad_grid, chi_grid), Deltas, method)
-dtau_interp    = interpolate((rad_grid, chi_grid), Dtaus, method)
+#delta_interp   = interpolate((rad_grid, chi_grid), Deltas, method)
+unity_interp   = interpolate((rad_grid, chi_grid), Unitys, method)
+dopps_interp    = interpolate((rad_grid, chi_grid), Dopps, method)
