@@ -83,7 +83,8 @@ for j in range(4):
         fname2 = path_JP + 'f'+nu+'pbbr12m1.4d45i45x10.csv'
     if j == 2:
         fname = path_JP + 'iso90++.txt'
-        fname2 = path_JP + 'f'+nu+'pbbr12m1.4d90i45x10.csv'
+        #fname2 = path_JP + 'f'+nu+'pbbr12m1.4d90i45x10.csv'
+        fname2 = path_JP + 'f'+nu+'pbbr12m1.4d90i45x10_nogamma_dS_div_gamma.csv'
     if j == 3:
         #fname = path_JP + 'hopf90.txt'
         #fname2 = path_JP + 'f'+nu+'phopfr12m1.4d90i45x10_gdS.csv'

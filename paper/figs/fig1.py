@@ -469,4 +469,4 @@ ax.text(-1.15, 0.5, "$\\hat{x}$", va='center', ha='center', size=lsize)
 ax.text(-0.83, 0.88,  "$\\hat{y}$", va='center', ha='center', size=lsize)
 #ax.text(-1.2, 0.8,  "$\\hat{z}$", va='center', ha='center', size=lsize)
 
-savefig('fig1.pdf', bbox_inches='tight')
+savefig('fig1.png', bbox_inches='tight')
