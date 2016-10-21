@@ -88,21 +88,21 @@
 \affil{}
 \altaffiltext{1}{Tuorla Observatory, University of Turku}
 \altaffiltext{2}{Nordita, Stockholm}
-\altaffiltext{3}{University of Helsinki}
+\altaffiltext{3}{University of Helsinki, Department of Physics, Gustaf H\"allstr\"omin katu 2a, 00560 Helsinki, Finland}
 
 
 \begin{abstract}
 Fully relativistic framework of formulae is derived for emission originating near compact rotating objects.
 We specialize the formulae for rotating oblate neutron stars and describe the surrounding metric up to second order in rotation.
 The entire framework is derived in a fully general relativistic manner, and as such we also validate previous ad-hod special relativistic formulations during the derivation.
-We give a detailed descriptions of the numerical algorithms used and provide an open source implementation of the framework available from \url{http://github.com/natj/bender}.
-As an application, we study line profiles from rapidly rotating oblate neutron stars and conclude that no narrow features in the energy distribution are seen for physically realistic parameter combinations.
+We give a detailed descriptions of the numerical algorithms used and provide an open source implementation of the framework, available at \url{http://github.com/natj/bender}.
+As an application, we study spectral line profiles from rapidly rotating oblate neutron stars. We find that no narrow features in the energy distribution are seen for physically realistic parameter combinations.
 We also calculate accurate pulse profiles and observer skymaps of emission from hot spots on accreting millisecond pulsars.
 \end{abstract}
 \keywords{gravitation - methods: numerical --- radiative transfer --- stars: neutron}
 
 \section{Introduction}
-Accurately modeling the emission from and around compact objects is a complicated combination of radiative processes and relativity.
+Accurate modeling of the emission from and around compact objects is a complicated combination of radiative processes and relativity.
 Not only is the object curving the spacetime around it, and hence affecting the trajectory of photons, but it can also affect the apparent observed radiation as the emitting surface can move with relativistic velocities.
 Applications for such modeling range from black hole accretion disk emission studies to neutron star (NS) pulse profile analysis.
 Emission around rotating (Kerr) black holes has been conveniently formulated and implemented in the publicly available \textsc{geokerr} and \textsc{grtrans} codes \citep{dexter2009, dexter2016}.
@@ -112,20 +112,20 @@ Compared to black holes, a further complication with neutron stars is that the r
 This introduces additional complications to the radiative transfer problem as we have general relativistic effects such as bending of photon trajectories in addition to special relativistic effects like Doppler boosting and aberration of the observed angles.
 Combining these effects is a challenging task both theoretically and numerically.
 Current and future observations, on the other hand, demand highly accurate models.
-For example, computing accurate pulse profiles of hot spots on spinning neutron stars has been recently intensively investigated, motivated by many upcoming or planned new spaceborne X-ray observatories like ESA's \textit{XIPE} \citep{XIPE}, CNSA's \textit{eXTP} \citep{eXTP}, and NASA's \textit{NICER} \citep{NICER}, as well as the already deployed ISRO's \textit{Astrosat} \citep{Astrosat}
+For example, computing accurate pulse profiles of hot spots on spinning neutron stars has been recently intensively investigated, motivated by many upcoming or planned new spaceborne X-ray observatories like ESA's \textit{XIPE} \citep{XIPE}, CNSA's \textit{eXTP} \citep{eXTP}, and NASA's \textit{NICER} \citep{NICER}, as well as the already deployed ISRO's \textit{Astrosat} \citep{Astrosat}.
 The expectation is that with accurate pulse profile observations we may be able to better constrain the unknown neutron star equation of state (EoS), using the information encoded in the radiation \citep[see e.g.,][]{LMB13}.
 
 Previous studies of emission from NSs are mainly formulated in a way that uses a curved spacetime metric for bending of the photon paths, with special relativistic corrections to radiative processes added separately, in an ad-hoc manner \citep[see e.g.,][]{PFC83, P95, WM01, PG03, PB06}. %and propagate photons starting from the star itself.
 Spacetimes in these studies were also typically described by the spherically symmetric \sch metric.
 As it has turned out, fast rotation can, however, be a serious complication when considering the observed emission.
-First of all, due to a finite pressure supporting the rotating star, the initially spherical star squeezes into an oblate spheroid when the rotation rates increase \citep{CST94, MLC07, aGM14}.
+First of all, due to a finite pressure supporting the rotating star, the star is squeezed into an oblate spheroid, with the oblateness increasing with increasing rate of rotation \citep{CST94, MLC07, aGM14}.
 This bulge in the equator will then distort the gravitational field outside the star.
 In Newtonian theory, the next order correction to a non-spherical object (with azimuthal rotational symmetry and reflection symmetry along the equatorial plane) is defined by the quadrupole moment (see e.g., \citealt{LP99}; but also \citealt{PA12}).
 %\citep[see e.g.,][]{LP99}.
 Introduction of rapid rotation will then not only break the spherical symmetry of the object but also the latitudinal symmetry of the spacetime.
 Pioneering work in computing pulse profiles of such objects was made by \citet{CL05} and \citet{CML07}.
 Recently, a general ray tracing formulation in Hartle-Thorne metric-variant was given in \citet{PJ12} and \citet{BPO12}. This formulation was used to compute accurate pulse profiles in \citet{PO14}.
-Here we seek to provide a similar, but open and publicly available code for solving similar type of problems.
+Here we seek to provide a similar, but open and publicly available code for solving similar types of problems.
 Moreover, because our formulation is fully general relativistic, we can validate the previous special relativistic calculations and provide a solid theoretical basis for the theory of radiation from and around compact rotating objects.
 
 
@@ -141,12 +141,13 @@ Hence, if accurate emission is to be studied from these sources, one has to take
 
 The paper is structured as follows.
 In Section~\ref{sect:theory} we introduce the framework of formulae and the theoretical background needed to compute the emission.
-We also describe the numerical methods used to solve the system of equations and present the publicly available code \textsc{bender}%
+We also describe the numerical methods used to solve the system of equations and present the publicly available code \textsc{bender},%
 \footnote{\textsc{bender}~is available from a public git repository hosted at http://github.com/natj/bender.}
-, which implements this framework.
+which implements this framework.
 Next, in Section~\ref{sect:appl} we apply the code to various physical problems, mostly related to AMPs.
-We do a thorough comparison of the results to existing results when possible to validate our calculations.
-Finally, in Section~\ref{sect:summary} we summarize the work done.
+We compare our results with results in literature, when possible, to validate our calculations.
+%We do a thorough comparison of the results to existing results when possible to validate our calculations.
+Finally, in Section~\ref{sect:summary} we summarize our work.
 
 
 %________________________________________________________________
@@ -207,7 +208,7 @@ In addition to the dimensionless compactness factor $u(r)$ (or $\ub(\rb)$), to d
 \be
 \Ob = \Omega \left( \frac{\Req^3}{G M} \right)^{1/2},
 \ee
-where $\Omega$ is the angular velocity of a sphere with an equatorial radius $\Req$ and a mass $M$ scaled with a Newtonian mass shedding (Kepler) limit $(GM/\Req^3)^{1/2}$ \citep[see][p.29]{rcs}.  
+where $\Omega$ is the angular velocity of a sphere with an equatorial radius $\Req$ and a mass $M$ scaled with the Newtonian mass shedding (Kepler) limit $(GM/\Req^3)^{1/2}$ \citep[see][p.29]{rcs}.  
 Here $\Req$ is described using the usual \sch radial coordinate and corresponds to the equatorial radius of the star for which $2\pi\Req$ gives the proper length of the circumference.  
 The asymptotically flat metric near a stationary axisymmetric rotating object in isotropic form is \citep{BW71} 
 \begin{align}\begin{split} \label{eq:BWmetric}
@@ -222,8 +223,8 @@ where $\wb$ is the angular velocity of the local inertial frame and the function
 Here $e^{-\nub}$ is the time dilation factor relating the proper time of the local observer to the time at infinity.
 Physical interpretation of $\Bb$ follows from the fact that the proper circumference of a circle around the axis of symmetry is $2\pi(e^{-\nub} \Bb \rb \sin\theta)$.
 Similarly, the interpretation of $\zetab$ follows from the fact that $e^{\zetab - \nub}$ acts as a conformal (angle preserving) factor of the spacetime. %determining the orthogonality of the 2-surfaces.
-Note also how the time and space coordinates are connected in the isotropic metric via the $\nub$-term that enters both the radial and angular coordinates also.
-The zeroth terms of the series expansions ($\Ob = 0$) are the familiar isotropic \sch metric coefficients (see Table \ref{tab:coeffs}).
+Note also how the time and space coordinates are connected in the isotropic metric via the $\nub$-term that also enters both the radial and angular terms.
+The zeroth order terms ($\Ob = 0$) of the series expansions are the familiar isotropic \sch metric coefficients (see Table \ref{tab:coeffs}).
 %\be
 %e^{\nu_0} = (1-\ub/2)/(1+\ub/2),
 %\ee
@@ -279,7 +280,7 @@ dr = e^{\zetab} d\rb
 which can be computed using the series presentation of \cite{BI76}.
 
 Since the series expansions of the metric coefficients are expanded using the isotropic radial coordinate $\rb$, we will favor this notation in our derivation.  
-However, in some cases we will simplify the equations into more intuitive form by using the \sch areal $r$ coordinate.
+However, in some cases we will simplify the equations into a more intuitive form by using the \sch areal $r$ coordinate.
 
 
 \subsection{Oblate shape of the neutron star}\label{sect:oblate}
@@ -320,8 +321,9 @@ Then the normal to the surface can be defined using the radial vector $\vec{r}$ 
 \be
 \vec{n} = \cos\gamma \vec{r} + \sin\gamma \vec{\theta}.
 \ee
-See also Fig.~\ref{fig:geom} for a clarification of the angles.
+See Fig.~\ref{fig:geom} for a clarification of the angles.
 From here it is clear how the angles transform easily in the isotropic metric while the quantities related to the area are simplified in the usual \sch metric.
+\red{TODO: From where is it clear that the angles transform easily in the isotropic metric, and areas in the normal Sch metric? We must mention the equations or be otherwise specific, or there will be a referee comment about weasel words.}
 
 
 \subsection{Geodesic motion through Hamilton-Jacobi equation}\label{sect:hamjac}
@@ -489,9 +491,9 @@ dF_E = I_E d\Omega_o,
 \ee
 where $I_E$ is the specific intensity of the radiation at infinity and $d\Omega_o$ is the solid angle subtended by the element as measured by the observer. 
 The total flux is then the integral of these elements over the image plane.
-As a final step this observed flux hast to be connected to the actual emerging radiation.
+As a final step this observed flux has to be connected to the actual emerging radiation.
 
-The relation between the emergent energy $E'$ to the observed energy $E$ is $E/E' = (1 + z)^{-1}$ (see \ref{eq:redshift}).
+From equation~\eqref{eq:redsfhit}, the relation between the emergent energy $E'$ to the observed energy $E$ is $E/E' = (1 + z)^{-1}$.
 The connection between the monochromatic observed and local intensity is then (see e.g. \citealt{MTW73}, p.588; \citealt{RL79}, p.145)
 \be
 I_E = \left( \frac{E}{E'} \right)^3 ~I'_{E'}(\alpha'),
@@ -553,8 +555,8 @@ Hence, the co-rotating observer has a Cartesian metric%
 \begin{align}\begin{split}
 %&\hat{g}_{ij} dx^i dx^j &= \frac{\partial(r, \theta, \phi_*)}{\partial{(x, y, z)} h_{ab} dx^a dx^b  \\
     & \hat{g}_{ij} d\hat{x}^i d\hat{x}^j = \frac{\partial x^a}{\partial \hat{x}^i} \frac{\partial x^b}{\partial \hat{x}^j} h_{ab} dx^a dx^b  \\
-&= \gamma_L^2 dy^2 + \frac{1}{2} [ (1+ \frac{e^{2\zetab}}{\Bb^2})(dx^2 + dz^2) \\
-&+ (\frac{e^{2\zetab}}{\Bb^2} - 1)(dx-dz)(dx + dz) \cos(2\theta) - 2dx dz \sin(2\theta) ] \\
+&= \gamma_L^2 dy^2 + \frac{1}{2} \Biggl[ \Bigl(1+ \frac{e^{2\zetab}}{\Bb^2}\Bigr)(dx^2 + dz^2) \\
+&+ \Bigl(\frac{e^{2\zetab}}{\Bb^2} - 1\Bigr)(dx-dz)(dx + dz) \cos(2\theta) - 2dx dz \sin(2\theta) \Biggr] \\
 & = dx^2 + \gamma_L^2 dy^2 + dz^2 + \mathcal{O}(\Ob^2)
 \end{split}\end{align}
 From the Cartesian form of the co-rotating metric it is also easy to obtain the great circle distance (on a unit sphere) as measured by the co-rotating observer by using the generalized inner-product \eqref{eq:gen_angle} as
@@ -593,8 +595,11 @@ This results in a mixing of the different frames because we would like the integ
 From the projection operator we can work out the total differential area element as
 \begin{align}\begin{split}\label{eq:dSp}
 dS' &= \sqrt{\det h_{ab}} d\theta d\phi d t\\
-&= \frac{e^{\zetab}}{B} \lgamma r^2 \sin\theta d\theta d\phi' = \lgamma d\cos\theta d\phi' + \mathcal{O}(\Ob^2). \\
+%&= \frac{e^{\zetab}}{B} \lgamma r^2 \sin\theta d\theta d\phi' = \lgamma d\cos\theta d\phi' + \mathcal{O}(\Ob^2). \\
+&= \frac{e^{\zetab}}{B} \lgamma R^2 \sin\theta d\theta d\phi' = \lgamma R^2 d\cos\theta d\phi' + \mathcal{O}(\Ob^2) \\
+&= \lgamma dS'' + \mathcal{O}(\Ob^2).
 \end{split}\end{align}
+\red{TODO: In which coordinates is $dS''$ defined now? We had two frames (= coordinate systems), $K$ and $K'$. In which coordinate frame is $dS''$ defined?}
 Hence, a change of $t$ and $\phi$  will result in a stretching of the area element by a factor of $\lgamma$.
 This result is obtained purely from differential geometry.
 To transform from the non-rotating $K$ frame to the co-rotating frame $K'$ we can use the Lorentz invariance of the photon beam cross-section given as \citep{Terrell60, LB85}
@@ -615,6 +620,7 @@ Finally, the total observed angular size is then seen to be
 d\Omega_o = \frac{\lgamma \delta}{1-u} \frac{d \cos\alpha}{d \cos\psi} ~\cos\alpha ~ \frac{dS''}{D^2}.
 \ee
 %as given by the co-rotating frame coordinates $dS'' = R^2 d\cos\theta d\phi'$.
+\red{TODO: This should be clarified. What does ``simultaneous measurements of local static observers'' mean? Same thing for ``Simultaneous measurements made by different static observers are not simultaneous for moving observers due to the coupling between time and space.'' Simultaneity and GR is very elusive and mostly poorly defined. The referee wil give us an ass-kicking if we're not super exact and careful here.}
 It differs by a factor of $\lgamma$ from the S+D approximation that is valid for an infinitesimally small spots.
 In other words, the surface element $dS'$ must be defined based on simultaneous measurements of local \textit{static} observers --- not using simultaneous measurements of comoving observers --- when dealing with finite sized spots on the surface.
 Simultaneous measurements made by different static observers are not simultaneous for moving observers due to the coupling between time and space.
@@ -664,7 +670,7 @@ with a starting guess of
 \begin{equation}\label{eq:apprx_hopf}
   H_0(\mu) = 1 + 2.3\mu - 0.3\mu^2.
 \end{equation}
-We also note that even the simple polynomial expansion \eqref{eq:apprx_hopf} already has an accuracy better than $<2\%$, and as such it can be used in approximate solutions with corresponding first moment of $\alpha_1 = 1.19167$.
+We also note that even the simple polynomial expansion \eqref{eq:apprx_hopf} already has an accuracy better than $<2\%$, and as such it can be used in approximate solutions with a corresponding first moment of $\alpha_1 = 1.19167$.
 
 
 \subsection{Method of solution}\label{sect:num_methods}
@@ -682,7 +688,7 @@ Red dashed line corresponds to the outline of the actual oblate star that is cov
 
 In practice we trace the photons from the image plate at infinity all
 the way to the surface of the star by solving the first order
-differential equations \eqref{eq:deltatime} - \eqref{eq:deltaphi}
+differential equations \eqref{eq:deltatime}--\eqref{eq:deltaphi}
 backwards in time.  In addition, we make a simple variable substitution $\tilde{x} = 1/r$
  that will help us by stretching the step when
 far from the star and shortening it when coming close to the star
@@ -718,6 +724,7 @@ calculate the total flux $F(t)$ we then integrate this small subgrid by
 using an adaptive multidimensional integration.  The algorithm is based
 on a tensor product of nested Clenshaw-Curtis quadrature rules and is
 implemented using the \textsc{Cubature} package.
+\red{TODO: Need a footnote (e.g. Github url) or a reference for Cubature.}
 
 
 
@@ -725,10 +732,10 @@ implemented using the \textsc{Cubature} package.
 %%%%%%%%%%%%
 \section{Applications \& Validation}\label{sect:appl}
 
-Next we present some applications of the framework to some simple physical problems related to neutron stars to showcase the possibilities that one can utilize the code to.
-The examples are also meant to act as a further validation as we provide comparison of the results, when possible.
-Most notably, we employ an extensive comparison against AMP pulse profiles computed with a code that propagates photons forward in time as presented in \citealt{PB06} and in Sect.~\ref{sect:coords}.
-As such, our code serves as a great validation tool for these kind of special relativistic formulations because our framework is fully general relativistic and propagates photons backwards in time from the observer to the surface.
+Next we present some applications of the framework to some simple physical problems related to neutron stars to showcase the possibilities that one can utilize the code for.
+The examples are also meant to act as a further validation, as we provide a comparison with existing literature results, when possible.
+Most notably, we employ an extensive comparison against AMP pulse profiles computed with a code that propagates photons forward in time as presented in \citet{PB06} and in Sect.~\ref{sect:coords}.
+As such, our code serves as a great cross-validation tool for these kind of special relativistic formulations because our framework is fully general relativistic and propagates photons backwards in time from the observer to the surface.
 
 
 
@@ -749,11 +756,11 @@ As such, our code serves as a great validation tool for these kind of special re
 
 As a first application of the code, we can determine the photon trajectories using the ray tracing algorithm and produce an image of the neutron star as seen by the observer.
 This also shows how we can connect the Cartesian coordinates $\hat{x}$ and $\hat{y}$ of the observer to the coordinates $\phi_e$ and $\theta_e$ of the star.
-Left panel in Fig.~\ref{fig:image} shows the trajectory of the photons using also a third $\hat{z}$ dimensions along the Cartesian image plane coordinates.
+Left panel in Fig.~\ref{fig:image} shows the trajectory of the photons in 3D, using a $\hat{z}$-coordinate in addition to the Cartesian image plane coordinates $\hat{x}$ and $\hat{y}$.
 The star is chosen to have $R=12~\mathrm{km}$ and $M=1.5~\Msun$, whereas the observer is located at the equator with an inclination of $i = 90^{\circ}$.
 Here the photons originate from the image plane located at $\hat{z} = 20$ and are then propagated backwards in time until they intersect with the surface of the star (center of the star located at $\hat{z} = 0$) , visualized with a spherical see-through wiregrid frame.
 Right panel of the figure shows the projected image as seen by a distant observer.
-Here the star is covered with a chess board pattern to show the varying $\phi_e$ and $\theta_e$ coordinates.
+Here the star is covered with a chess board pattern to show how the $\phi_e$ and $\theta_e$ coordinates on the neutron star surface are seen by the distant observer.
 
 
 \subsection{Accuracy of the split Hamilton-Jacobi propagator}
@@ -810,36 +817,36 @@ We further note that in cases of extreme rotation or when high precision is requ
 \end{figure}
 
 As a next step, we can study the energy dependent flux from the star by computing the observed energy distribution $E$ for a delta injection of energy $E'$ from the surface.
-Because of the varying redshift along the surface of the star due to Doppler boosting, the observer then sees a range of energies in her detector \citep{OP03,BML06,CMB06}.
-Example of line profiles are shown in Fig.~\ref{fig:line_profiles} for different spacetimes and star configurations.
+Because of the varying redshift along the surface of the star due to Doppler boosting, the observer then sees a range of energies \citep{OP03,BML06,CMB06}.
+Examples of line profiles are shown in Fig.~\ref{fig:line_profiles} for different spacetimes and star configurations.
 The flux is normalized so that the emitted bolometric flux is unity, i.e., the area encapsulated by the profile is one.
 In each case, the star is taken to have $\nu = 700~\mathrm{Hz}$, $R = 10~\mathrm{km}$, and $M=1.4~\Msun$.
 Observer inclination is $i=20^{\circ}$ and emission is taken to be proportional to $(E/E')^3$ with an isotropic beaming for simplicity.
-We consider \sch spacetime for spherical and oblate stars (radius given by eq. \ref{eq:radf}), in addition to a full second-order spacetime with quadrupole moments and oblate surfaces.
+We consider a \sch spacetime for spherical and oblate stars, with radius given by equation~\ref{eq:radf}, in addition to a full second-order spacetime with quadrupole moments and an oblate neutron star surface.
 
-The obtained profiles can be compared to the ones in fig.~2 of \citealt{BPO13} where the \sch results are seen to match well with our calculations.
+The obtained profiles can be compared to the ones in Fig.~2 of \citet{BPO13} where the \sch results are seen to match well with our calculations.
 For the second-order metric we see a deviation due to the differing value of the quadrupole moments:
 In the Hartle-Thorne metric \citep{HT68} the quadrupole moment is given by $q = -a^2 (1 + \eta)$, where $a$ is the dimensionless spin parameter (see eq. \eqref{eq:wbar} and our $j$) and $\eta$ is the strength of the deviation from a spherical potential ($\eta = 0$ reduces to Kerr-like spacetime).
-In the paper, \citealt{BPO13}~ select $\eta=3.3$ that is a typical value given by the FPS EoS \citep{FPS} for a star with $M\approx1.4~\Msun$ \citep[see][]{LP99}.
+\citet{BPO13} select $\eta=3.3$ that is a typical value given by the FPS EoS \citep{FPS} for a star with $M\approx1.4~\Msun$ \citep[see][]{LP99}.
 For the angular momentum they adopt $a = 0.357$, again, as given by the FPS EoS at $\nu \approx 700~\mathrm{Hz}$.
 With the aforementioned value, their quadrupole moment is then $q \approx -0.548$.
 
 The quadrupole moment is larger for a stiffer EoS, because a stiffer EoS produces a larger star and the quadrupole moment scales with the square of the radius.
-For us, this scaling is taken into account by the relations \eqref{eq:quad} and \eqref{eq:beta} that are obtained by fitting a large library of EoSs \citep[see][]{aGM14} to yield us a consistent quadrupole moment at any given mass, radius (i.e., stiffness) and angular velocity.
+For us, this scaling is taken into account by the relations \eqref{eq:quad} and \eqref{eq:beta} that are obtained by fitting a large library of EoSs \citep[see][]{aGM14} to yield a consistent quadrupole moment at any given mass, radius (i.e., stiffness) and angular velocity.
 This scaling also hides the difference between the non-rotating and rotating radii because it is formulated using the equatorial radius $R_{\mathrm{e}}$.
 Alternatively, one could always consider the corresponding $R_0$ of a non-rotating configuration for which $R_0 \le R_{\mathrm{e}}$ for any given $\Ob$.
 For a $M=1.4~\Msun$, $R_{\mathrm{e}}=10~\mathrm{km}$, and $\nu = 700~\mathrm{Hz}$ we obtain $j \approx 0.275$, $q \approx -0.268$, and $\beta \approx 0.010$ that then give $\qinv \approx -0.255$.
 Additionally, a star like this with $\Ob \approx 0.323$ has an eccentricity $\epsilon \approx 0.341$ as given by the radius function \eqref{eq:radf}.
 Line profile emerging from a such a star is shown with a red solid line in Fig.~\ref{fig:line_profiles} and is not seen to develop a narrow core because the quadrupole moment is not strong enough to dominate over the gravitational part $e^{\nub_0}$ in the $g_{tt}$ component of the metric.
-By artificially enhancing the quadrupole moment to be $q \times 2$, roughly consistent with the value used by \citealt{BPO13}, we do reproduce the narrow feature in the blue part of the line profile for a spherical star.
-For an oblate star, we need $q \times (4-5)$ for the line profile to produce a narrow core as seen by the red dashed line in Fig.~\ref{fig:line_profiles}.
-Here the large difference between the spherical configuration is explained by the increasing eccentricity of the star that acts as a countering force because it strengthens the gravitational part of the $g_{tt}$ component due to the star being more compressed, and hence more compact, around the poles.
+By artificially enhancing the quadrupole moment to be $q \times 2$, roughly consistent with the value used in \citet{BPO13}, we do reproduce the narrow feature in the blue part of the line profile for a spherical star.
+For an oblate star, we need $q \times (4-5)$ for the line profile to produce a narrow core as seen in the red dashed line in Fig.~\ref{fig:line_profiles}.
+Here the large difference to the spherical configuration is explained by the increasing eccentricity of the star that acts as a countering force because it strengthens the gravitational part of the $g_{tt}$ component due to the star being more compressed, and hence more compact, around the poles.
 
 On the other hand, by adopting $M = 1.4~\Msun$, $j = 0.357$ and $\nu = 700~\mathrm{Hz}$, our radius is fixed to be $R_{\mathrm{e}} \approx 11.8~\mathrm{km}$.
-This results in an eccentricity of $\epsilon \approx 0.444$, $\beta \approx 0.013$, $q \approx -0.613$, and $\qinv \approx -0.595$, consistent with the values given by the FPS EoS as tabulated by \citealt{LP99} for $q$ and by \citealt{CST94} for the rest of the parameters.
+This results in an eccentricity of $\epsilon \approx 0.444$, $\beta \approx 0.013$, $q \approx -0.613$, and $\qinv \approx -0.595$, consistent with the values given by the FPS EoS as tabulated by \citet{LP99} for $q$ and by \citet{CST94} for the rest of the parameters.
 Note also that $R_0 = 10.85~\mathrm{km}$ for $M=1.4~\Msun$ with a stiffness given by the FPS EoS \citep{CST94}.
 No narrow core is seen to form in this case either as it is always the increasing gravitational part of the $g_{tt}$ near the compressed poles that counters the increasing quadrupole moment with increasing eccentricity.
-In fact, no narrow core is ever seen to form with our consistent way of calculating the resulting oblateness and quadrupole moments.
+In fact, no narrow core is ever seen to form when the oblateness and quadrupole moments are computed in a consistent way, as above.
 To validate this, we computed line profiles for a range of $R_{\mathrm{e}}$ ranging from $10$ to $16$ km as shown in Fig.~\ref{fig:line_profiles_sweep} for $M=1.4~\Msun$.
 No deviations from the overall rather smooth profile is seen even for the extreme case of $M = 1.1~\Msun$ where we expect to maximize the quadrupole moment of the configuration.
 
@@ -848,7 +855,7 @@ No deviations from the overall rather smooth profile is seen even for the extrem
 \subsection{AMPs pulse profiles}\label{sect:AMPs}
 
 From here on, we move to time-dependent ray tracing problems by considering pulse profiles from AMPs.
-Here some hot spot on top of the surface is emitting and the star is seen to rotate with a frequency of $\Omega$.
+Here a hot spot on top of the surface is emitting and the star is seen to rotate with a frequency of $\Omega$.
 
 
 %\subsubsection{Schwarzchild $+$ Doppler}
@@ -858,10 +865,10 @@ For simplicity, only spherical stars were considered here.
 Main parameters were: the stellar mass $M = 1.6~\Msun$, the stellar radius $R = 12~\mathrm{km}$, the observer inclination $i = 60^{\circ}$ and the colatitude of the spot $\theta_{\mathrm{s}} = 50^{\circ}$.  
 The effective temperature of the radiation was set to $T_{\mathrm{eff}} = 2~\mathrm{keV}$.  
 The distance to the source was assumed to be $D = 10~\mathrm{kpc}$.  
-We defined a circular spot with angular radius $\rho$ either $1$ or $30$ degrees.
+We defined a circular spot with an angular radius $\rho$ of either $1$ or $30$ degrees.
 Here the spot is defined using an angle as measured by the co-rotating observer (see eq.~\ref{eq:rel_cos}) to coincide with the S+D approximation.
 Hence, the spot is circular in shape for the co-rotating observer, but not so for the distant static observer, as measured by using the \textit{angular} size, not \textit{linear} size on the surface.
-Angular distribution of radiation corresponds either to isotropic blackbody with constant intensity or an electron scattering dominated atmosphere, i.e., Hopf profile.
+Angular distribution of radiation corresponds either to isotropic blackbody with constant intensity or an electron scattering dominated atmosphere, i.e., the Hopf profile.
 
 
 The light curves are computed in 128 time bins.  Zero time $t = 0$ corresponds to the moment when the spot center crosses the plane defined by the spin axis and the direction to the observer.  
@@ -890,7 +897,7 @@ We computed curves for the five following quantities: monochromatic photon flux 
 
 Comparison of these lightcurves are shown in Fig.~\ref{fig:sch_comp1} for slowly rotating star ($1$ Hz) and in Fig.~\ref{fig:sch_comp400} for fast rotation ($400$ Hz).
 In practice, comparing the profiles for slow rotation only tests our ray tracing routines because special relativistic effects (Doppler boosting, angle aberration and so on) are negligible.
-Overall agreement of the two different methods is excellent and from here a baseline accuracy of about $<0.2\%$ relative error is constrained for the mapping of quantities between image plane and star's surface.
+Overall agreement of the two different methods is excellent and from here a baseline accuracy of about $<0.2\%$ relative error is obtained for the mapping of quantities between image plane and star's surface.
 Similarly, when rotation is increased and special relativistic effects start to play a role we are able to reproduce the pulse profiles usually down to $<0.3\%$ relative error, except near $\phi_{\mathrm{e}} \sim 0$.
 Here the tilt of the spot increases and even though the absolute error remains the same, the relative error grows because the observed flux is smaller and smaller for a more inclined spot.
 No large deviation between isotropic and Hopf profile is detected either, indicating a good agreement in our emission angle computations and formulation.
@@ -922,22 +929,22 @@ No large deviation between isotropic and Hopf profile is detected either, indica
 \end{figure*}
 
 Next we compare emission from oblate stars.
-The surface here is defined using the radius function \eqref{eq:radf} but the star is still embed in a symmetric \sch spacetime.
-The parameters used are equatorial radius $R_{\mathrm{eq}} = 12~\mathrm{km}$ (in the usual \sch metric), star mass of $M = 1.4~\Msun$, extreme rotational frequency $\nu = 700~\mathrm{Hz}$, observer inclination $i=45^{\circ}$, and spot angular size of $\rho = 10^{\circ}$
-Effective temperature of the radiation is again taken to be $T_{\mathrm{eff}} = 2~\mathrm{keV}$, and the distance $D = 10~\mathrm{kpc}$.
+The surface here is defined using the radius function \eqref{eq:radf} but the star is still embedded in a symmetric \sch spacetime.
+The parameters used are equatorial radius $R_{\mathrm{eq}} = 12~\mathrm{km}$ (in the usual \sch metric), neutron star mass of $M = 1.4~\Msun$, extreme rotational frequency $\nu = 700~\mathrm{Hz}$, observer inclination $i=45^{\circ}$, and spot angular size of $\rho = 10^{\circ}$.
+Effective temperature of the radiation is again taken to be $T_{\mathrm{eff}} = 2~\mathrm{keV}$, and the distance to be $D = 10~\mathrm{kpc}$.
 Here the spot size is defined in the co-rotating \textit{spherical} coordinate system on top of a unit sphere and is then projected to the oblate inclined surface.
 To trace the effects of the changing surface we consider the spot in three different locations at colatitudes of $\theta_{\mathrm{S}} = 18^{\circ}$, $45^{\circ}$, and $90^{\circ}$.
-Additionally, we consider a spot with emission angle-dependent intensity.
-This is done for electron scattering atmosphere with $\theta_{\mathrm{S}} = 45^{\circ}$.
+Additionally, we consider a spot with angle-dependent emission intensity.
+This is done using the electron scattering atmosphere with $\theta_{\mathrm{S}} = 45^{\circ}$.
 %Additionally for $\theta_{\mathrm{S}} = 90^{\circ}$ when the spot is on the equator we observer a full eclipse in the light curve.
 %This imposes a serious test for both of the codes as the gradually more and more blocked spot is also seen from a very shallow angle before disappearing and appearing again.
 %We note that when integrating flux from the spot in the image plane, a polar subgrid is extremely useful just before the eclipse as the impact parameter can vary only by a $\sim1\%$ before the spot is hidden behind the star.
 %Attaining a similar resolution in a Cartesian subgrid would then need far more integrand evaluations as the spot is seen from a very shallow angle.
 
-Comparison of the oblate lightcurves are shown in Fig.~\ref{fig:osch_comp700}.
-Again we obtain excellent agreement against the forward-in-time method with similar errors as in the spherical case (relative error $< 0.2\%$).
+A comparison of the oblate lightcurves is shown in Fig.~\ref{fig:osch_comp700}.
+Again we obtain an excellent agreement with the forward-in-time method, with similar errors as in the spherical case (relative error $< 0.2\%$).
 This agreement is, of course, expected since our method is general and does not depend on the shape of the emitting surface.
-Only large deviation is, again, seen when the spot is viewed from an extreme angle for $\theta_{\mathrm{s}} = 90^{\circ}$, just before the eclipse.
+The only large deviation is again seen when the spot is viewed from an extreme angle for $\theta_{\mathrm{s}} = 90^{\circ}$, just before the eclipse.
 
 %\subsection{Hartle-Thorne -like spacetimes}
 %\begin{figure*}
@@ -970,14 +977,14 @@ Only large deviation is, again, seen when the spot is viewed from an extreme ang
 \end{figure}
 
 
-As a last example, after the comparisons, we calculate full skymaps of the emerging radiation from rapidly rotating oblate AMPs as shown in Fig.~\ref{fig:skymap}
+As a last example, after the comparisons, we calculate full skymaps of the emerging radiation from rapidly rotating oblate AMPs as shown in Fig.~\ref{fig:skymap}.
 The emission from the AMP is shown for all possible observers and is mapped to the y-axis by using the observer's inclination angle $i$.
 X-axis of the map is the usual pulse phase.
 The brightness of the skymap is proportional to the received bolometric photon number flux.
-Cutting the skymap from one particular $i$ produces the light curve as seen by the observer.
+Taking a slice of the skymap at one particular value of $i$ produces the light curve as seen by the observer at that inclination.
 Calculations here are done for an extreme case of a NS with $R_{\mathrm{e}} = 15~\mathrm{km}$, $M=1.6~\Msun$, and $\nu = 600~\mathrm{Hz}$.
-Spot size of $\rho = 10^{\circ}$ is considered (now defined in the spherical co-rotating coordinate system using linear length scales), with a varying co-latitude ranging from near the pole at $\theta_{\mathrm{s}} = 10^{\circ}$ to a spot in the equator at $\theta_{\mathrm{s}} = 90^{\circ}$.
-We consider both, one and two (antipodal) spots with isotropic beaming and black body emission with $T_{\mathrm{eff}} = 2~\mathrm{keV}$.
+Spot size of $\rho = 10^{\circ}$ is considered (now defined in the spherical co-rotating coordinate system using linear length scales \red{TODO: What does this mean? Taken at face value, it seems to imply that we have non-linear length scales somewhere, or that the angular measurement $\rho$ is actually now defined with spatial, not angular units. Need to clarify.}), with varying co-latitudes ranging from near the pole at $\theta_{\mathrm{s}} = 10^{\circ}$ to the equator at $\theta_{\mathrm{s}} = 90^{\circ}$.
+We consider both the cases of one spot and two antipodal spots with isotropic beaming and black body emission with $T_{\mathrm{eff}} = 2~\mathrm{keV}$.
 As a result, we can see that full eclipses are only observed with one spot.
 From here it is also easy to see how the maxima and minima of the flux varies in phase when the viewing angle of the observer is changing.
 The effect becomes the most prominent with two spots located at $\theta_{\mathrm{s}} \sim 50-70^{\circ}$ (second antipodal spot at $\theta_{\mathrm{s,2}} \sim 110-130^{\circ}$) and the minimum is seen to change from around phase 0.2 all the way to 0.4.
@@ -994,10 +1001,10 @@ From here the symmetry between $\theta_{\mathrm{s}}$ and $i$ becomes obvious as 
 
 
 \section{Summary}\label{sect:summary}
-We have made a detailed study of radiation emerging from and near rotating compact objects.
-Framework of formulas were derived in a fully general relativistic manner and were then specialized to NSs.
+We have presented a detailed study of radiation emerging from and near rotating compact objects.
+A framework of formulae for solving this problem was derived in a fully general relativistic manner. The formulae were then specialized to the context of rotating neutron stars.
 
-Firstly, in Section \ref{sect:spacetime} we give a detailed description of the second-order in rotation spacetime metrics that was used.
+Firstly, in Section \ref{sect:spacetime} we gave a detailed description of the second-order in rotation spacetime metrics that was used.
 The spacetime is no longer described by a spherically symmetric \sch metric but has non-zero quadrupole moments similar to the Hartle-Thorne metric.
 The quadrupole moments $q$ and $\beta$ can then be defined via approximative relations for a wide span of NS masses, radii and spins \citep{aGM14}.
 When the rotation increases, the star also starts to deviate from a sphere due to the weakening of the gravitational force on the equator because of the increasing centrifugal force.
@@ -1006,26 +1013,26 @@ An approximative relation for the resulting oblate spheroidal shape of the star 
 Secondly, we derived, a new ray tracing formulation using a so-called split Hamilton-Jacobi (also known as super-Hamiltonian) method.
 This derivation is presented and discussed in detail in Sections \ref{sect:hamjac} and \ref{sect:raytracing}.
 Instead of using the geodesic equation that is a second-order differential equation we separate the Hamilton-Jacobi equation using a third constant of motion known as Carter's constant.
-The method is exact up to first-order in rotation (Kerr-like spacetime with frame-dragging effects) but remains sufficiently accurate also for second order in rotation because deviations by the quadrupole moments are small.
+The method is exact up to first-order in rotation (Kerr-like spacetime with frame-dragging effects) but remains sufficiently accurate also for second order in rotation because deviations caused by the quadrupole moments are small.
 Formulating the components of the four-momentum vector like this has the useful feature that the polarization of the radiation can easily be taken into account \citep[see e.g.][]{cha, dexter2016}
 
-Thirdly, we give a thorough description of the calculations related to the actual emission of the radiation.
-Effects like redshift, Doppler boosting and emission angle of the photon are discussed in a fully general relativistic manner in Sections \ref{sect:redshift_angle} and \ref{sect:emission}, hence also validating the previous ad-hoc special relativistic formulations \citep[see e.g.][]{PG03, PB06}.
-In the special relativistic formulation by \citealt{PB06} the calculations are done in flat spacetime and then Lorentz boosted to the rotating relativistic frame.
-In Section \ref{sect:coords}, we derive a connection to this method by introducing a way to measure the angle size of a pattern in the co-rotating frame.
-Full solid angle element is also derived to go beyond the S+D approximation of a infinitely small spots.
-Most notably, this leads to a difference of $\lgamma$ (i.e., a simple Lorentz contraction in \sch metric) on the observed flux.
-We also briefly discuss the actual intensity of the emerging radiation and present an iterative method to solve the Chandrasekhar-Ambartsumian integral (along an approximative polynomial expansion) that is related to the angle-dependent electron scattering atmosphere in Section \ref{sect:angular_distr}.
-Numerical methods to solve all of the presented equations are then laid out in Section \ref{sect:num_methods}.
+Thirdly, we gave a thorough description of the calculations related to the actual emission of the radiation.
+Effects like redshift, Doppler boosting and emission angle of the photon were discussed in a fully general relativistic manner in Sections \ref{sect:redshift_angle} and \ref{sect:emission}, hence also validating the previous ad-hoc special relativistic formulations \citep[see e.g.][]{PG03, PB06}.
+In the special relativistic formulation by \citet{PB06} the calculations are done in a flat spacetime and then Lorentz boosted to the rotating relativistic frame.
+In Section \ref{sect:coords}, we derived a connection to this method by introducing a way to measure the angular size of a pattern in the co-rotating frame.
+Full solid angle element is also derived to go beyond the S+D approximation of infinitely small spots.
+Most notably, this leads to a difference by a factor of $\lgamma$ on the observed flux, understood to originate from a simple Lorentz contraction in \sch metric.
+We also briefly discussed the actual intensity of the emerging radiation and presented an iterative method to solve the Chandrasekhar-Ambartsumian integral (along an approximative polynomial expansion) that is related to the angle-dependent electron scattering atmosphere in Section \ref{sect:angular_distr}.
+Numerical methods to solve all of the presented equations were then laid out in Section \ref{sect:num_methods}.
 
-Finally, in Section \ref{sect:appl} we present some applications of the framework.
-Connection to previous work in the literature is also made, when possible.
-As a first simple example, we show how the image of NS is formed in a curved spacetime.
+Finally, in Section \ref{sect:appl} we presented some applications of the framework.
+Connection to previous work in the literature was also made, when possible.
+As a first simple example, we showed how the image of NS is formed in a curved spacetime.
 Next, we studied the energy dependent emission by considering the emerging line profiles.
-Most notably we conclude that when our consistent formulation of increasing eccentricity of the star is coupled with the related quadrupole moments, no narrow features are ever seen in the line profiles.
-We then employ an extensive and thorough study of AMP pulse profiles and exhaustively compare them to previous special relativistic calculations.
-Here the agreement between the two methods is seen to be excellent.
-Lastly, and for the first time, we compute full skymaps of radiation emerging from rapidly rotating AMPs taking into account the oblate shape of the star and the quadrupole moments of the spacetime metric.
+Most notably, we concluded that when a consistent formulation is used for how the increasing eccentricity of the star is coupled with the related quadrupole moments, no narrow features are seen in the line profiles.
+We then did an extensive and thorough study of AMP pulse profiles and compared our results to results obtained using existing special relativistic methods found in the literature.
+Here the agreement between the two methods was found to be excellent.
+Lastly, for the first time, we computed full skymaps of radiation emerging from rapidly rotating AMPs, taking into account the oblate shape of the star and the quadrupole moments of the spacetime metric.
 
 
 
@@ -1036,7 +1043,7 @@ Lastly, and for the first time, we compute full skymaps of radiation emerging fr
 We offer sincere thanks to various people that helped to improve the formulation of the theory and the actual paper by engaging the authors to helpful discussions: Most notably we would like to thank Cole Miller, Fred Lamb and Sharon Morsink for their help and comments.
 We also offer special thanks to Tuomo Salmi for producing us the pulse profiles for the code comparison.
 JN acknowledges support from the University of Turku Graduate School in Physical and Chemical Sciences.
-\red{PP thanks..}
+PP acknowledges support from the Academy of Finland, grant no.~1274931.
 This work benefited from discussions at the International Symposium on Neutron Stars in the Multi-Messenger Era in May 2016 supported by the National Science Foundation under Grant No. PHY-1430152 (JINA Center for the Evolution of the Elements).
 \red{INT2b-16 pre-print number}
 }
@@ -1056,6 +1063,7 @@ This work benefited from discussions at the International Symposium on Neutron S
 
 \section{Underlying elliptic integrals of the four-momentum components}
 
+\red{TODO: Are these actually used in the code? The fact Hamilton-Jacobi equations separating in coordinates of oblate spheroidal type can be solved with Jacobi elliptic integrals is known. If we don't have novelty here, we probably should not include this bit.}
 After separating the equation \eqref{eq:hamjac} with the help of the Carter's constant $\Ca$, we get the remaining four-momentum components
 \be\label{eq:pr}
 p_r = \pd_r S = e^{\zetab-2\nub} \left( (E-L_z \omega)^2 - \frac{\mathcal{C}}{\Bb^2 e^{-4\nub} \rb^2} \right)^{1/2} = \mathcal{R}(r)
