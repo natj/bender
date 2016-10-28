@@ -81,9 +81,7 @@
 \title{Radiation from rapidly rotating oblate neutron stars}
 
 %\author{J. N\"attil\"a\altaffilmark{1,2}\thanks{nattila.joonas@gmail.com} \textit{et al.} }
-\author{J. N\"attil\"a\altaffilmark{1,2}\thanks{nattila.joonas@gmail.com},
-  P. Pihajoki\altaffilmark{3},
-  \red{J. Poutanen\altaffilmark{1,2}(?)}}
+\author{J. N\"attil\"a\altaffilmark{1,2}\thanks{nattila.joonas@gmail.com} \and P. Pihajoki\altaffilmark{3}}
 
 \affil{}
 \altaffiltext{1}{Tuorla Observatory, University of Turku}
@@ -318,12 +316,11 @@ The angle $\gamma$, defined as the angle between the radial unit vector $\vec{r}
 \cos\gamma = \left(1 + f(\theta)^2\right)^{-1/2}.
 \ee
 Then the normal to the surface can be defined using the radial vector $\vec{r}$ and the tangential vector $\vec{\theta}$ as
-\be
+\be\label{eq:surf_norm}
 \vec{n} = \cos\gamma \vec{r} + \sin\gamma \vec{\theta}.
 \ee
 See Fig.~\ref{fig:geom} for a clarification of the angles.
-From here it is clear how the angles transform easily in the isotropic metric while the quantities related to the area are simplified in the usual \sch metric.
-\red{TODO: From where is it clear that the angles transform easily in the isotropic metric, and areas in the normal Sch metric? We must mention the equations or be otherwise specific, or there will be a referee comment about weasel words.}
+
 
 
 \subsection{Geodesic motion through Hamilton-Jacobi equation}\label{sect:hamjac}
@@ -467,7 +464,10 @@ consisting of the gravitational part $e^{\nub}$ and of the second Doppler-like t
 
 To compute the emission angle we again have to take the rotating frame into account.  
 This can be done by introducing a projection operator $\bar{h}_{ab} = g_{ab} + s_a s_b$, which projects 4-vectors from the non-rotating frame to the rotating frame where the radiative processes are defined.  
-As a definition, we can take the emission angle to be the angle between photon and a spacelike surface normal vector $n_{\alpha} = (0, \cos\gamma/N_n, \rb \sin\gamma/N_n, 0)$, with normalization $N_n = e^{\zetab - \nub}$ fulfilling $n_{\alpha}n^{\alpha} = -1$.  
+As a definition, we can take the emission angle to be the angle between photon and a spacelike surface normal vector\footnote{
+Line element in spherical coordinates is $d\vec{s} = dr \vec{\hat{r}} + r d\theta \vec{\hat{\theta}} + r \sin\theta d\phi \vec{\hat{\phi}}$ and by combining this with equation \eqref{eq:surf_norm} we obtain the presented surface normal.
+}
+$n_{\alpha} = (0, \cos\gamma/N_n, \rb \sin\gamma/N_n, 0)$, with normalization $N_n = e^{\zetab - \nub}$ fulfilling $n_{\alpha}n^{\alpha} = -1$.  
 When projected to the rotating-frame we can then obtain the angle from the generalized dot-product definition between two vectors as
 \be\label{eq:gen_angle}
 \cos\alpha' = \frac{\bar{h}_{ab}n^a u^b}{(\bar{h}_{ab} n^a n^a)^{1/2} (\bar{h}_{ab} u^a u^b)^{1/2}}.
@@ -493,7 +493,7 @@ where $I_E$ is the specific intensity of the radiation at infinity and $d\Omega_
 The total flux is then the integral of these elements over the image plane.
 As a final step this observed flux has to be connected to the actual emerging radiation.
 
-From equation~\eqref{eq:redsfhit}, the relation between the emergent energy $E'$ to the observed energy $E$ is $E/E' = (1 + z)^{-1}$.
+From equation~\eqref{eq:redshift}, the relation between the emergent energy $E'$ to the observed energy $E$ is $E/E' = (1 + z)^{-1}$.
 The connection between the monochromatic observed and local intensity is then (see e.g. \citealt{MTW73}, p.588; \citealt{RL79}, p.145)
 \be
 I_E = \left( \frac{E}{E'} \right)^3 ~I'_{E'}(\alpha'),
@@ -596,12 +596,14 @@ From the projection operator we can work out the total differential area element
 \begin{align}\begin{split}\label{eq:dSp}
 dS' &= \sqrt{\det h_{ab}} d\theta d\phi d t\\
 %&= \frac{e^{\zetab}}{B} \lgamma r^2 \sin\theta d\theta d\phi' = \lgamma d\cos\theta d\phi' + \mathcal{O}(\Ob^2). \\
-&= \frac{e^{\zetab}}{B} \lgamma R^2 \sin\theta d\theta d\phi' = \lgamma R^2 d\cos\theta d\phi' + \mathcal{O}(\Ob^2) \\
-&= \lgamma dS'' + \mathcal{O}(\Ob^2).
+&= \frac{e^{\zetab}}{B} \lgamma R^2 \sin\theta d\theta d\phi' = \lgamma R^2 d\cos\theta d\phi' + \mathcal{O}(\Ob^2).
+%&= \lgamma dS'' + \mathcal{O}(\Ob^2).
 \end{split}\end{align}
-\red{TODO: In which coordinates is $dS''$ defined now? We had two frames (= coordinate systems), $K$ and $K'$. In which coordinate frame is $dS''$ defined?}
+%\red{TODO: In which coordinates is $dS''$ defined now? We had two frames (= coordinate systems), $K$ and $K'$. In which coordinate frame is $dS''$ defined?}
 Hence, a change of $t$ and $\phi$  will result in a stretching of the area element by a factor of $\lgamma$.
 This result is obtained purely from differential geometry.
+
+Next we will work only in the \sch case and consider only terms up to $\mathcal{O}(\Ob^2)$.
 To transform from the non-rotating $K$ frame to the co-rotating frame $K'$ we can use the Lorentz invariance of the photon beam cross-section given as \citep{Terrell60, LB85}
 \be
 \cos\alpha ~dS = \cos\alpha' ~dS'.
@@ -610,23 +612,23 @@ To transform from the non-rotating $K$ frame to the co-rotating frame $K'$ we ca
 Connection between the emission angles $\cos\alpha'$ and $\cos\alpha$ is also known from equations \eqref{eq:cosap} and \eqref{eq:cosa} and is seen to be a simple Doppler boost factor $\delta$.
 From here we then obtain
 \be
-dS = \lgamma \delta dS'',
+dS = \lgamma \delta R^2 \sin\theta d\theta d\phi',
 \ee
-as given by the co-rotating frame coordinates $dS'' = R^2 d\cos\theta d\phi'$.
+as given by the co-rotating frame coordinates.
 %when taking into account also the transformation of frames $K$ and $K'$ using the differential area from \eqref{eq:dSp}.
 %A possible misconception here might arise from the fact that the power emitted is Lorentz invariant but the power received is not \citep[see e.g.][]{Ghi99}!
 Finally, the total observed angular size is then seen to be 
 \be
-d\Omega_o = \frac{\lgamma \delta}{1-u} \frac{d \cos\alpha}{d \cos\psi} ~\cos\alpha ~ \frac{dS''}{D^2}.
+d\Omega_o = \frac{\lgamma \delta}{1-u} \frac{d \cos\alpha}{d \cos\psi} ~\cos\alpha ~ \frac{R^2 \sin\theta d\theta d\phi'}{D^2}.
 \ee
 %as given by the co-rotating frame coordinates $dS'' = R^2 d\cos\theta d\phi'$.
-\red{TODO: This should be clarified. What does ``simultaneous measurements of local static observers'' mean? Same thing for ``Simultaneous measurements made by different static observers are not simultaneous for moving observers due to the coupling between time and space.'' Simultaneity and GR is very elusive and mostly poorly defined. The referee wil give us an ass-kicking if we're not super exact and careful here.}
+%\red{TODO: This should be clarified. What does ``simultaneous measurements of local static observers'' mean? Same thing for ``Simultaneous measurements made by different static observers are not simultaneous for moving observers due to the coupling between time and space.'' Simultaneity and GR is very elusive and mostly poorly defined. The referee wil give us an ass-kicking if we're not super exact and careful here.}
 It differs by a factor of $\lgamma$ from the S+D approximation that is valid for an infinitesimally small spots.
-In other words, the surface element $dS'$ must be defined based on simultaneous measurements of local \textit{static} observers --- not using simultaneous measurements of comoving observers --- when dealing with finite sized spots on the surface.
+In special relativity we could say that the surface element $dS'$ must be defined based on simultaneous measurements of local \textit{static} observers --- not using simultaneous measurements of comoving observers --- when dealing with finite sized spots on the surface.
 Simultaneous measurements made by different static observers are not simultaneous for moving observers due to the coupling between time and space.
 Hence, ray tracing photons from the observer to the star and using the frame of the static observer our time coordinate is automatically correct and the difference is seen in the size of the spots (see eq. \ref{eq:rel_cos}).
 Working in the co-rotating frame $K'$ the lengths (i.e., spot size and shape) are taken to be correct and it is a question of how to connect the time intervals to the observers time measurements.
-Here the error in time might be interpreted as not taking into account the different photon arrival times to the detector.
+Here the error in time might then be interpreted as not taking into account the different photon arrival times to the detector.
 
 
 \subsection{Angular distribution of radiation}\label{sect:angular_distr}
@@ -723,8 +725,9 @@ $\hat{x}$ and $\hat{y}$) depending on the total area covered in the observers sk
 calculate the total flux $F(t)$ we then integrate this small subgrid by
 using an adaptive multidimensional integration.  The algorithm is based
 on a tensor product of nested Clenshaw-Curtis quadrature rules and is
-implemented using the \textsc{Cubature} package.
-\red{TODO: Need a footnote (e.g. Github url) or a reference for Cubature.}
+implemented using the \textsc{Cubature} package.\footnote{
+\url{http://ab-initio.mit.edu/wiki/index.php/Cubature}}
+
 
 
 
@@ -983,7 +986,7 @@ X-axis of the map is the usual pulse phase.
 The brightness of the skymap is proportional to the received bolometric photon number flux.
 Taking a slice of the skymap at one particular value of $i$ produces the light curve as seen by the observer at that inclination.
 Calculations here are done for an extreme case of a NS with $R_{\mathrm{e}} = 15~\mathrm{km}$, $M=1.6~\Msun$, and $\nu = 600~\mathrm{Hz}$.
-Spot size of $\rho = 10^{\circ}$ is considered (now defined in the spherical co-rotating coordinate system using linear length scales \red{TODO: What does this mean? Taken at face value, it seems to imply that we have non-linear length scales somewhere, or that the angular measurement $\rho$ is actually now defined with spatial, not angular units. Need to clarify.}), with varying co-latitudes ranging from near the pole at $\theta_{\mathrm{s}} = 10^{\circ}$ to the equator at $\theta_{\mathrm{s}} = 90^{\circ}$.
+Spot size of $\rho = 10^{\circ}$ is considered (defined in the spherical co-rotating coordinate system using spatial units), with varying co-latitudes ranging from near the pole at $\theta_{\mathrm{s}} = 10^{\circ}$ to the equator at $\theta_{\mathrm{s}} = 90^{\circ}$.
 We consider both the cases of one spot and two antipodal spots with isotropic beaming and black body emission with $T_{\mathrm{eff}} = 2~\mathrm{keV}$.
 As a result, we can see that full eclipses are only observed with one spot.
 From here it is also easy to see how the maxima and minima of the flux varies in phase when the viewing angle of the observer is changing.
@@ -1061,35 +1064,34 @@ This work benefited from discussions at the International Symposium on Neutron S
 \clearpage
 \appendix
 
-\section{Underlying elliptic integrals of the four-momentum components}
-
-\red{TODO: Are these actually used in the code? The fact Hamilton-Jacobi equations separating in coordinates of oblate spheroidal type can be solved with Jacobi elliptic integrals is known. If we don't have novelty here, we probably should not include this bit.}
-After separating the equation \eqref{eq:hamjac} with the help of the Carter's constant $\Ca$, we get the remaining four-momentum components
-\be\label{eq:pr}
-p_r = \pd_r S = e^{\zetab-2\nub} \left( (E-L_z \omega)^2 - \frac{\mathcal{C}}{\Bb^2 e^{-4\nub} \rb^2} \right)^{1/2} = \mathcal{R}(r)
-\ee
-and
-\be\label{eq:ptheta}
-p_{\theta} = \pd_{\theta} S = e^{\mub} \left( \mathcal{C} - \frac{L_z^2}{\sin^2 \theta} \right)^{1/2} = \Theta(\theta).
-\ee
-Now, in addition to our predefined constants $E$ and $L_z$, we have a new constant of motion $\Ca$, for which
-\be
-\frac{\pd S}{\pd \mathcal{C}} = \frac{1}{2} \int^r \frac{1}{\sqrt{\mathcal{R}}} \frac{\pd \mathcal{R}}{\pd \mathcal{C}} dr + \frac{1}{2} \int^{\theta} \frac{1}{\sqrt{\Theta}} \frac{\pd \Theta}{\pd \mathcal{C}} d\theta = 0.
-\ee 
-After substitution and cancellation of terms the relation leads to elliptic integrals of the form
-\begin{align}\begin{split}\label{eq:Lz_C_rel}
- \int^r d\rb e^{\zetab + 3\nub} \Bb^{-2} &  \rb^{-2} \left( (E-L_z\omega)^2 - \frac{\mathcal{C}}{\Bb^2 e^{-4\nub} \rb^2} \right)^{-3/4}  = \\
-& \int^{\theta} d\theta e^{\mub/2} \left(\mathcal{C} - \frac{L_z^2}{\sin^2 \theta} \right)^{-3/4}
-\end{split}\end{align}
-connecting our three constants of motion.
-This can be refined further when we remember that $e^{\mub} \approx 1$, i.e., constant without any $\theta$ dependency. 
-With this in mind, we can write
-\be
-\int^{\theta} d\theta e^{\mub/2} \left(\mathcal{C} - \frac{L_z^2}{\sin^2
-\theta} \right)^{-3/4} = -\frac{e^{\mub/2} L_z}{\mathcal{C} (\mathcal{C}-L_z^2)^{1/4}} [ \Pi(n; \alpha, -1)+\Pi(-n;\alpha, -1)],
-\ee
-where $\Pi$ is the incomplete elliptic integral of the third kind with parameters $n = \sqrt{1-L_z^2/\mathcal{C}}$ as the elliptic characteristic and the angle $\alpha$ defined as $\sin^4 \alpha = (\mathcal{C}-L_z^2 \csc^2 \theta)/(\mathcal{C}-L_z^2))$ with elliptic modulus of $-1$.
-No analytical form for the left side of the equation \eqref{eq:Lz_C_rel} is found.
+%\section{Underlying elliptic integrals of the four-momentum components}
+%%\red{TODO: Are these actually used in the code? The fact Hamilton-Jacobi equations separating in coordinates of oblate spheroidal type can be solved with Jacobi elliptic integrals is known. If we don't have novelty here, we probably should not include this bit.}
+%After separating the equation \eqref{eq:hamjac} with the help of the Carter's constant $\Ca$, we get the remaining four-momentum components
+%\be\label{eq:pr}
+%p_r = \pd_r S = e^{\zetab-2\nub} \left( (E-L_z \omega)^2 - \frac{\mathcal{C}}{\Bb^2 e^{-4\nub} \rb^2} \right)^{1/2} = \mathcal{R}(r)
+%\ee
+%and
+%\be\label{eq:ptheta}
+%p_{\theta} = \pd_{\theta} S = e^{\mub} \left( \mathcal{C} - \frac{L_z^2}{\sin^2 \theta} \right)^{1/2} = \Theta(\theta).
+%\ee
+%Now, in addition to our predefined constants $E$ and $L_z$, we have a new constant of motion $\Ca$, for which
+%\be
+%\frac{\pd S}{\pd \mathcal{C}} = \frac{1}{2} \int^r \frac{1}{\sqrt{\mathcal{R}}} \frac{\pd \mathcal{R}}{\pd \mathcal{C}} dr + \frac{1}{2} \int^{\theta} \frac{1}{\sqrt{\Theta}} \frac{\pd \Theta}{\pd \mathcal{C}} d\theta = 0.
+%\ee 
+%After substitution and cancellation of terms the relation leads to elliptic integrals of the form
+%\begin{align}\begin{split}\label{eq:Lz_C_rel}
+% \int^r d\rb e^{\zetab + 3\nub} \Bb^{-2} &  \rb^{-2} \left( (E-L_z\omega)^2 - \frac{\mathcal{C}}{\Bb^2 e^{-4\nub} \rb^2} \right)^{-3/4}  = \\
+%& \int^{\theta} d\theta e^{\mub/2} \left(\mathcal{C} - \frac{L_z^2}{\sin^2 \theta} \right)^{-3/4}
+%\end{split}\end{align}
+%connecting our three constants of motion.
+%This can be refined further when we remember that $e^{\mub} \approx 1$, i.e., constant without any $\theta$ dependency. 
+%With this in mind, we can write
+%\be
+%\int^{\theta} d\theta e^{\mub/2} \left(\mathcal{C} - \frac{L_z^2}{\sin^2
+%\theta} \right)^{-3/4} = -\frac{e^{\mub/2} L_z}{\mathcal{C} (\mathcal{C}-L_z^2)^{1/4}} [ \Pi(n; \alpha, -1)+\Pi(-n;\alpha, -1)],
+%\ee
+%where $\Pi$ is the incomplete elliptic integral of the third kind with parameters $n = \sqrt{1-L_z^2/\mathcal{C}}$ as the elliptic characteristic and the angle $\alpha$ defined as $\sin^4 \alpha = (\mathcal{C}-L_z^2 \csc^2 \theta)/(\mathcal{C}-L_z^2))$ with elliptic modulus of $-1$.
+%No analytical form for the left side of the equation \eqref{eq:Lz_C_rel} is found.
 
 
 %\section{Special case: equatorial rays}
