@@ -224,7 +224,7 @@ for j in range(5):
             cb.set_label('Bolometric flux\n[ph cm$^{-2}$ s$^{-1}$]',size=lsize)
 
 
-    fig.text(0.5, 0.91-j*0.16, '$\\theta_{\mathrm{s}}$ = '+colat,  ha='center', va='center', size=tsize)
+    fig.text(0.5, 0.91-j*0.16, '$\\theta_{\mathrm{s}}$ = '+colat+'$^{\\circ}$',  ha='center', va='center', size=tsize)
     mfiglim += panelh+skiph
 
     

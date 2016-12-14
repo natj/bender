@@ -65,9 +65,9 @@ tsize = 10.0
 nu = '700'
 
 
-fig.text(0.5, 0.92, '$\\theta_s = 18^{\\circ}$',  ha='center', va='center', size=tsize)
-fig.text(0.5, 0.72, '$\\theta_s = 45^{\\circ}$',  ha='center', va='center', size=tsize)
-fig.text(0.5, 0.52, '$\\theta_s = 90^{\\circ}$',  ha='center', va='center', size=tsize)
+fig.text(0.5, 0.92, '$\\theta_{\\mathrm{s}} = 18^{\\circ}$',  ha='center', va='center', size=tsize)
+fig.text(0.5, 0.72, '$\\theta_{\\mathrm{s}} = 45^{\\circ}$',  ha='center', va='center', size=tsize)
+fig.text(0.5, 0.52, '$\\theta_{\\mathrm{s}} = 90^{\\circ}$',  ha='center', va='center', size=tsize)
 fig.text(0.5, 0.32, 'Hopf $\\theta_s = 45^{\circ}$',  ha='center', va='center', size=tsize)
 
 #fig.text(0.5, 0.12, 'Phase',ha='center', va='center', size=lsize)

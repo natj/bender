@@ -383,7 +383,7 @@ ax=draw_radial(ax, spot_phi, spot_theta, fmt)
 #ax = draw_axis(ax, spot_phi, spot_theta, rfac=1.2)
 
 fmta= {'color':'black', 'linestyle':'solid', 'lw':1.4, 'head_width': 0.02, 'head_length': 0.05,}
-alen = 0.6
+alen = 0.5
 ax.add_patch(patches.FancyArrow(
             y(spot_phi, spot_theta)*1.0, z(spot_phi, spot_theta)*1.0,
             y(spot_phi, spot_theta)*alen, z(spot_phi, spot_theta)*alen,
@@ -462,11 +462,11 @@ ax.text(0.06, 1.1, "$y$", va='center', ha='center', size=lsize)
 ax.text(-1.3, 0.1, "$z$", va='center', ha='center', size=lsize)
 #ax.text(-0.1, 0.9, "$\\hat{\\Omega}$", va='center', ha='center', size=lsize)
 
-ax.text(0.55, 0.96, "$\\hat{r}$", va='center', ha='center', size=lsize)
+ax.text(0.53, 0.91, "$\\hat{r}$", va='center', ha='center', size=lsize)
 ax.text(0.38, 0.92, "$\\hat{n}$", va='center', ha='center', size=lsize)
 
 ax.text(-1.15, 0.5, "$\\hat{x}$", va='center', ha='center', size=lsize)
 ax.text(-0.83, 0.88,  "$\\hat{y}$", va='center', ha='center', size=lsize)
 #ax.text(-1.2, 0.8,  "$\\hat{z}$", va='center', ha='center', size=lsize)
 
-savefig('fig1.png', bbox_inches='tight')
+savefig('fig1.pdf', bbox_inches='tight')
