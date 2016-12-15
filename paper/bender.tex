@@ -1,6 +1,7 @@
 %\documentclass[iop, usenatbib]{emulateapj}
 %\documentclass[iop, usenatbib]{aa}
-\documentclass{aa}
+%\documentclass{aa}
+\documentclass[referee]{aa}
 
 %\usepackage[utf8]{inputenc}
 \usepackage[varg]{txfonts}
@@ -18,6 +19,7 @@
 \usepackage{graphics}
 \usepackage{color}
 \usepackage{natbib}
+\usepackage{caption}
 %\usepackage{siunitx}
 %\usepackage{xifthen}
 
@@ -104,7 +106,7 @@
 Fully relativistic framework of formulae is derived for emission originating near compact rotating objects.
 We specialize the formulae for rotating oblate neutron stars and describe the surrounding metric up to second order in rotation.
 The entire framework is derived in a fully general relativistic manner, and as such we also validate and review previous special relativistic formulations during the derivation.
-We give a detailed descriptions of the numerical algorithms used and provide an open source implementation of the numerical framework. %, available at \url{http://github.com/natj/bender}.
+We give detailed descriptions of the numerical algorithms used and provide an open source implementation of the numerical framework. %, available at \url{http://github.com/natj/bender}.
 As an application, we study spectral line profiles from rapidly rotating oblate neutron stars. We find that no narrow features in the energy distribution are seen for physically realistic parameter combinations.
 We also calculate accurate pulse profiles and observer skymaps of emission from hot spots on accreting millisecond pulsars.
 }
@@ -172,8 +174,7 @@ Finally, in Section~\ref{sect:summary} we summarize our work.
 \section{Theory}\label{sect:theory}
 \subsection{Space-time metric}\label{sect:spacetime}
 
-\begin{table*}[ht!]
-  \label{tab:coeffs}
+\begin{table*}[ht!]\label{tab:coeffs}
 %\renewcommand{\arraystretch}{1.4}
 \begin{center}
 \caption{Series expansion terms of the metric coefficients up to $\Ob^2$}
@@ -244,7 +245,7 @@ Here $e^{-\nub}$ is the time dilation factor relating the proper time of the loc
 Physical interpretation of $\Bb$ follows from the fact that the proper circumference of a circle around the axis of symmetry is $2\pi(e^{-\nub} \Bb \rb \sin\theta)$.
 Similarly, the interpretation of $\zetab$ follows from the fact that $e^{\zetab - \nub}$ acts as a conformal (angle preserving) factor of the spacetime. %determining the orthogonality of the 2-surfaces.
 Note also how the time and space coordinates are connected in the isotropic metric via the $\nub$-term that also enters both the radial and angular terms.
-The zeroth order terms ($\Ob = 0$) of the series expansions are the familiar isotropic \sch metric coefficients (see Table \ref{tab:coeffs}).
+The zeroth order terms ($\Ob = 0$) of the series expansions are the familiar isotropic \sch metric coefficients (see Table 1).
 %\be
 %e^{\nu_0} = (1-\ub/2)/(1+\ub/2),
 %\ee
@@ -370,7 +371,7 @@ After re-organizing terms and introducing a simplifying notation $e^{\zetab}/\Bb
 \end{split}\end{align}
 which is in a separated form, but only if $\nub = \nub(\rb)$, $\Bb = \Bb(\rb)$, $\zetab = \zetab(\rb)$ and $\mu = \mu(\theta)$.
 
-To first order in rotation, i.e. $\mathcal{O}(\Ob)$, this condition is satisfied exactly because $e^{\mub} = 1 + \mathcal{O}(\Ob^2)$, in addition to $\nub = \nub_0(\rb) + \mathcal{O}(\Ob^2)$ and $\Bb = \Bb_0(\rb) + \mathcal{O}(\Ob^2)$ (see Table \ref{tab:coeffs}).  
+To first order in rotation, i.e. $\mathcal{O}(\Ob)$, this condition is satisfied exactly because $e^{\mub} = 1 + \mathcal{O}(\Ob^2)$, in addition to $\nub = \nub_0(\rb) + \mathcal{O}(\Ob^2)$ and $\Bb = \Bb_0(\rb) + \mathcal{O}(\Ob^2)$ (see Table 1).  
 In the second order of the expansion, $\theta$ dependent mass and pressure quadrupole moments are present, and separability is lost.
 For geodesics, however, these higher order deviations only contribute very close to the actual NS surface, and neglecting them enables us to obtain accurate approximations of the photon path.
 
@@ -762,9 +763,6 @@ Most notably, we employ an extensive comparison against AMP pulse profiles compu
 As such, our code serves as a great cross-validation tool for these kind of special relativistic formulations because our framework is fully general relativistic and propagates photons backwards in time from the observer to the surface.
 
 
-
-\subsection{Images of neutron stars}
-
 \begin{figure*}
 \centering
 \includegraphics[clip, trim=0.0cm 0.5cm 0.0cm 2.0cm, width=8cm]{figs/fig10a.pdf}
@@ -778,6 +776,8 @@ As such, our code serves as a great cross-validation tool for these kind of spec
 \end{figure*}
 
 
+\subsection{Images of neutron stars}
+
 As a first application of the code, we can determine the photon trajectories using the ray tracing algorithm and produce an image of the neutron star as seen by the observer.
 This also shows how we can connect the Cartesian coordinates $\hat{x}$ and $\hat{y}$ of the observer to the coordinates $\phi_{\mathrm{e}}$ and $\theta_{\mathrm{e}}$ of the star.
 Left panel in Fig.~\ref{fig:image} shows the trajectory of the photons in 3D, using a $\hat{z}$-coordinate in addition to the Cartesian image plane coordinates $\hat{x}$ and $\hat{y}$.
@@ -789,7 +789,7 @@ Here the star is covered with a chess board pattern to show how the $\phi_{\math
 
 \subsection{Accuracy of the split Hamilton-Jacobi propagator}
 
-\begin{figure*}
+\begin{figure*}[htbp!]
 \centering
 \includegraphics[width=16cm]{figs/popiha/fig_casual_15.pdf}
 \includegraphics[width=16cm]{figs/popiha/fig_casual_45.pdf}
@@ -797,25 +797,21 @@ Here the star is covered with a chess board pattern to show how the $\phi_{\math
 \includegraphics[width=16cm]{figs/popiha/fig_extreme_15.pdf}
 \includegraphics[width=16cm]{figs/popiha/fig_extreme_45.pdf}
 \includegraphics[width=16cm]{figs/popiha/fig_extreme_75.pdf}
-%\includegraphics[width=18cm]{figs/popiha/casual_400pts_16m_12km_400hz_15inc.pdf}
-%\includegraphics[width=18cm]{figs/popiha/casual_400pts_16m_12km_400hz_45inc.pdf}
-%\includegraphics[width=18cm]{figs/popiha/casual_400pts_16m_12km_400hz_75inc.pdf}
-%\includegraphics[width=18cm]{figs/popiha/extreme_400pts_14m_15km_600hz_15inc.pdf}
-%\includegraphics[width=18cm]{figs/popiha/extreme_400pts_14m_15km_600hz_45inc.pdf}
-%\includegraphics[width=18cm]{figs/popiha/extreme_400pts_14m_15km_600hz_75inc.pdf}
 \caption{\label{fig:H_C1_C2}
     Errors in ray tracing two neutron stars with $R_{\mathrm{e}}=12\,\mathrm{km}$, $M=1.6\Msun$, $\nu=400\,\mathrm{Hz}$ or $R_{\mathrm{e}}=15\,\mathrm{km}$, $M=1.4\Msun$, $\nu=600\,\mathrm{Hz}$, and with observer inclinations $i=15^\circ$, $45^\circ$ and $75^\circ$, using the \textsc{arcmancer} code.
     The leftmost panels show the maximal variation in the Hamiltonian $H$ of the geodesic, while the center and rightmost panels show the maximal variation in the Jacobi constant, computed either with the left side ($C_1$) or the right side ($C_2$) of equation \eqref{eq:S}.
-  }
+}
 \end{figure*}
 
-Next, we study the feasibility of the split Hamilton-Jacobi propagator by comparing to results from a general-purpose geodesic solver \textsc{arcmancer} (Pihajoki et al. 2016, \emph{in prep.}).
+
+Next, we study the feasibility of the split Hamilton-Jacobi propagator by comparing to results from a general-purpose geodesic solver \textsc{arcmancer} \citep{PRJ16}.
 The comparison solver directly solves the Lagrangian equations of motion of the geodesic in an arbitrary user-given metric. 
 We compute the change in the Jacobi constant as computed with both sides of equation \eqref{eq:S}, and the change in the value of the Hamiltonian of the geodesic for two different neutron star configurations:
 $R_{\mathrm{e}}=12\,\mathrm{km}$, $M=1.6\Msun$, $\nu=400\,\mathrm{Hz}$, and $R_{\mathrm{e}}=15\,\mathrm{km}$, $M=1.4\Msun$, $\nu=600\,\mathrm{Hz}$.
 Observer inclinations considered are $i=15^\circ$, $45^\circ$ and $75^\circ$.
 The results are shown in Figure~\ref{fig:H_C1_C2}. In general, we see that the assumption of separability, as measured by the variation in the Jacobi constant, is good to a level of $10^{-3}$--$10^{-2}$, except for geodesics that hit the center of the neutron star from the observer's point of view. However, the examples were deliberately chosen to be extreme, and the approximation of separability is much better for more slowly rotating neutron stars.
 We further note that in cases of extreme rotation or when high precision is required, the geodesic propagation can easily be done using the \textsc{arcmancer}, instead of equations \eqref{eq:deltatime}--\eqref{eq:deltaphi}, while using the rest of the results in this paper for the actual radiation computations.
+
 
 \subsection{Line profiles}
 
@@ -847,6 +843,7 @@ The flux is normalized so that the emitted bolometric flux is unity, i.e., the a
 In each case, the star is taken to have $\nu = 700~\mathrm{Hz}$, $R_{\mathrm{e}} = 10~\mathrm{km}$, and $M=1.4~\Msun$.
 Observer inclination is $i=20^{\circ}$ and emission is taken to be isotropic, for simplicity.
 We consider a \sch spacetime for spherical and oblate stars, with radius given by equation~\eqref{eq:radf}, in addition to a full second-order spacetime with quadrupole moments and an oblate neutron star surface.
+
 
 The obtained profiles can be compared to the ones in fig.~2 of \citet{BPO13} where the \sch results are seen to match well with our calculations.
 For the second-order metric we see a deviation due to the differing value of the quadrupole moments:
@@ -963,7 +960,7 @@ Next we compare emission from oblate stars.
 The surface here is defined using the radius function \eqref{eq:radf} but the star is still embedded in a symmetric \sch spacetime.
 The parameters used are equatorial radius $R_{\mathrm{e}} = 12~\mathrm{km}$ (in the usual \sch metric), neutron star mass of $M = 1.4~\Msun$, extreme rotational frequency $\nu = 700~\mathrm{Hz}$, observer inclination $i=45^{\circ}$, and spot angular size of $\rho = 10^{\circ}$.
 Effective temperature of the radiation is again taken to be $T_{\mathrm{eff}} = 2~\mathrm{keV}$, and the distance to be $D = 10~\mathrm{kpc}$.
-Here the spot size is defined in the co-rotating \textit{spherical} coordinate system on top of a unit sphere and is then projected to the oblate inclined surface.
+Here the spot size is defined in a \textit{spherical} coordinate system on top of a unit sphere and is then projected to the oblate inclined surface.
 To trace the effects of the changing surface we consider the spot in three different locations at colatitudes of $\theta_{\mathrm{s}} = 18^{\circ}$, $45^{\circ}$, and $90^{\circ}$.
 Additionally, we consider a spot with angle-dependent emission intensity.
 This is done using the electron scattering atmosphere with $\theta_{\mathrm{s}} = 45^{\circ}$.
@@ -1009,12 +1006,12 @@ The only large deviation is again seen when the spot is viewed from an extreme a
 
 
 As a last example, after the comparisons, we calculate full skymaps of the emerging radiation from rapidly rotating oblate AMPs as shown in Fig.~\ref{fig:skymap}.
-The emission from the AMP is shown for all possible observers and is mapped to the y-axis by using the observer's inclination angle $i$.
+The emission from the AMP is shown for all possible observers and is mapped to the vertical axis by using the observer's inclination angle $i$.
 Horizontal axis of the map is the usual pulse phase.
 The brightness of the skymap is proportional to the received bolometric photon number flux.
 Taking a slice of the skymap at one particular value of $i$ produces the light curve as seen by the observer at that inclination.
 Calculations here are done for an extreme case of a NS with $R_{\mathrm{e}} = 15~\mathrm{km}$, $M=1.6~\Msun$, and $\nu = 600~\mathrm{Hz}$.
-Spot size of $\rho = 10^{\circ}$ is considered (defined in the spherical co-rotating coordinate system using spatial units), with varying co-latitudes ranging from near the pole at $\theta_{\mathrm{s}} = 10^{\circ}$ to the equator at $\theta_{\mathrm{s}} = 90^{\circ}$.
+Spot size of $\rho = 10^{\circ}$ is considered, with varying co-latitudes ranging from near the pole at $\theta_{\mathrm{s}} = 10^{\circ}$ to the equator at $\theta_{\mathrm{s}} = 90^{\circ}$.
 We consider both the cases of one spot and two antipodal spots with isotropic beaming and black body emission with $T_{\mathrm{eff}} = 2~\mathrm{keV}$.
 As a result, we can see that full eclipses are only observed with one spot.
 From here it is also easy to see how the maxima and minima of the flux varies in phase when the viewing angle of the observer is changing.
@@ -1077,15 +1074,217 @@ We also offer special thanks to Tuomo Salmi for producing us the pulse profiles 
 JN acknowledges support from the University of Turku Graduate School in Physical and Chemical Sciences.
 PP acknowledges support from the Academy of Finland, grant no.~1274931.
 This work benefited from discussions at the International Symposium on Neutron Stars in the Multi-Messenger Era in May 2016 supported by the National Science Foundation under Grant No. PHY-1430152 (JINA Center for the Evolution of the Elements).
-\red{INT2b-16 pre-print number}
+%\red{INT2b-1r pre-print number}
 }
 
 
 \bibliographystyle{aa}
-\bibliography{allbib}
+%\bibliography{allbib}
+\begin{thebibliography}{46}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 
-%\begin{thebibliography}
-%\end{thebibliography}
+\bibitem[{{Agrawal}(2006)}]{Astrosat}
+{Agrawal}, P.~C. 2006, Advances in Space Research, 38, 2989
+
+\bibitem[{{AlGendy} \& {Morsink}(2014)}]{aGM14}
+{AlGendy}, M. \& {Morsink}, S.~M. 2014, \apj, 791, 78
+
+\bibitem[{{Bardeen} \& {Wagoner}(1971)}]{BW71}
+{Bardeen}, J.~M. \& {Wagoner}, R.~V. 1971, \apj, 167, 359
+
+\bibitem[{{Baub{\"o}ck} {et~al.}(2013){Baub{\"o}ck}, {Psaltis}, \&
+  {{\"O}zel}}]{BPO13}
+{Baub{\"o}ck}, M., {Psaltis}, D., \& {{\"O}zel}, F. 2013, \apj, 766, 87
+
+\bibitem[{{Baub{\"o}ck} {et~al.}(2012){Baub{\"o}ck}, {Psaltis}, {{\"O}zel}, \&
+  {Johannsen}}]{BPO12}
+{Baub{\"o}ck}, M., {Psaltis}, D., {{\"O}zel}, F., \& {Johannsen}, T. 2012,
+  \apj, 753, 175
+
+\bibitem[{{Bhattacharyya} {et~al.}(2006){Bhattacharyya}, {Miller}, \&
+  {Lamb}}]{BML06}
+{Bhattacharyya}, S., {Miller}, M.~C., \& {Lamb}, F.~K. 2006, \apj, 644, 1085
+
+\bibitem[{{Braje} {et~al.}(2000){Braje}, {Romani}, \& {Rauch}}]{BR01}
+{Braje}, T.~M., {Romani}, R.~W., \& {Rauch}, K.~P. 2000, \apj, 531, 447
+
+\bibitem[{{Butterworth} \& {Ipser}(1976)}]{BI76}
+{Butterworth}, E.~M. \& {Ipser}, J.~R. 1976, \apj, 204, 200
+
+\bibitem[{{Cadeau} {et~al.}(2005){Cadeau}, {Leahy}, \& {Morsink}}]{CL05}
+{Cadeau}, C., {Leahy}, D.~A., \& {Morsink}, S.~M. 2005, \apj, 618, 451
+
+\bibitem[{{Cadeau} {et~al.}(2007){Cadeau}, {Morsink}, {Leahy}, \&
+  {Campbell}}]{CML07}
+{Cadeau}, C., {Morsink}, S.~M., {Leahy}, D., \& {Campbell}, S.~S. 2007, \apj,
+  654, 458
+
+\bibitem[{{Chandrasekhar}(1960)}]{Cha60}
+{Chandrasekhar}, S. 1960, {Radiative transfer} (Dover, New York)
+
+\bibitem[{Chandrasekhar(1998)}]{cha}
+Chandrasekhar, S. 1998, The Mathematical Theory of Black Holes, The International series of monographs on physics (Oxford Univ. Press, Oxford)
+
+\bibitem[{{Chang} {et~al.}(2006){Chang}, {Morsink}, {Bildsten}, \&
+  {Wasserman}}]{CMB06}
+{Chang}, P., {Morsink}, S., {Bildsten}, L., \& {Wasserman}, I. 2006, \apjl,
+  636, L117
+
+\bibitem[{{Cook} {et~al.}(1994){Cook}, {Shapiro}, \& {Teukolsky}}]{CST94}
+{Cook}, G.~B., {Shapiro}, S.~L., \& {Teukolsky}, S.~A. 1994, \apj, 424, 823
+
+\bibitem[{{Dexter}(2016)}]{dexter2016}
+{Dexter}, J. 2016, \mnras, 462, 115
+
+\bibitem[{{Dexter} \& {Agol}(2009)}]{dexter2009}
+{Dexter}, J. \& {Agol}, E. 2009, \apj, 696, 1616
+
+\bibitem[{Friedman \& Stergioulas(2013)}]{rcs}
+Friedman, J. \& Stergioulas, N. 2013, Rotating Relativistic Stars, Cambridge
+  Monographs on Mathematical Physics (Cambridge University Press, Cambridge)
+
+\bibitem[{{Friedman} {et~al.}(1986){Friedman}, {Ipser}, \& {Parker}}]{FIP86}
+{Friedman}, J.~L., {Ipser}, J.~R., \& {Parker}, L. 1986, \apj, 304, 115
+
+\bibitem[{{Gendreau} {et~al.}(2012){Gendreau}, {Arzoumanian}, \&
+  {Okajima}}]{NICER}
+{Gendreau}, K.~C., {Arzoumanian}, Z., \& {Okajima}, T. 2012, in \procspie, Vol.
+  8443, Space Telescopes and Instrumentation 2012: Ultraviolet to Gamma Ray,
+  844313
+
+\bibitem[{{Hartle} \& {Thorne}(1968)}]{HT68}
+{Hartle}, J.~B. \& {Thorne}, K.~S. 1968, \apj, 153, 807
+
+\bibitem[{{Laarakkers} \& {Poisson}(1999)}]{LP99}
+{Laarakkers}, W.~G. \& {Poisson}, E. 1999, \apj, 512, 282
+
+\bibitem[{{Lind} \& {Blandford}(1985)}]{LB85}
+{Lind}, K.~R. \& {Blandford}, R.~D. 1985, \apj, 295, 358
+
+\bibitem[{{Lo} {et~al.}(2013){Lo}, {Miller}, {Bhattacharyya}, \&
+  {Lamb}}]{LMB13}
+{Lo}, K.~H., {Miller}, M.~C., {Bhattacharyya}, S., \& {Lamb}, F.~K. 2013, \apj,
+  776, 19
+
+\bibitem[{{Lorenz} {et~al.}(1993){Lorenz}, {Ravenhall}, \& {Pethick}}]{FPS}
+{Lorenz}, C.~P., {Ravenhall}, D.~G., \& {Pethick}, C.~J. 1993, Physical Review
+  Letters, 70, 379
+
+\bibitem[{{Misner} {et~al.}(1973){Misner}, {Thorne}, \& {Wheeler}}]{MTW73}
+{Misner}, C.~W., {Thorne}, K.~S., \& {Wheeler}, J.~A. 1973, Gravitation, (W.H.~Freeman and Co., San Francisco)
+
+\bibitem[{{Morsink} {et~al.}(2007){Morsink}, {Leahy}, {Cadeau}, \&
+  {Braga}}]{MLC07}
+{Morsink}, S.~M., {Leahy}, D.~A., {Cadeau}, C., \& {Braga}, J. 2007, \apj, 663,
+  1244
+
+\bibitem[{{Muno} {et~al.}(2002){Muno}, {Chakrabarty}, {Galloway}, \&
+  {Psaltis}}]{MC02}
+{Muno}, M.~P., {Chakrabarty}, D., {Galloway}, D.~K., \& {Psaltis}, D. 2002,
+  \apj, 580, 1048
+
+\bibitem[{{{\"O}zel} \& {Psaltis}(2003)}]{OP03}
+{{\"O}zel}, F. \& {Psaltis}, D. 2003, \apjl, 582, L31
+
+\bibitem[{{Page}(1995)}]{P95}
+{Page}, D. 1995, \apj, 442, 273
+
+\bibitem[{{Papitto} {et~al.}(2014){Papitto}, {Torres}, {Rea}, \&
+  {Tauris}}]{PTR14}
+{Papitto}, A., {Torres}, D.~F., {Rea}, N., \& {Tauris}, T.~M. 2014, \aap, 566,
+  A64
+
+\bibitem[{{Pappas} \& {Apostolatos}(2012)}]{PA12}
+{Pappas}, G. \& {Apostolatos}, T.~A. 2012, Physical Review Letters, 108, 231104
+
+\bibitem[{{Patruno} \& {Watts}(2012)}]{PW12}
+{Patruno}, A. \& {Watts}, A.~L. 2012, ArXiv e-prints \eprint{[arXiv:1206.2727]}
+
+\bibitem[{{Pechenick} {et~al.}(1983){Pechenick}, {Ftaclas}, \& {Cohen}}]{PFC83}
+{Pechenick}, K.~R., {Ftaclas}, C., \& {Cohen}, J.~M. 1983, \apj, 274, 846
+
+\bibitem[{{Pihajoki} {et~al.}(2016){Pihajoki}, {Rantala}, \&
+  {Johansson}}]{PRJ16}
+{Pihajoki}, P., {Rantala}, A., \& {Johansson}, P.~H. 2016, ArXiv e-prints \eprint{[arXiv:1612.02828]}
+
+\bibitem[{{Poutanen} \& {Beloborodov}(2006)}]{PB06}
+{Poutanen}, J. \& {Beloborodov}, A.~M. 2006, \mnras, 373, 836
+
+\bibitem[{{Poutanen} \& {Gierli{\'n}ski}(2003)}]{PG03}
+{Poutanen}, J. \& {Gierli{\'n}ski}, M. 2003, \mnras, 343, 1301
+
+\bibitem[{{Psaltis} \& {Johannsen}(2012)}]{PJ12}
+{Psaltis}, D. \& {Johannsen}, T. 2012, \apj, 745, 1
+
+\bibitem[{{Psaltis} \& {{\"O}zel}(2014)}]{PO14}
+{Psaltis}, D. \& {{\"O}zel}, F. 2014, \apj, 792, 87
+
+\bibitem[{{Rybicki} \& {Lightman}(1979)}]{RL79}
+{Rybicki}, G.~B. \& {Lightman}, A.~P. 1979, {Radiative processes in
+  astrophysics} (Wiley-Interscience, New York)
+
+\bibitem[{{Sobolev}(1963)}]{Sob63}
+{Sobolev}, V.~V. 1963, {A treatise on radiative transfer} (Van Nostrand, Princeton)
+
+\bibitem[{{Soffitta} {et~al.}(2013){Soffitta}, {Barcons}, {Bellazzini},
+  {Braga}, {Costa}, {Fraser}, {Gburek}, {Huovelin}, {Matt}, {Pearce},
+  {Poutanen}, {Reglero}, {Santangelo}, {Sunyaev}, {Tagliaferri}, {Weisskopf},
+  {Aloisio}, {Amato}, {Attin{\'a}}, {Axelsson}, {Baldini}, {Basso}, {Bianchi},
+  {Blasi}, {Bregeon}, {Brez}, {Bucciantini}, {Burderi}, {Burwitz}, {Casella},
+  {Churazov}, {Civitani}, {Covino}, {Curado da Silva}, {Cusumano}, {Dadina},
+  {D'Amico}, {De Rosa}, {Di Cosimo}, {Di Persio}, {Di Salvo}, {Dovciak},
+  {Elsner}, {Eyles}, {Fabian}, {Fabiani}, {Feng}, {Giarrusso}, {Goosmann},
+  {Grandi}, {Grosso}, {Israel}, {Jackson}, {Kaaret}, {Karas}, {Kuss}, {Lai},
+  {Rosa}, {Larsson}, {Larsson}, {Latronico}, {Maggio}, {Maia}, {Marin},
+  {Massai}, {Mineo}, {Minuti}, {Moretti}, {Muleri}, {O'Dell}, {Pareschi},
+  {Peres}, {Pesce}, {Petrucci}, {Pinchera}, {Porquet}, {Ramsey}, {Rea},
+  {Reale}, {Rodrigo}, {R{\'o}{\.z}a{\'n}ska}, {Rubini}, {Rudawy}, {Ryde},
+  {Salvati}, {de Santiago}, {Sazonov}, {Sgr{\'o}}, {Silver}, {Spandre},
+  {Spiga}, {Stella}, {Tamagawa}, {Tamborra}, {Tavecchio}, {Teixeira Dias}, {van
+  Adelsberg}, {Wu}, \& {Zane}}]{XIPE}
+{Soffitta}, P., {Barcons}, X., {Bellazzini}, R., {et~al.} 2013, Experimental
+  Astronomy, 36, 523
+
+\bibitem[{{Terrell}(1959)}]{Terrell60}
+{Terrell}, J. 1959, Physical Review, 116, 1041
+
+\bibitem[{{Watts}(2012)}]{Watts12}
+{Watts}, A.~L. 2012, \araa, 50, 609
+
+\bibitem[{{Weinberg} {et~al.}(2001){Weinberg}, {Miller}, \& {Lamb}}]{WM01}
+{Weinberg}, N., {Miller}, M.~C., \& {Lamb}, D.~Q. 2001, \apj, 546, 1098
+
+\bibitem[{{Wijnands} \& {van der Klis}(1998)}]{WvdK98}
+{Wijnands}, R. \& {van der Klis}, M. 1998, \nat, 394, 344
+
+\bibitem[{{Zhang} {et~al.}(2016){Zhang}, {Feroci}, {Santangelo}, {Dong},
+  {Feng}, {Lu}, {Nandra}, {Wang}, {Zhang}, {Bozzo}, {Brandt}, {De Rosa}, {Gou},
+  {Hernanz}, {van der Klis}, {Li}, {Liu}, {Orleanski}, {Pareschi}, {Pohl},
+  {Poutanen}, {Qu}, {Schanne}, {Stella}, {Uttley}, {Watts}, {Xu}, {Yu}, {in 't
+  Zand}, {Zane}, {Alvarez}, {Amati}, {Baldini}, {Bambi}, {Basso},
+  {Bhattacharyya}, {Bellazzini}, {Belloni}, {Bellutti}, {Bianchi}, {Brez},
+  {Bursa}, {Burwitz}, {Budtz-Jorgensen}, {Caiazzo}, {Campana}, {Cao},
+  {Casella}, {Chen}, {Chen}, {Chen}, {Chen}, {Chen}, {Chen}, {Civitani}, {Coti
+  Zelati}, {Cui}, {Cui}, {Dai}, {Del Monte}, {De Martino}, {Di Cosimo},
+  {Diebold}, {Dovciak}, {Donnarumma}, {Doroshenko}, {Esposito}, {Evangelista},
+  {Favre}, {Friedrich}, {Fuschino}, {Galvez}, {Gao}, {Ge}, {Gevin}, {Goetz},
+  {Han}, {Heyl}, {Horak}, {Hu}, {Huang}, {Huang}, {Hudec}, {Huppenkothen},
+  {Israel}, {Ingram}, {Karas}, {Karelin}, {Jenke}, {Ji}, {Kennedy}, {Korpela},
+  {Kunneriath}, {Labanti}, {Li}, {Li}, {Li}, {Liang}, {Limousin}, {Lin},
+  {Ling}, {Liu}, {Liu}, {Liu}, {Lu}, {Lund}, {Lai}, {Luo}, {Luo}, {Ma},
+  {Mahmoodifar}, {Marisaldi}, {Martindale}, {Meidinger}, {Men}, {Michalska},
+  {Mignani}, {Minuti}, {Motta}, {Muleri}, {Neilsen}, {Orlandini}, {Pan},
+  {Patruno}, {Perinati}, {Picciotto}, {Piemonte}, {Pinchera}, {Rachevski},
+  {Rapisarda}, {Rea}, {Rossi}, {Rubini}, {Sala}, {Shu}, {Sgro}, {Shen},
+  {Soffitta}, {Song}, {Spandre}, {Stratta}, {Strohmayer}, {Sun}, {Svoboda},
+  {Tagliaferri}, {Tenzer}, {Tong}, {Taverna}, {Torok}, {Turolla}, {Vacchi},
+  {Wang}, {Wang}, {Walton}, {Wang}, {Wang}, {Wang}, {Wang}, {Weng}, {Wilms},
+  {Winter}, {Wu}, {Wu}, {Xiong}, {Xu}, {Xue}, {Yan}, {Yang}, {Yang}, {Yang},
+  {Yuan}, {Yuan}, {Yuan}, {Zampa}, {Zampa}, {Zdziarski}, {Zhang}, {Zhang},
+  {Zhang}, {Zhang}, {Zhang}, {Zhang}, {Zheng}, {Zhou}, \& {Zhou}}]{eXTP}
+{Zhang}, S.~N., {Feroci}, M., {Santangelo}, A., {et~al.} 2016, ArXiv e-prints \eprint{[arXiv:1607.08823]}
+
+\end{thebibliography}
 
 
 %\clearpage
