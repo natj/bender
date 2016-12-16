@@ -6,8 +6,8 @@ include("bender.jl")
 #Nrad = 2000
 #Nchi = 2000
 
-Nrad = 50
-Nchi = 50
+Nrad = 300
+Nchi = 70
 
 rmin = 0.0
 rmax = 12.0

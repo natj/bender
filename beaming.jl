@@ -34,7 +34,7 @@ p = plot(xrange=[0,1],
 for iter = 1:10
     
     #println()
-    println("iter $iter")
+    #println("iter $iter")
 
     #make array of H values into function by interpolation
     #println(Hnm1(mus))
@@ -47,7 +47,7 @@ for iter = 1:10
                                 0,1,reltol=1.0e-8,maxevals=0)
         amoms[mom+1] = val0
     end
-    println("Moments: a0: $(amoms[1]) a1: $(amoms[2]) a2: $(amoms[3])")
+    #println("Moments: a0: $(amoms[1]) a1: $(amoms[2]) a2: $(amoms[3])")
     
 
     for i = 1:length(mus)
@@ -64,7 +64,7 @@ for iter = 1:10
                                 0,1,reltol=1.0e-8,maxevals=0)
 
         rvalt[i] = sqrt(1.0 - 2.0*val1) + val2
-        println("T1: $val1 T2: $val2 I: $(rvalt[i])")
+        #println("T1: $val1 T2: $val2 I: $(rvalt[i])")
     end
 
     #Hns[:] = 1.0 ./ rvalt
