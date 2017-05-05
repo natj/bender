@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
+from scipy import interpolate
 
 from joblib import Parallel, delayed
 import multiprocessing
@@ -284,7 +285,7 @@ class Pixel:
 
 #Find star radius boundaries
 def find_boundaries(metric, distance, inclination, surfaces):
-    Nedge = 31
+    Nedge = 5
     chis = np.linspace(0.0, 1.0, Nedge)*2.0*pi + 0.001
     rlims = np.zeros(Nedge)
 
@@ -301,13 +302,10 @@ def find_boundaries(metric, distance, inclination, surfaces):
 
         Nbi = 20
         N = 0
-        #while (N <= Nbi):
         for N in range(Nbi):
             rmid = (rmini + rmaxi)/2.0
 
             geos.append((0,0,0,0, pol2geo(metric, distance, inclination, rmid, chii) ))
-
-            #geo.compute(-(distance + 5.0*R_eq), metric, conf, surfaces)
             compute_element(geos[N], distance, metric, conf, surfaces)
 
 
@@ -318,8 +316,6 @@ def find_boundaries(metric, distance, inclination, surfaces):
             else:
                 rmaxi = rmid
             #print "Iterating edge at {} after {} tries for {}".format(rmid, N, chii)
-            #N += 1
-
 
         rlims[i] = rmid
     return chis, rlims
@@ -330,6 +326,34 @@ rmax = np.max(rlims)*1.001
 print "Maximum edge {}".format(rmax)
 
 
+edge_inter_raw = interpolate.InterpolatedUnivariateSpline(chis, rlims)
+#def edge_inter
+
+
+
+##################################################
+# Now create internal polar grid
+Nchi = 20
+Nrad = 20
+
+dchi_edge = 0.001
+chimin = 0.0 - dchi_edge
+chimax = 2.0*pi + dchi_edge
+
+chi_diffs = 0.8 + np.sin( np.linspace(0.0, 2.0*pi, Nchi-3) )**2
+chi_diffs = np.insert(chi_diffs, 0, 0.0)
+chi_grid = chimin + (chimax - chimin) * np.cumsum(chi_diffs)/np.sum(chi_diffs)
+chi_grid = np.insert(chi_grid, 0, chi_grid[0] - dchi_edge)
+chi_grid = np.append(chi_grid, chi_grid[-1] + dchi_edge)
+
+print chi_grid
+
+
+rad_diffs = 1.0 / np.exp( np.linspace(1.2, 2.0, Nrad-1)**2)
+rad_grid = rmax * np.cumsum(rad_diffs)/np.sum(rad_diffs)
+rad_grid = np.insert(rad_grid, 0, 0.001)
+
+print rad_grid
 
 
 
