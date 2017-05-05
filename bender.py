@@ -11,12 +11,16 @@ from joblib import Parallel, delayed
 import multiprocessing
 
 
-
 num_cores = multiprocessing.cpu_count()
 print "num of cores {}", num_cores
 
 mpl.rcParams['image.cmap'] = 'inferno'
 
+
+
+
+
+##################################################
 #Setup star
 R_in            = 12.0
 m_in            = 1.4
@@ -26,6 +30,8 @@ colat_in        = 90.0
 spot_temp_in    = 2.0
 spot_ang_in     = 10.0
 spot_colat_in   = 90.0
+
+
 
 
 ##################################################
@@ -102,6 +108,10 @@ conf.store_only_endpoints     = False
 metric = pyac.AGMMetric(R_eq, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
 
 
+ns_surface = pyac.AGMSurface(R_eq, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
+surfaces = [ ns_surface ]
+
+
 
 #pyac.Log.set_console()
 pyac.Log.set_file()
@@ -163,6 +173,9 @@ def cartesian_position(a, x_bl):
 # Initialize photon with some (x,y) coordinates in the _image plane_
 # and make it point towards the neutron star
 def xy2geo(metric, distance, inclination, x, y):
+
+    #print "Initializing geodesic for {},{}".format(x,y)
+
     # get coordinates for position of image plane point
     normal = np.array([np.sin(inclination), 0.0, np.cos(inclination)])
 
@@ -207,6 +220,12 @@ def xy2geo(metric, distance, inclination, x, y):
     return geo
 
 
+#polar coordinates to photon in image plane
+def pol2geo(metric, distance, inclination, rad, chi):
+    x = rad * np.sin(chi)
+    y = rad * np.cos(chi)
+    return xy2geo(metric, distance, inclination, x, y)
+
 
 # generate an image plane of geodesics
 def generate_image_plane(metric, distance, inclination, x_span, y_span, x_bins, y_bins):
@@ -239,16 +258,89 @@ def bb_intensity(nu, T):
 
 
 
+class ImagePlane:
+
+    def __init__(self, metric, dist, incl):
+
+        self.metric = metric
+        self.dist   = dist
+        self.incl   = incl
+
+
+class Pixel:
+
+    ix = 0
+    iy = 0
+
+    def __init__(self, x, y):
+
+        self.x  = x
+        self.y  = y
+        
+        #self.geo = geo
 
 
 ##################################################
 
+#Find star radius boundaries
+def find_boundaries(metric, distance, inclination, surfaces):
+    Nedge = 31
+    chis = np.linspace(0.0, 1.0, Nedge)*2.0*pi + 0.001
+    rlims = np.zeros(Nedge)
+
+    rmin = 0.0
+    rmax = 12.0
+
+
+    for i, chii in enumerate(chis):
+        geos = []
+
+        rmini = rmin
+        rmaxi = rmax
+        rmid = 0.0
+
+        Nbi = 20
+        N = 0
+        #while (N <= Nbi):
+        for N in range(Nbi):
+            rmid = (rmini + rmaxi)/2.0
+
+            geos.append((0,0,0,0, pol2geo(metric, distance, inclination, rmid, chii) ))
+
+            #geo.compute(-(distance + 5.0*R_eq), metric, conf, surfaces)
+            compute_element(geos[N], distance, metric, conf, surfaces)
+
+
+            hit = geos[N][4].front_termination().hit_surface
+
+            if hit:
+                rmini = rmid
+            else:
+                rmaxi = rmid
+            #print "Iterating edge at {} after {} tries for {}".format(rmid, N, chii)
+            #N += 1
+
+
+        rlims[i] = rmid
+    return chis, rlims
+                
+
+chis, rlims = find_boundaries(metric, distance, inclination, surfaces)
+rmax = np.max(rlims)*1.001
+print "Maximum edge {}".format(rmax)
+
+
+
+
+
+
+##################################################
 imgplane = generate_image_plane(metric, distance, inclination, x_span,
                                 y_span, x_bins, y_bins)
 
 
-ns_surface = pyac.AGMSurface(R_eq, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
-surfaces = [ ns_surface ]
+#ns_surface = pyac.AGMSurface(R_eq, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
+#surfaces = [ ns_surface ]
 
 
 for i, el in enumerate(imgplane):
