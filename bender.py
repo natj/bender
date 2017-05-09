@@ -26,7 +26,7 @@ mpl.rcParams['image.cmap'] = 'inferno'
 #Setup star
 R_in            = 12.0
 m_in            = 1.4
-freq_in         = 700.0
+freq_in         = 600.0
 colat_in        = 90.0
 
 spot_temp_in    = 2.0
@@ -59,12 +59,6 @@ kelvin_per_kev = 1.16045e7
 km_per_kpc     = 3.086e16
 kg_per_Msun    = 1.988435e30
 
-## planck units
-#planck_length_in_m = 1.616e-35
-#planck_mass_in_kg  = 2.176e-8
-#planck_time_in_s   = 5.3912e-44
-#planck_temp_in_K   = 1.417e32
-#planck_charge_in_C = 1.876e-18
 
 # Operate in units where G = c = 1.
 # Use units of solar masses
@@ -94,7 +88,7 @@ conf = pyac.Configuration()
 
 conf.absolute_tolerance = 1e-12 * R_eq
 conf.relative_tolerance = 1e-12
-conf.henon_tolerance    = 1e-8
+conf.henon_tolerance    = 1e-5
 conf.sampling_interval = 1e-3
 conf.minimum_stepsize  = 1e-10 * R_eq
 conf.maximum_steps     = 100000
@@ -110,7 +104,8 @@ conf.store_only_endpoints     = False
 metric = pyac.AGMMetric(R_eq, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
 
 
-ns_surface = pyac.AGMSurface(R_eq, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
+#ns_surface = pyac.AGMSurface(R_eq, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
+ns_surface = pyac.AGMSurface(R_eq, 1.0, angvel, pyac.AGMSurface.SurfaceType.agm)
 surfaces = [ ns_surface ]
 
 
@@ -137,7 +132,6 @@ pixel_area = pixel_dx * pixel_dy
 
 initial_xs = np.linspace(-x_span, x_span, x_bins)
 initial_ys = np.linspace(-y_span, y_span, y_bins)
-
 
 
 # construct local spherical axes in cartesian coordinates
@@ -341,17 +335,13 @@ def internal_polar_grid(Nrad, Nchi):
     chi_grid = np.insert(chi_grid, 0, chi_grid[0] - dchi_edge)
     chi_grid = np.append(chi_grid, chi_grid[-1] + dchi_edge)
     
-    print chi_grid
-    
     
     rad_diffs = 1.0 / np.exp( np.linspace(1.2, 2.0, Nrad-1)**2)
     rad_grid = rmax * np.cumsum(rad_diffs)/np.sum(rad_diffs)
     rad_grid = np.insert(rad_grid, 0, 0.001)
     
-    print rad_grid
     
     grid = np.empty((Nrad,Nchi), dtype=np.object)
-    
     
     for i, chi in enumerate(chi_grid):
         print "{} % done".format(float(i)/len(chi_grid) * 100)
@@ -361,27 +351,21 @@ def internal_polar_grid(Nrad, Nchi):
             grid[j,i] = pol2geo(metric, distance, inclination, rad, chi)
             grid[j,i].compute(-(distance + 5.0*R_eq), metric, conf, surfaces)
     
-
-
-
     return rad_grid, chi_grid, grid
-
-
 
 
 #Reduce geodesic into auxiliary quantities
 def dissect_geos(grid):
 
+    print "Dissecting geodesic paths to observed quantities..."
+
     Nrad, Nchi = np.shape(grid)
 
-    #Times  = np.zeros((Nrad, Nchi))
-    #Phis   = np.zeros((Nrad, Nchi))
-    #Thetas = np.zeros((Nrad, Nchi))
-    #Hits   = np.zeros((Nrad, Nchi))
-    #Cosas  = np.zeros((Nrad, Nchi))
-    #Xs     = np.zeros((Nrad, Nchi))
-
     Reds   = np.zeros((Nrad, Nchi))
+    Cosas  = np.zeros((Nrad, Nchi))
+    Times  = np.zeros((Nrad, Nchi))
+    Thetas = np.zeros((Nrad, Nchi))
+    Phis   = np.zeros((Nrad, Nchi))
 
     
     for i, chi in enumerate(chi_grid):
@@ -393,6 +377,11 @@ def dissect_geos(grid):
             hit_pt = geo.get_points()[0]
             obs_pt = geo.get_points()[-1]
 
+            #coordinates 
+            #surface_point.point.x
+            t  = Times[j,i]  = hit_pt.point.x[0]
+            th = Thetas[j,i] = hit_pt.point.x[2]
+            p  = Phis[j,i]   = hit_pt.point.x[3]
             
             hit = geo.front_termination().hit_surface
 
@@ -401,10 +390,12 @@ def dissect_geos(grid):
                 metric.dot(obs_pt.point, pyac.static_observer(metric, obs_pt.x())) / \
                     metric.dot(hit_pt.point, ns_surface.observer(metric, hit_pt.x()))
 
+            #hit angle
+            cosa = Cosas[j,i] = \
+                geo.front_termination().observer_hit_angle
 
 
-
-    return Reds
+    return Reds, Cosas, Times, Thetas, Phis
 
 
 #Interpolation function
@@ -413,133 +404,89 @@ def dissect_geos(grid):
 # in Cartesian (x,y) coordinates.
 # New points are then first transformed to polar coordinates for querying.
 def grid_interpolate(rads, chis, z, 
-                     x2, y2):
+                     x2, y2,
+                     edge_inter):
 
-    #rads = np.hypot(x, y)
-    #chis = np.arctan2(y, x)
+    ##rads = np.hypot(x, y)
+    ##chis = np.arctan2(y, x)
 
-    rads2 = np.hypot(x2, y2)
-    chis2 = np.arctan2(y2, x2)
+    ##rads2 = np.hypot(x2, y2)
+    ##chis2 = np.arctan2(y2, x2)
 
-    x_sparse, y_sparse = np.meshgrid(rads, chis)
-    #y_sparse, x_sparse = np.meshgrid(rads, chis)
+    #x_sparse, y_sparse = np.meshgrid(rads, chis)
+    ##y_sparse, x_sparse = np.meshgrid(rads, chis)
 
-    x_dense, y_dense = np.meshgrid(rads2, chis2)
+    ##x_dense, y_dense = np.meshgrid(rads2, chis2)
 
-    z2 = interp.griddata(np.array([x_sparse.ravel(),y_sparse.ravel()]).T,
-                                  z.ravel(),
-                                  (x_dense,y_dense), method='linear')
+    ##new way of transforming only after the unpacking of mesh
+    #x_dense, y_dense = np.meshgrid(x2, y2)
+
+
+    #z2 = interp.griddata(np.array([x_sparse.ravel(),y_sparse.ravel()]).T,
+    #                              z.ravel(),
+    #                              (x_dense,y_dense), method='linear')
+    #print np.shape(z)
+    #print np.shape(rads), min(rads), max(rads)
+    #print np.shape(chis), min(chis), max(chis)
+
+    #Using spline; XXX is this a good idea, I dunno!
+    ir = interp.RectBivariateSpline(rads, chis, z, 
+                                    #bbox=[0.01, max(rads), 0.0, 2*np.pi], 
+                                    kx=1, ky=1, s=0)
+
+    #build interpolated array
+    z2 = np.zeros((len(x2), len(y2)))
+    for i, xi in enumerate(x2):
+        for j, yi in enumerate(y2):
+            radi = np.hypot(xi, yi)
+            chii = np.arctan2(yi, xi)
+
+            #Check radius
+            redge = edge_inter(chii)
+            if radi <= redge:
+                z2[i,j] = ir.ev(radi, chii)
 
 
     return z2
 
 ##################################################
 ##################################################
-##################################################
-##################################################
-##################################################
-##################################################
-
 
 #Locate edges
-#chis, rlims = find_boundaries(metric, distance, inclination, surfaces)
-rlims = 8.04
+chis, rlims = find_boundaries(metric, distance, inclination, surfaces)
+#rlims = 8.04
 rmax = np.max(rlims)*1.001
 print "Maximum edge {}".format(rmax)
 
 #Build edge location interpolator
-#edge_inter_raw = interp.InterpolatedUnivariateSpline(chis, rlims)
-#def edge_inter
+edge_inter_raw = interp.InterpolatedUnivariateSpline(chis, rlims)
 
 #Build internal coarse grid for the interpolation routines
-rad_grid, chi_grid, coarse_polar_grid = internal_polar_grid(10, 10)
+rad_grid, chi_grid, coarse_polar_grid = internal_polar_grid(20, 20)
 
-reds = dissect_geos(coarse_polar_grid)
+#Read observed values from geodesics
+reds_int, cosas_int, times_int, thetas_int, phis_int  = dissect_geos(coarse_polar_grid)
 
-
-
-
-
-redshift = grid_interpolate(rad_grid, chi_grid, reds,
-                            initial_xs, initial_ys) 
-                            
-            
-print redshift
+#Interpolate everything into thick grid
+redshift = grid_interpolate(rad_grid, chi_grid, reds_int,
+                            initial_xs, initial_ys, edge_inter_raw)
+obs_hit_angle = grid_interpolate(rad_grid, chi_grid, cosas_int,
+                            initial_xs, initial_ys, edge_inter_raw)
+times    = grid_interpolate(rad_grid, chi_grid, times_int,
+                            initial_xs, initial_ys, edge_inter_raw)
+thetas   = grid_interpolate(rad_grid, chi_grid, thetas_int,
+                            initial_xs, initial_ys, edge_inter_raw)
+phis     = grid_interpolate(rad_grid, chi_grid, phis_int,
+                            initial_xs, initial_ys, edge_inter_raw)
 
 
 ##################################################
-#imgplane = generate_image_plane(metric, distance, inclination, x_span,
-#                                y_span, x_bins, y_bins)
-
-
-#ns_surface = pyac.AGMSurface(R_eq, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
-#surfaces = [ ns_surface ]
-
-
-#for i, el in enumerate(imgplane):
-#    if 10*i % len(imgplane) == 0:
-#        print "{} % done".format(float(i)/len(imgplane) * 100)
-#    compute_element(el, distance, metric, conf, surfaces)
-
-
 # plot values on image plane
 def trans(mat):
     return np.flipud(mat.T)
 #return mat
 def detrans(mat):
     return np.flipud(mat).T
-
-xs             = np.zeros((x_bins, y_bins))
-ys             = np.zeros((x_bins, y_bins))
-iis            = np.zeros((x_bins, y_bins))
-jjs            = np.zeros((x_bins, y_bins))
-radii          = np.zeros((x_bins, y_bins))
-obs_hit_angle  = np.zeros((x_bins, y_bins))
-rest_hit_angle = np.zeros((x_bins, y_bins))
-#redshift       = np.zeros((x_bins, y_bins))
-flux           = np.zeros((x_bins, y_bins))
-bolflux        = np.zeros((x_bins, y_bins))
-polfrac        = np.zeros((x_bins, y_bins))
-polangle       = np.zeros((x_bins, y_bins))
-
-
-#for el in imgplane:
-#    i, j = el[0:2]
-#    hit_pt = el[4].get_points()[0]
-#    radii[i,j] = hit_pt.x()[1]
-#    iis[i,j] = i
-#    jjs[i,j] = j
-#    # _screen_ x and y
-#    xs[i,j] = el[2]
-#    ys[i,j] = el[3]
-#    #print "i {} j {} x {} y {}".format(i, j, xs[i,j], ys[i,j])
-
-
-#for el in imgplane:
-#    i, j = el[0:2]
-#
-#    if not el[4].front_termination().hit_surface:
-#        #print "ray at {},{}", i, j, "didn't hit anything!"
-#        #print el[4].get_points()
-#        continue
-#
-#    hit_pt = el[4].get_points()[0]
-#    obs_pt = el[4].get_points()[-1]
-#
-#
-#    obs_hit_angle[i,j] = el[4].front_termination().observer_hit_angle
-#    rest_hit_angle[i,j] = el[4].front_termination().rest_hit_angle
-#
-#
-#    g = redshift[i,j] = \
-#        metric.dot(obs_pt.point, pyac.static_observer(metric, obs_pt.x())) / \
-#        metric.dot(hit_pt.point, ns_surface.observer(metric, hit_pt.x()))
-#
-#
-#    #bolflux[i,j] = g**4 * ntdisk['flux'][i,j] # * pixel_area
-#    bolflux[i,j] = g**4 * 1.0
-
-
 
 
 # transform everything to mesh with imshow
@@ -572,23 +519,28 @@ plt.title('emitter angle')
 
 plt.subplot(222)
 
-plt.imshow(np.log10(redshift), interpolation=interpolation, extent=extent)
+#plt.imshow(np.log10(redshift), interpolation=interpolation, extent=extent)
+plt.imshow(redshift, interpolation=interpolation, extent=extent)
 bar = plt.colorbar()
 bar.formatter.set_useOffset(False)
 bar.update_ticks()
 plt.title('redshift')
 
-plt.subplot(224)
-
-plt.imshow(np.log10(bolflux), interpolation='lanczos', extent=extent)
+plt.subplot(223)
+plt.imshow(phis, interpolation=interpolation, extent=extent)
 bar = plt.colorbar()
 bar.formatter.set_useOffset(False)
 bar.update_ticks()
-plt.title('bolometric flux')
+plt.title(r'$\phi$')
 
 
+plt.subplot(224)
+plt.imshow(thetas, interpolation=interpolation, extent=extent)
+bar = plt.colorbar()
+bar.formatter.set_useOffset(False)
+bar.update_ticks()
+plt.title(r'$\theta$')
 
 plt.tight_layout()
-plt.show()
-
-
+#plt.show()
+plt.savefig('arcmancer_debug.png')
