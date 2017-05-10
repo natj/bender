@@ -6,6 +6,8 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
+from matplotlib import cm
+
 #from scipy import interpolate
 import scipy.interpolate as interp
 
@@ -26,8 +28,8 @@ mpl.rcParams['image.cmap'] = 'inferno'
 #Setup star
 R_in            = 12.0
 m_in            = 1.4
-freq_in         = 600.0
-colat_in        = 90.0
+freq_in         = 400.0
+colat_in        = 45.0
 
 spot_temp_in    = 2.0
 spot_ang_in     = 10.0
@@ -104,8 +106,8 @@ conf.store_only_endpoints     = False
 metric = pyac.AGMMetric(R_eq, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
 
 
-#ns_surface = pyac.AGMSurface(R_eq, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
-ns_surface = pyac.AGMSurface(R_eq, 1.0, angvel, pyac.AGMSurface.SurfaceType.agm)
+ns_surface = pyac.AGMSurface(R_eq, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
+#ns_surface = pyac.AGMSurface(R_eq, 1.0, angvel, pyac.AGMSurface.SurfaceType.agm)
 surfaces = [ ns_surface ]
 
 
@@ -176,6 +178,9 @@ def xy2geo(metric, distance, inclination, x, y):
     normal = np.array([np.sin(inclination), 0.0, np.cos(inclination)])
 
     x_cart = np.array([-y*np.cos(inclination), x, y*np.sin(inclination)])
+    #x_cart = np.array([ x, -y*np.cos(inclination), y*np.sin(inclination) ] )
+
+
 
     x_cart += distance * normal
     x_sph = boyer_lindquist_position(x_cart)
@@ -220,6 +225,7 @@ def xy2geo(metric, distance, inclination, x, y):
 def pol2geo(metric, distance, inclination, rad, chi):
     x = rad * np.sin(chi)
     y = rad * np.cos(chi)
+
     return xy2geo(metric, distance, inclination, x, y)
 
 
@@ -321,19 +327,18 @@ def find_boundaries(metric, distance, inclination, surfaces):
 ##################################################
 # Creates internal polar grid for the interpolation
 def internal_polar_grid(Nrad, Nchi):
-
-    #Nchi = 20
-    #Nrad = 20
     
     dchi_edge = 0.001
     chimin = 0.0 - dchi_edge
     chimax = 2.0*pi + dchi_edge
     
-    chi_diffs = 0.8 + np.sin( np.linspace(0.0, 2.0*pi, Nchi-3) )**2
-    chi_diffs = np.insert(chi_diffs, 0, 0.0)
-    chi_grid = chimin + (chimax - chimin) * np.cumsum(chi_diffs)/np.sum(chi_diffs)
-    chi_grid = np.insert(chi_grid, 0, chi_grid[0] - dchi_edge)
-    chi_grid = np.append(chi_grid, chi_grid[-1] + dchi_edge)
+    #chi_diffs = 0.8 + np.sin( np.linspace(0.0, 2.0*pi, Nchi-3) )**2
+    #chi_diffs = np.insert(chi_diffs, 0, 0.0)
+    #chi_grid = chimin + (chimax - chimin) * np.cumsum(chi_diffs)/np.sum(chi_diffs)
+    #chi_grid = np.insert(chi_grid, 0, chi_grid[0] - dchi_edge)
+    #chi_grid = np.append(chi_grid, chi_grid[-1] + dchi_edge)
+
+    chi_grid = np.linspace(0.0, 2.0*pi, Nchi)
     
     
     rad_diffs = 1.0 / np.exp( np.linspace(1.2, 2.0, Nrad-1)**2)
@@ -355,7 +360,7 @@ def internal_polar_grid(Nrad, Nchi):
 
 
 #Reduce geodesic into auxiliary quantities
-def dissect_geos(grid):
+def dissect_geos(grid, rad_grid, chi_grid):
 
     print "Dissecting geodesic paths to observed quantities..."
 
@@ -396,6 +401,22 @@ def dissect_geos(grid):
 
 
     return Reds, Cosas, Times, Thetas, Phis
+
+
+def mod2pi(x):
+    #return np.fmod(x, 2*np.pi)
+
+    while (x > 2.0*np.pi):
+        x -= 2.0*np.pi
+    while (x < 0.0):
+        x += 2.0*np.pi
+    return x
+
+
+
+def calc_chi(x,y):
+    return mod2pi(np.pi/2.0 - np.arctan2(y,x) )
+    #return mod2pi( np.arctan2(y,x) )
 
 
 #Interpolation function
@@ -439,12 +460,14 @@ def grid_interpolate(rads, chis, z,
     for i, xi in enumerate(x2):
         for j, yi in enumerate(y2):
             radi = np.hypot(xi, yi)
-            chii = np.arctan2(yi, xi)
+            #chii = np.arctan2(yi, xi)
+            chii = calc_chi(xi, yi)
 
             #Check radius
             redge = edge_inter(chii)
             if radi <= redge:
                 z2[i,j] = ir.ev(radi, chii)
+                #z2[i,j] = chii
 
 
     return z2
@@ -465,7 +488,7 @@ edge_inter_raw = interp.InterpolatedUnivariateSpline(chis, rlims)
 rad_grid, chi_grid, coarse_polar_grid = internal_polar_grid(20, 20)
 
 #Read observed values from geodesics
-reds_int, cosas_int, times_int, thetas_int, phis_int  = dissect_geos(coarse_polar_grid)
+reds_int, cosas_int, times_int, thetas_int, phis_int  = dissect_geos(coarse_polar_grid, rad_grid, chi_grid)
 
 #Interpolate everything into thick grid
 redshift = grid_interpolate(rad_grid, chi_grid, reds_int,
@@ -488,21 +511,56 @@ def trans(mat):
 def detrans(mat):
     return np.flipud(mat).T
 
+def clean_image(mat):
+
+    #mask all 0.0 elements and transpose
+    mat_masked = np.ma.masked_where(mat == 0, mat) 
+
+    return trans(mat_masked)
+    #return mat_masked
+
+#build up a chess board layering from phi and theta coordinates
+def chess_layer(phis, thetas):
+
+    none = 0
+    white = 1
+    black = 2
+    
+    Nx, Ny = np.shape(phis)
+    mat = np.zeros((Nx,Ny))
+
+    for i in range(Nx):
+        for j in range(Ny):
+            phi = phis[i,j]
+            theta = thetas[i,j]
+            
+            if (phi == 0.0) and (theta == 0):
+                mat[i,j] = none
+                continue
+
+            xd = np.int(60.0*phi/(2*pi))
+            yd = np.int(60.0*theta/(2*pi))
+            
+            if (xd & 1) and (yd & 1):
+                mat[i,j] = black
+            elif (xd & 0) and (yd & 0):
+                mat[i,j] = black
+            else:
+                mat[i,j] = white
+
+    return mat
+
 
 # transform everything to mesh with imshow
-xs             = trans(xs            )
-ys             = trans(ys            )
-iis            = trans(iis           )
-jjs            = trans(jjs           )
-radii          = trans(radii         )
-obs_hit_angle  = trans(obs_hit_angle )
-rest_hit_angle = trans(rest_hit_angle)
-redshift       = trans(redshift      )
-flux           = trans(flux          )
-bolflux        = trans(bolflux       )
-polfrac        = trans(polfrac       )
-polangle       = trans(polangle      )
 
+chess         = chess_layer(phis, thetas)
+
+obs_hit_angle = clean_image(obs_hit_angle)
+redshift      = clean_image(redshift)
+times         = clean_image(times)
+thetas        = clean_image(thetas)
+phis          = clean_image(phis)
+chess         = clean_image(chess)
 
 
 # other settings for imshow
@@ -510,14 +568,14 @@ extent=( initial_xs[0], initial_xs[-1], initial_ys[0], initial_ys[-1])
 interpolation = 'nearest'
 
 
-plt.subplot(221)
+plt.subplot(331)
 plt.imshow(obs_hit_angle, interpolation=interpolation, extent=extent)
 bar = plt.colorbar()
 bar.formatter.set_useOffset(False)
 bar.update_ticks()
 plt.title('emitter angle')
 
-plt.subplot(222)
+plt.subplot(332)
 
 #plt.imshow(np.log10(redshift), interpolation=interpolation, extent=extent)
 plt.imshow(redshift, interpolation=interpolation, extent=extent)
@@ -526,7 +584,7 @@ bar.formatter.set_useOffset(False)
 bar.update_ticks()
 plt.title('redshift')
 
-plt.subplot(223)
+plt.subplot(333)
 plt.imshow(phis, interpolation=interpolation, extent=extent)
 bar = plt.colorbar()
 bar.formatter.set_useOffset(False)
@@ -534,12 +592,24 @@ bar.update_ticks()
 plt.title(r'$\phi$')
 
 
-plt.subplot(224)
+plt.subplot(334)
 plt.imshow(thetas, interpolation=interpolation, extent=extent)
 bar = plt.colorbar()
 bar.formatter.set_useOffset(False)
 bar.update_ticks()
 plt.title(r'$\theta$')
+
+
+
+plt.subplot(335)
+plt.imshow(chess, interpolation=interpolation, extent=extent, cmap=cm.get_cmap('Greys'), vmin=0.8, vmax=2.0)
+bar = plt.colorbar()
+bar.formatter.set_useOffset(False)
+bar.update_ticks()
+
+
+
+
 
 plt.tight_layout()
 #plt.show()
