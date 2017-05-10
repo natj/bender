@@ -124,8 +124,8 @@ distance = mass * 100
 x_span = 1.5*R_eq
 y_span = 1.5*R_eq
 
-x_bins = 100
-y_bins = 100
+x_bins = 500
+y_bins = 500
 
 pixel_dx = 2*x_span / x_bins
 pixel_dy = 2*y_span / y_bins
@@ -332,13 +332,13 @@ def internal_polar_grid(Nrad, Nchi):
     chimin = 0.0 - dchi_edge
     chimax = 2.0*pi + dchi_edge
     
-    #chi_diffs = 0.8 + np.sin( np.linspace(0.0, 2.0*pi, Nchi-3) )**2
-    #chi_diffs = np.insert(chi_diffs, 0, 0.0)
-    #chi_grid = chimin + (chimax - chimin) * np.cumsum(chi_diffs)/np.sum(chi_diffs)
-    #chi_grid = np.insert(chi_grid, 0, chi_grid[0] - dchi_edge)
-    #chi_grid = np.append(chi_grid, chi_grid[-1] + dchi_edge)
+    chi_diffs = 0.8 + np.sin( np.linspace(0.0, 2.0*pi, Nchi-3) )**2
+    chi_diffs = np.insert(chi_diffs, 0, 0.0)
+    chi_grid = chimin + (chimax - chimin) * np.cumsum(chi_diffs)/np.sum(chi_diffs)
+    chi_grid = np.insert(chi_grid, 0, chi_grid[0] - dchi_edge)
+    chi_grid = np.append(chi_grid, chi_grid[-1] + dchi_edge)
 
-    chi_grid = np.linspace(0.0, 2.0*pi, Nchi)
+    #chi_grid = np.linspace(0.0, 2.0*pi, Nchi)
     
     
     rad_diffs = 1.0 / np.exp( np.linspace(1.2, 2.0, Nrad-1)**2)
@@ -374,7 +374,7 @@ def dissect_geos(grid, rad_grid, chi_grid):
 
     
     for i, chi in enumerate(chi_grid):
-        print "{} % done".format(float(i)/len(chi_grid) * 100)
+        #print "{} % done".format(float(i)/len(chi_grid) * 100)
         for j, rad in enumerate(rad_grid):
 
             geo = grid[j,i]
@@ -485,7 +485,7 @@ print "Maximum edge {}".format(rmax)
 edge_inter_raw = interp.InterpolatedUnivariateSpline(chis, rlims)
 
 #Build internal coarse grid for the interpolation routines
-rad_grid, chi_grid, coarse_polar_grid = internal_polar_grid(20, 20)
+rad_grid, chi_grid, coarse_polar_grid = internal_polar_grid(30, 30)
 
 #Read observed values from geodesics
 reds_int, cosas_int, times_int, thetas_int, phis_int  = dissect_geos(coarse_polar_grid, rad_grid, chi_grid)
@@ -501,6 +501,59 @@ thetas   = grid_interpolate(rad_grid, chi_grid, thetas_int,
                             initial_xs, initial_ys, edge_inter_raw)
 phis     = grid_interpolate(rad_grid, chi_grid, phis_int,
                             initial_xs, initial_ys, edge_inter_raw)
+
+
+# Computes lineprofile
+def lineprofile(fluxc, redsc):
+    print "Computing line profile..."
+
+    xarr = np.array([])
+    yarr = np.array([])
+
+    Ny_dense, Nx_dense = np.shape(fluxc)
+
+    energ = 1.0
+    for jj in range(Ny_dense):
+        for ii in range(Nx_dense):
+            fy  = fluxc[jj, ii]
+            xii = redsc[jj, ii]
+
+            if xii > 0.0:
+                xarr = np.append(xarr, xii*energ)
+                yarr = np.append(yarr, fy)
+
+
+    xind = np.argsort(xarr)
+    xarrs = xarr[xind]
+    yarrs = yarr[xind]
+
+    NN = len(xarrs)
+
+    emin = np.min(xarrs)*0.99
+    emax = np.max(xarrs)*1.01
+
+    Nr = 100
+    es = np.linspace(emin, emax, Nr)
+    yy2 = np.zeros((Nr))
+
+    xst = 0
+    for ii in range(1,Nr):
+        for jj in range(xst, NN):
+            if es[ii-1] <= xarrs[jj] < es[ii]:
+                yy2[ii] += yarrs[jj]
+            elif xarrs[jj] >= es[ii]:
+                xst = jj
+                break
+
+    #normalize
+    des = np.diff(es)[1]
+    yy2 = yy2 / np.sum(yy2*des)
+
+        
+    return es, yy2         
+ 
+es, yy2 = lineprofile(redshift**3, redshift)
+
 
 
 ##################################################
@@ -608,7 +661,8 @@ bar.formatter.set_useOffset(False)
 bar.update_ticks()
 
 
-
+plt.subplot(336)
+plt.plot(es, yy2, "b-")
 
 
 plt.tight_layout()
