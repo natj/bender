@@ -4,7 +4,8 @@ import pyarcmancer as pyac
 import numpy as np
 
 import matplotlib as mpl
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
+from pylab import *
 
 from matplotlib import cm
 
@@ -14,6 +15,13 @@ import scipy.interpolate as interp
 from joblib import Parallel, delayed
 import multiprocessing
 
+
+mpl.rc('font', family='serif')
+mpl.rc('xtick', labelsize='small')
+mpl.rc('ytick', labelsize='small')
+gs = GridSpec(3, 3)
+gs.update(hspace = 0.3)
+#gs.update(wspace = 0.3)
 
 num_cores = multiprocessing.cpu_count()
 print "num of cores {}", num_cores
@@ -28,8 +36,8 @@ mpl.rcParams['image.cmap'] = 'inferno'
 #Setup star
 R_in            = 12.0
 m_in            = 1.4
-freq_in         = 400.0
-colat_in        = 45.0
+freq_in         = 600.0
+colat_in        = 10.0
 
 spot_temp_in    = 2.0
 spot_ang_in     = 10.0
@@ -73,6 +81,8 @@ mass = m_in
 R_eq = R_in * solar_mass_per_km / mass
 angvel = freq_in * 2.0*np.pi / solar_mass_per_s * mass
 
+compactness = np.sqrt(1 - 2/R_eq)
+print "compactness=",compactness
 
 ##################################################
 #convert spot quantities
@@ -90,14 +100,14 @@ conf = pyac.Configuration()
 
 conf.absolute_tolerance = 1e-12 * R_eq
 conf.relative_tolerance = 1e-12
-conf.henon_tolerance    = 1e-5
+conf.henon_tolerance    = 1e-8
 conf.sampling_interval = 1e-3
 conf.minimum_stepsize  = 1e-10 * R_eq
-conf.maximum_steps     = 100000
+conf.maximum_steps     = 10000
 conf.enforce_maximum_stepsize = False
 conf.enforce_minimum_stepsize = True
 conf.enforce_maximum_steps    = True
-conf.store_only_endpoints     = False
+conf.store_only_endpoints     = True
 
 
 
@@ -124,8 +134,8 @@ distance = mass * 100
 x_span = 1.5*R_eq
 y_span = 1.5*R_eq
 
-x_bins = 500
-y_bins = 500
+x_bins = 200
+y_bins = 200
 
 pixel_dx = 2*x_span / x_bins
 pixel_dy = 2*y_span / y_bins
@@ -288,7 +298,7 @@ class Pixel:
 def find_boundaries(metric, distance, inclination, surfaces):
     print "Finding edge boundaries for the star..."
 
-    Nedge = 5
+    Nedge = 10
     chis = np.linspace(0.0, 1.0, Nedge)*2.0*pi + 0.001
     rlims = np.zeros(Nedge)
 
@@ -305,7 +315,13 @@ def find_boundaries(metric, distance, inclination, surfaces):
 
         Nbi = 20
         N = 0
-        for N in range(Nbi):
+        #for N in range(Nbi):
+
+        relerr = 1.0
+        reltol = 1e-3
+        rmid_old = 100.0
+
+        while (N < Nbi) and (relerr > reltol):
             rmid = (rmini + rmaxi)/2.0
 
             geos.append((0,0,0,0, pol2geo(metric, distance, inclination, rmid, chii) ))
@@ -318,7 +334,12 @@ def find_boundaries(metric, distance, inclination, surfaces):
                 rmini = rmid
             else:
                 rmaxi = rmid
-            #print "Iterating edge at {} after {} tries for {}".format(rmid, N, chii)
+            
+            relerr = np.abs(rmid - rmid_old)/rmid
+            rmid_old = rmid
+
+            N += 1
+            print "Iterating edge at {} after {} tries for angle={} ({})".format(rmid, N, chii, relerr)
 
         rlims[i] = rmid
     return chis, rlims
@@ -351,7 +372,7 @@ def internal_polar_grid(Nrad, Nchi):
     for i, chi in enumerate(chi_grid):
         print "{} % done".format(float(i)/len(chi_grid) * 100)
         for j, rad in enumerate(rad_grid):
-    
+            print "  tracing geodesic at chi={} and r={}".format(chi, rad) 
             #Trace geodesic from image plane to star
             grid[j,i] = pol2geo(metric, distance, inclination, rad, chi)
             grid[j,i].compute(-(distance + 5.0*R_eq), metric, conf, surfaces)
@@ -553,7 +574,7 @@ def lineprofile(fluxc, redsc):
     return es, yy2         
  
 es, yy2 = lineprofile(redshift**3, redshift)
-
+es = es/compactness
 
 
 ##################################################
@@ -621,50 +642,52 @@ extent=( initial_xs[0], initial_xs[-1], initial_ys[0], initial_ys[-1])
 interpolation = 'nearest'
 
 
-plt.subplot(331)
-plt.imshow(obs_hit_angle, interpolation=interpolation, extent=extent)
-bar = plt.colorbar()
-bar.formatter.set_useOffset(False)
-bar.update_ticks()
-plt.title('emitter angle')
-
-plt.subplot(332)
-
-#plt.imshow(np.log10(redshift), interpolation=interpolation, extent=extent)
-plt.imshow(redshift, interpolation=interpolation, extent=extent)
-bar = plt.colorbar()
-bar.formatter.set_useOffset(False)
-bar.update_ticks()
-plt.title('redshift')
-
-plt.subplot(333)
-plt.imshow(phis, interpolation=interpolation, extent=extent)
-bar = plt.colorbar()
-bar.formatter.set_useOffset(False)
-bar.update_ticks()
-plt.title(r'$\phi$')
-
-
-plt.subplot(334)
-plt.imshow(thetas, interpolation=interpolation, extent=extent)
-bar = plt.colorbar()
-bar.formatter.set_useOffset(False)
-bar.update_ticks()
-plt.title(r'$\theta$')
+ax = subplot(gs[0:2,0:2])
+ax.axis('off')
+ax.imshow(chess, interpolation=interpolation, extent=extent, cmap=cm.get_cmap('Greys'), vmin=0.8, vmax=2.0, alpha=0.6)
+ax.imshow(redshift, interpolation=interpolation, origin='lower', extent=extent,
+        cmap=cm.get_cmap('coolwarm_r'), vmin=0.8*compactness, vmax=1.2*compactness, alpha=0.95)
+ax.contour(redshift, 10, hold='on', colors='w',
+        origin='lower', extent=extent, vmin=0.8*compactness, vmax=1.2*compactness)
 
 
 
-plt.subplot(335)
-plt.imshow(chess, interpolation=interpolation, extent=extent, cmap=cm.get_cmap('Greys'), vmin=0.8, vmax=2.0)
-bar = plt.colorbar()
-bar.formatter.set_useOffset(False)
-bar.update_ticks()
+ax = subplot(gs[2,0])
+ax.minorticks_on()
+cax = ax.imshow(obs_hit_angle, interpolation=interpolation, extent=extent)
+colorbar(cax)
+ax.set_title(r'emitter angle $\alpha$')
 
 
-plt.subplot(336)
-plt.plot(es, yy2, "b-")
+ax = subplot(gs[2,1])
+ax.minorticks_on()
+cax = ax.imshow(redshift, interpolation=interpolation, origin='lower', extent=extent,
+        cmap=cm.get_cmap('coolwarm_r'), vmin=0.8*compactness, vmax=1.2*compactness)
+ax.contour(redshift, 20, hold='on', colors='w',
+        origin='lower', extent=extent, vmin=0.8*compactness, vmax=1.2*compactness)
+colorbar(cax)
+ax.set_title('redshift')
 
 
-plt.tight_layout()
+ax = subplot(gs[0,2])
+ax.minorticks_on()
+cax = ax.imshow(phis, interpolation=interpolation, extent=extent)
+colorbar(cax)
+ax.set_title(r'$\phi$')
+
+
+ax = subplot(gs[1,2])
+ax.minorticks_on()
+cax = ax.imshow(thetas, interpolation=interpolation, extent=extent)
+colorbar(cax)
+ax.set_title(r'$\theta$')
+
+
+ax = subplot(gs[2,2])
+ax.plot(es, yy2, "b-")
+ax.set_title(r'line profile')
+
+
+#plt.tight_layout()
 #plt.show()
-plt.savefig('arcmancer_debug.png')
+savefig('arcmancer_debug.png')
