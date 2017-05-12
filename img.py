@@ -266,7 +266,10 @@ class imgplane:
         self.Cosas  = np.zeros((Nrad, Nchi))
         self.Times  = np.zeros((Nrad, Nchi))
         self.Thetas = np.zeros((Nrad, Nchi))
-        self.Phis   = np.zeros((Nrad, Nchi))
+
+
+        self.Phis_sin   = np.zeros((Nrad, Nchi))
+        self.Phis_cos   = np.zeros((Nrad, Nchi))
     
         
         for i, chi in enumerate(self.chi_grid):
@@ -291,7 +294,9 @@ class imgplane:
                 #surface_point.point.x
                 t  = self.Times[j,i]  = hit_pt.point.x[0]
                 th = self.Thetas[j,i] = hit_pt.point.x[2]
-                p  = self.Phis[j,i]   = hit_pt.point.x[3]
+
+                ps  = self.Phis_sin[j,i] = np.sin(hit_pt.point.x[3])
+                pc  = self.Phis_cos[j,i] = np.cos(hit_pt.point.x[3])
                 
     
                 #Redshift
@@ -317,7 +322,10 @@ class imgplane:
 
         self.intp_Thetas = interp.RectBivariateSpline(self.rad_grid, self.chi_grid, self.Thetas, kx=kx, ky=ky, s=s)
 
-        self.intp_Phis = interp.RectBivariateSpline(self.rad_grid, self.chi_grid, self.Phis, kx=kx, ky=ky, s=s)
+
+        self.intp_Phis_sin = interp.RectBivariateSpline(self.rad_grid, self.chi_grid, self.Phis_sin, kx=kx, ky=ky, s=s)
+        self.intp_Phis_cos = interp.RectBivariateSpline(self.rad_grid, self.chi_grid, self.Phis_cos, kx=kx, ky=ky, s=s)
+
 
         self.intp_Cosas = interp.RectBivariateSpline(self.rad_grid, self.chi_grid, self.Cosas, kx=kx, ky=ky, s=s)
 
@@ -338,7 +346,11 @@ class imgplane:
 
         if rad <= self.edge(chi):
             time  = self.intp_Times.ev(rad, chi)
-            phi   = self.intp_Phis.ev(rad, chi)
+
+            phis  = self.intp_Phis_sin.ev(rad, chi)
+            phic  = self.intp_Phis_cos.ev(rad, chi)
+            phi   = np.arctan2(phis, phic)
+
             theta = self.intp_Thetas.ev(rad, chi)
             cosa  = self.intp_Cosas.ev(rad, chi)
             reds  = self.intp_Reds.ev(rad, chi)
