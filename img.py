@@ -30,7 +30,7 @@ def xy2pol(x, y):
 
 
 
-class imgplane:
+class Imgplane:
 
 
     incl     = 90.0
@@ -317,6 +317,7 @@ class imgplane:
         kx = ky = 2
         s = 0
 
+        self.Times -= np.min(self.Times)
 
         self.intp_Times = interp.RectBivariateSpline(self.rad_grid, self.chi_grid, self.Times, kx=kx, ky=ky, s=s)
 
@@ -355,7 +356,26 @@ class imgplane:
             cosa  = self.intp_Cosas.ev(rad, chi)
             reds  = self.intp_Reds.ev(rad, chi)
 
+            #pix = pixel([time, theta, phi], reds, cosa)
 
         return time, phi, theta, cosa, reds
     
+
+# Pixel class that connects the image plane coordinates to star coordinates
+class pixel:
+
+    def __init__(self, 
+                 x, 
+                 redshift, 
+                 hit_angle):
+
+        #self.x = np.array([0.0, 0.0, 0.0])
+        self.x = x
+
+        self.redshift  = redshift
+        self.hit_angle = hit_angle
+
+
+
+
 

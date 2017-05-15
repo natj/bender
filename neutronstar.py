@@ -2,7 +2,7 @@ import sys
 sys.path.append('/Users/natj/projects/arcmancer/lib/')
 import pyarcmancer as pyac
 
-from img import imgplane
+from img import Imgplane
 from lineprofile import *
 
 import numpy as np
@@ -36,7 +36,7 @@ mpl.rcParams['image.cmap'] = 'inferno'
 # Star parameters
 R = 12.0
 M = 1.4
-freq = 400.0
+freq = 600.0
 incl = 10.0
 
 
@@ -84,17 +84,19 @@ pyac.Log.set_file()
 ##################################################
 #Define metric and surfaces of the spacetime 
 
-#metric = pyac.SchwarzschildMetric(2.0*mass/radius)
+#metric = pyac.SchwarzschildMetric(mass/radius)
 metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
+#metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_no_quadrupole)
 
 ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
 #ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.oblate)
+#ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.agm)
 surfaces = [ ns_surface ]
 
 
 
 # Build and configure image plane by hand
-img = imgplane(conf, metric, surfaces)
+img = Imgplane(conf, metric, surfaces)
 
 img.verbose  = 1
 img.incl     = np.deg2rad(incl) #set inclination
@@ -153,7 +155,7 @@ for i, xi in enumerate(xs):
 ##################################################
 # Compute line profile
 es, yy2 = lineprofile(redshift**3, redshift)
-es = es/compactness
+#es = es/compactness
 
 
 
@@ -226,9 +228,9 @@ ax = subplot(gs[0:2,0:2])
 ax.axis('off')
 ax.imshow(chess, interpolation=interpolation, extent=extent, cmap=cm.get_cmap('Greys'), vmin=0.8, vmax=2.0, alpha=0.6)
 ax.imshow(redshift, interpolation=interpolation, origin='lower', extent=extent,
-        cmap=cm.get_cmap('coolwarm_r'), vmin=0.8*compactness, vmax=1.2*compactness, alpha=0.95)
+        cmap=cm.get_cmap('coolwarm_r'), vmin=0.9*compactness, vmax=1.1*compactness, alpha=0.95)
 
-levels = np.linspace(0.8*compactness, 1.2*compactness, 20)
+levels = np.linspace(0.9*compactness, 1.2*compactness, 20)
 ax.contour(redshift, levels, hold='on', colors='w',
         origin='lower', extent=extent, vmin=0.8*compactness, vmax=1.2*compactness)
 
@@ -246,11 +248,11 @@ ax.set_title(r'emitter angle $\alpha$')
 ax = subplot(gs[2,1])
 ax.minorticks_on()
 cax = ax.imshow(redshift, interpolation=interpolation, origin='lower', extent=extent,
-        cmap=cm.get_cmap('coolwarm_r'), vmin=0.8*compactness, vmax=1.2*compactness)
+        cmap=cm.get_cmap('coolwarm_r'), vmin=0.85*compactness, vmax=1.15*compactness)
 
-levels = np.linspace(0.8*compactness, 1.2*compactness, 20)
+levels = np.linspace(0.9*compactness, 1.1*compactness, 20)
 ax.contour(redshift, levels, hold='on', colors='w',
-        origin='lower', extent=extent, vmin=0.8*compactness, vmax=1.2*compactness)
+        origin='lower', extent=extent, vmin=0.85*compactness, vmax=1.15*compactness)
 colorbar(cax)
 ax.set_title('redshift')
 
@@ -273,7 +275,7 @@ ax.set_title(r'$\theta$')
 
 # Line profile
 ax = subplot(gs[2,2])
-ax.set_xlim(0.8, 1.2)
+#ax.set_xlim(0.8, 1.2)
 ax.plot(es, yy2, "b-")
 ax.set_title(r'line profile')
 
