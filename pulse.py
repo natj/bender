@@ -40,16 +40,13 @@ mpl.rcParams['image.cmap'] = 'inferno'
 R = 12.0
 M = 1.4
 freq = 600.0
-incl = 10.0
+incl = 60.0
 
 
 ##################################################
 # Spot parameters
 rho = 20.0
 colat = 45.0
-
-spot = Spot(colat, rho, freq) #initalize spot(s)
-
 
 
 ##################################################
@@ -70,6 +67,11 @@ mass        = M
 radius      = R * solar_mass_per_km / mass
 angvel      = freq * 2.0*np.pi / solar_mass_per_s * mass
 compactness = np.sqrt(1 - 2/radius)
+
+
+##################################################
+#Create spots
+spot = Spot(colat, rho, angvel) #initalize spot(s)
 
 
 
@@ -95,8 +97,8 @@ pyac.Log.set_file()
 ##################################################
 #Define metric and surfaces of the spacetime 
 
-#metric = pyac.SchwarzschildMetric(mass/radius)
-metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
+metric = pyac.SchwarzschildMetric(mass/radius)
+#metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
 #metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_no_quadrupole)
 
 ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
@@ -134,21 +136,23 @@ visz.plot(img)
 
 #step in time
 ##################################################
-Nt = 16
-times = np.linspace(0.0, 1.0/freq, Nt)
+Nt = 12
+times = np.linspace(0.0, 1.0/freq, Nt)*(solar_mass_per_s/mass)
 phase = np.linspace(0.0, 1.0, Nt)
 
+print 'angvel {}'.format(angvel)
 
 for t, time_step in enumerate(times):
-    #print 'step: {0:3i} / {1:3f} / {2:3f}'.format(t, time_step, phase[t])
+    print 'step: {:3d} / {:6.2f} / {:4.2f}'.format(t, time_step, phase[t])
 
-    print "t={}".format(t)
-    spot.star_time += time_step
+    spot.star_time = time_step
 
+    visz.star(img, spot)
+    bounds = visz.spot_bounding_box()
 
-    visz.plot_star(img, spot)
 
     pause(0.001)
+
 
 
 

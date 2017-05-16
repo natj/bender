@@ -11,19 +11,18 @@ from matplotlib import cm
 ##################################################
 # plot values on image plane
 def trans(mat):
-    return np.flipud(mat.T)
-#return mat
-def detrans(mat):
-    return np.flipud(mat).T
+    #return np.flipud(mat.T) #trans
+    return np.flipud(mat).T  #detrans
 
-#mask all 0.0 elements and transpose
+
+#mask all 0.0 elements and self.origin
 def mask(mat):
     return np.ma.masked_where(mat == 0, mat) 
 
 
 
 #build up a chess board layering from phi and theta coordinates
-def chess_layer(phis, thetas):
+def chess_layer(phis, thetas, star_rot):
 
     none  = 0
     white = 1
@@ -41,7 +40,7 @@ def chess_layer(phis, thetas):
                 mat[i,j] = none
                 continue
 
-            xd = np.int(60.0*phi/(2*pi))
+            xd = np.int(60.0*(phi + star_rot)/(2*pi))
             yd = np.int(60.0*theta/(2*pi))
             
             if (xd & 1) and (yd & 1):
@@ -79,6 +78,9 @@ class Visualize:
     #flag for not re-plotting everything
     initialized = False
 
+    #imshow parameters
+    origin='lower'
+
     def __init__(self):
 
         self.gs = GridSpec(self.ny, self.nx)
@@ -87,6 +89,10 @@ class Visualize:
         #Big neutron star visualization panel
         self.axs[0] = subplot( self.gs[0:2, 0:2] )
         self.axs[0].axis('off')
+
+
+        #create line object ready for spot bounding box
+        self.line0, = self.axs[0].plot([0,0,0,0,0],[0,0,0,0,0],"k-")
 
 
         #Other minor figures
@@ -141,16 +147,19 @@ class Visualize:
                 self.thetas[i,j]        = theta
                 self.phis[i,j]          = phi
 
-        self.redshift      = trans(self.redshift)
-        self.obs_hit_angle = trans(self.obs_hit_angle)
-        self.times         = trans(self.times)
-        self.thetas        = trans(self.thetas)
-        self.phis          = trans(self.phis)
 
 
 
     #Separate dissection for patterns on the surface
     def dissect_spot(self, img, spot):
+
+        self.frame_x1 = self.xs[-1]
+        self.frame_x2 = self.xs[0]
+
+        self.frame_y1 = self.ys[-1]
+        self.frame_y2 = self.ys[0]
+        
+        self.located_spot = False
 
         for i, xi in enumerate(self.xs):
             for j, yi in enumerate(self.ys):
@@ -160,7 +169,20 @@ class Visualize:
                 theta = self.thetas[i,j]
         
                 hits_spot = spot.hit([time, theta, phi])
-        
+
+                #Change state if we found the spot
+                if hits_spot:
+                    self.located_spot = True
+
+                    #record bounding boxes
+                    self.frame_y2 = yi if self.frame_y2 < yi else self.frame_y2 #top max
+                    self.frame_y1 = yi if self.frame_y1 > yi else self.frame_y1 #bot min
+
+                    self.frame_x1 = xi if self.frame_x1 > xi else self.frame_x1 #left min
+                    self.frame_x2 = xi if self.frame_x2 < xi else self.frame_x2 #right max
+
+
+                #record hit pixels
                 self.spotarea[i,j] = 1.0 if hits_spot else 0.0
 
 
@@ -169,26 +191,35 @@ class Visualize:
     #Actual visualizations
 
     #Star plot
-    def star(self):
+    def star_plot(self, star_rotation):
 
         #Compute chess pattern
-        chess = chess_layer(self.phis, self.thetas)
+        chess = chess_layer(self.phis, self.thetas, star_rotation)
+
+        chess    = trans(mask(chess))
+
+        redshift = trans(mask(self.redshift))
+        spotarea = trans(mask(self.spotarea))
+
+        self.axs[0].clear()
+        self.axs[0].axis('off')
 
         self.axs[0].imshow(
-                mask(chess), 
+                chess,
                 interpolation=self.interpolation, 
                 extent=self.extent, 
                 cmap=cm.get_cmap('Greys'), 
                 vmin=0.8, 
                 vmax=2.0, 
                 alpha=0.6, 
-                origin='lower')
+                origin=self.origin
+                )
 
 
         self.axs[0].imshow(
-                mask(self.redshift),
+                redshift,
                 interpolation=self.interpolation, 
-                origin='lower', 
+                origin=self.origin,
                 extent=self.extent,
                 cmap=cm.get_cmap('coolwarm_r'), 
                 vmin=0.9*self.compactness, 
@@ -199,54 +230,63 @@ class Visualize:
         levels = np.linspace(0.9*self.compactness, 1.2*self.compactness, 20)
 
         self.axs[0].contour(
-                mask(self.redshift),
+                redshift,
                 levels, 
                 hold='on', 
                 colors='w',
-                origin='lower', 
+                origin=self.origin,
                 extent=self.extent, 
                 vmin=0.8*self.compactness, 
                 vmax=1.2*self.compactness
                 )
     
         self.axs[0].imshow(
-                mask(self.spotarea),
+                spotarea,
                 interpolation=self.interpolation, 
                 extent=self.extent, 
                 cmap=cm.get_cmap('inferno'), 
-                alpha=0.7
+                alpha=0.7,
+                origin=self.origin
                 )
     
 
 
     #Plot img class & spot
-    def plot_star(self, img, spot):
+    def star(self, img, spot):
 
         self.dissect(img)
         self.dissect_spot(img, spot)
 
-        self.star()
-        pause(0.001)
+        phirot = -spot.star_time * spot.angvel
+        self.star_plot(phirot)
+        #pause(0.001)
 
 
     def plot(self, img):
 
         self.dissect(img)
 
+        redshift      = trans(mask(self.redshift))
+        obs_hit_angle = trans(mask(self.obs_hit_angle))
+        times         = trans(mask(self.times))
+        thetas        = trans(mask(self.thetas))
+        phis          = trans(mask(self.phis))
+
+
         #observer hit angle
         cax = self.axs[1].imshow(
-                mask(self.obs_hit_angle), 
+                obs_hit_angle, 
                 interpolation=self.interpolation, 
                 extent=self.extent,
-                origin='lower'
+                origin=self.origin
                 )
         #colorbar(cax)
 
         #redshift
         cax = self.axs[2].imshow(
-                mask(self.redshift), 
+                redshift, 
                 interpolation=self.interpolation, 
-                origin='lower', 
+                origin=self.origin,
                 extent=self.extent,
                 cmap=cm.get_cmap('coolwarm_r'), 
                 vmin=0.85*self.compactness, 
@@ -255,11 +295,11 @@ class Visualize:
         
         levels = np.linspace(0.9*self.compactness, 1.1*self.compactness, 20)
         self.axs[2].contour(
-                mask(self.redshift), 
+                redshift, 
                 levels, 
                 hold='on', 
                 colors='w',
-                origin='lower', 
+                origin=self.origin,
                 extent=self.extent, 
                 vmin=0.85*self.compactness, 
                 vmax=1.15*self.compactness
@@ -269,25 +309,61 @@ class Visualize:
 
         #phi angle
         cax = self.axs[3].imshow(
-                mask(self.phis), 
+                phis, 
                 interpolation=self.interpolation, 
                 extent=self.extent,
-                origin='lower'
+                origin=self.origin
                 )
         #colorbar(cax)
 
         #theta angle
         cax = self.axs[4].imshow(
-                mask(self.thetas), 
+                thetas, 
                 interpolation=self.interpolation, 
                 extent=self.extent,
-                origin='lower'
+                origin=self.origin
                 )
         #colorbar(cax)
 
 
-        pause(0.001)
+        #pause(0.001)
 
+
+    #Show cartesian bounding box surrounding the box
+    def spot_bounding_box(self):
+
+        #expand image a bit
+        frame_expansion_x = 2.0*np.abs(self.xs[1] - self.xs[0])
+        frame_expansion_y = 2.0*np.abs(self.ys[1] - self.ys[0])
+
+        self.frame_x1 -= frame_expansion_x
+        self.frame_x2 += frame_expansion_x
+        self.frame_y1 -= frame_expansion_y
+        self.frame_y2 += frame_expansion_y
+
+        curvex = [-self.frame_x1,
+                  -self.frame_x2,
+                  -self.frame_x2,
+                  -self.frame_x1,
+                  -self.frame_x1]
+        curvey = [self.frame_y1,
+                  self.frame_y1,
+                  self.frame_y2,
+                  self.frame_y2,
+                  self.frame_y1]
+
+        if self.located_spot:
+            self.axs[0].plot(curvex, curvey, "k-")
+            #self.line0.set_xdata(curvex)
+            #self.line0.set_ydata(curvey)
+
+            #pause(0.001)
+        
+        return [(self.frame_x1, self.frame_y1), 
+                (self.frame_x2, self.frame_y2)]
+        
+
+    
 
 
 

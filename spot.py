@@ -27,11 +27,12 @@ class Spot:
 
     star_time = 0.0 #internal time in the surface
 
-    def __init__(self, colat, rho, freq):
+    def __init__(self, colat, rho, angvel):
 
         self.colat  = np.deg2rad(colat)
         self.rho    = np.deg2rad(rho)
-        self.angvel = freq*2.0*np.pi
+        #self.angvel = freq*2.0*np.pi
+        self.angvel = angvel
 
 
     def circular_spot(self, phi, theta):
@@ -48,6 +49,7 @@ class Spot:
         theta = coords[1]
         phi   = coords[2]
 
+        #time = 0.0
         phi_rot = phi - (time - self.star_time)*self.angvel
 
         inside = self.circular_spot(phi_rot, theta)
