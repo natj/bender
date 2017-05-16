@@ -15,6 +15,8 @@ from pylab import *
 from matplotlib import cm
 
 import scipy.interpolate as interp
+from cubature import cubature
+
 
 #from joblib import Parallel, delayed
 #import multiprocessing
@@ -124,6 +126,21 @@ img.generate_internal_grid(Nrad = 30, Nchi = 30 )
 img.dissect_geos()
 
 
+###################################################
+# flux function for integration
+def flux(xy):
+    x, y = xy
+    time, phi, theta, cosa, reds = img.get_pixel(x, y) 
+    coords = np.array([time, theta, phi])
+
+    hit = spot.hit(coords)
+
+    if hit:
+        return np.array([1.0, 1.0])
+    else:
+        return np.array([0.0, 0.0])
+
+
 
 
 #Construct output xy image plane from img object
@@ -150,15 +167,21 @@ for t, time_step in enumerate(times):
     visz.star(img, spot)
     bounds = visz.spot_bounding_box()
 
+    #integrate
+    min_lims = [bounds[0], bounds[1]]
+    max_lims = [bounds[2], bounds[3]]
+            
+    vals, errs = cubature( flux, 
+                          2, 2, 
+                          min_lims, max_lims,
+                          relerr=1.0e-3,
+                          maxEval=10000,
+                          adaptive='p'
+                          )
+    
+    print "vals", vals," ",errs
 
     pause(0.001)
-
-
-
-
-
-
-
 
 
 

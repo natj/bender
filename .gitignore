@@ -18,4 +18,6 @@ movie*/
 /**/*.eps
 /**/*.txt
 /**/cppe
-
+*.pyc
+*.llt
+*.log

@@ -195,7 +195,6 @@ class Visualize:
 
         #Compute chess pattern
         chess = chess_layer(self.phis, self.thetas, star_rotation)
-
         chess    = trans(mask(chess))
 
         redshift = trans(mask(self.redshift))
@@ -259,7 +258,6 @@ class Visualize:
 
         phirot = -spot.star_time * spot.angvel
         self.star_plot(phirot)
-        #pause(0.001)
 
 
     def plot(self, img):
@@ -326,7 +324,6 @@ class Visualize:
         #colorbar(cax)
 
 
-        #pause(0.001)
 
 
     #Show cartesian bounding box surrounding the box
@@ -354,13 +351,9 @@ class Visualize:
 
         if self.located_spot:
             self.axs[0].plot(curvex, curvey, "k-")
-            #self.line0.set_xdata(curvex)
-            #self.line0.set_ydata(curvey)
-
-            #pause(0.001)
         
-        return [(self.frame_x1, self.frame_y1), 
-                (self.frame_x2, self.frame_y2)]
+
+        return [self.frame_x1, self.frame_y1, self.frame_x2, self.frame_y2]
         
 
     
