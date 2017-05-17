@@ -8,16 +8,15 @@ from spot import Spot
 from visualize import Visualize
 import radiation
 
-
 import numpy as np
 import matplotlib as mpl
 from pylab import *
-
 from matplotlib import cm
-
 import scipy.interpolate as interp
 from cubature import cubature
 
+
+from timeit import default_timer as timer
 
 #from joblib import Parallel, delayed
 #import multiprocessing
@@ -171,10 +170,14 @@ def flux(xy):
         fluxNB = (1.0/reds**3) * radiation.NB(teff) * beam
         fluxB  = (1.0/reds**4) * radiation.EB(teff) * beam
 
+        fluxE  = (1.0/reds**3) * radiation.BE(teff, energies*reds) * beam
+        fluxNE = (1.0/reds**2) * radiation.NBE(teff, energies*reds) * beam
 
-        return np.array([fluxNB, fluxB])*normalization
+        fluxarray = np.hstack((fluxNE, fluxNB, fluxB, fluxE))*normalization
+
+        return fluxarray
     else:
-        return np.zeros(2)
+        return np.zeros(8)
 
 
 
@@ -202,7 +205,7 @@ Nt = 32
 times = np.linspace(0.0, 1.0/freq, Nt)*(solar_mass_per_s/mass)
 phase = np.linspace(0.0, 1.0, Nt)
 
-fluxes = np.zeros((Nt, 2))
+fluxes = np.zeros((Nt, 9))
 
 
 for t, time_step in enumerate(times):
@@ -212,43 +215,41 @@ for t, time_step in enumerate(times):
 
     visz.star(img, spot)
     bounds = visz.spot_bounding_box()
-    pause(0.001)
 
     #integrate
     min_lims = [bounds[0], bounds[1]]
     max_lims = [bounds[2], bounds[3]]
-            
+
+    start = timer()
     vals, errs = cubature( flux, 
-                          2, 2, 
+                          2, 8, 
                           min_lims, max_lims,
                           relerr=1.0e-3,
                           maxEval=100000,
                           adaptive='p'
                           )
-    
-    print "vals", vals," ",errs/vals
-    fluxes[t,:] = vals
+    end = timer()
+    print '   flux {:6.2f} +- {:6.2f}%  | elapsed time: {}'.format(vals[3], 100.0*errs[3]/vals[3], end-start)
+
 
     #plot pulse profile on the fly
-    visz.axs[5].plot(phase[0:t], fluxes[0:t,0], "b.-")
+    fluxes[t,0]  = phase[t]
+    fluxes[t,1::] = vals
+    visz.axs[5].plot(phase[0:t], fluxes[0:t,4], "b.-")
 
 
+    pause(0.001)
 
 
 ioff()
 show()
 
 
-
-#wmatr = zeros(Nt, 9)
-#wmatr[:,1] = phase
-#wmatr[:,2] = sfluxNE[:, 1] #2 kev
-#wmatr[:,3] = sfluxNE[:, 2] #6 kev
-#wmatr[:,4] = sfluxNE[:, 3] #12 kev
-#wmatr[:,5] = sfluxNB #bol number flux
-#wmatr[:,6] = sfluxB #bol energy flux
-#wmatr[:,7] = sfluxE[:, 1] #2 kev
-#wmatr[:,8] = sfluxE[:, 2] #6 kev
-#wmatr[:,9] = sfluxE[:, 3] #12 kev
-
+#Finally save to file
+np.savetxt('pulse.csv', 
+        fluxes, 
+        delimiter=',', 
+        fmt = '%10.9e',
+        header='Phase, F_N(2), F_N(6), F_N(12), F_Nb, F_N, F_E(2), F_E(6), F_E(12)'
+        )
 
