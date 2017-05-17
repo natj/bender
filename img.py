@@ -36,6 +36,8 @@ class Imgplane:
     incl     = 90.0
     distance = 150.0
     rmax     = 10.0
+    time0    = 0.0
+
     verbose  = 0
 
     def __init__(self, conf, metric, surfaces):
@@ -317,7 +319,12 @@ class Imgplane:
         kx = ky = 2
         s = 0
 
-        self.Times -= np.min(self.Times)
+
+        #Shift time XXX
+        time_, phi_, theta_, cosa_, reds_ = self.get_exact_pixel(0.0, 0.0)
+        self.time0 = time_
+        self.Times -= time_
+
 
         self.intp_Times = interp.RectBivariateSpline(self.rad_grid, self.chi_grid, self.Times, kx=kx, ky=ky, s=s)
 
@@ -345,6 +352,7 @@ class Imgplane:
         cosa = 0.0
         reds = 0.0
 
+
         if rad <= self.edge(chi):
             time  = self.intp_Times.ev(rad, chi)
 
@@ -360,6 +368,33 @@ class Imgplane:
 
         return time, phi, theta, cosa, reds
     
+    def get_exact_pixel(self, x, y):
+
+        geo = self.xy2geo(x, y)
+        self.compute_element(geo)
+
+        hit = geo.front_termination().hit_surface
+        if not(hit):
+            return 0.0, 0.0, 0.0, 0.0, 0.0
+
+        hit_pt = geo.get_points()[0]
+        obs_pt = geo.get_points()[-1]
+    
+        #coordinates 
+        time  = hit_pt.point.x[0] - self.time0
+        theta = hit_pt.point.x[2]
+        phi   = hit_pt.point.x[3]
+
+        #Redshift
+        reds = self.metric.dot(obs_pt.point, pyac.static_observer(self.metric, obs_pt.x())) / \
+            self.metric.dot(hit_pt.point, self.surfaces[0].observer(self.metric, hit_pt.x()))
+    
+        #hit angle
+        cosa = geo.front_termination().observer_hit_angle
+    
+        return time, phi, theta, cosa, reds
+
+
 
 # Pixel class that connects the image plane coordinates to star coordinates
 class pixel:

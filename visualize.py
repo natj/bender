@@ -5,9 +5,6 @@ from matplotlib import cm
 
 
 
-
-
-
 ##################################################
 # plot values on image plane
 def trans(mat):
@@ -60,7 +57,7 @@ class Visualize:
 
     #gridspec size
     nx = 3
-    ny = 3
+    ny = 4
 
     #image plane width & height
     x_span = 10.0
@@ -84,6 +81,7 @@ class Visualize:
     def __init__(self):
 
         self.gs = GridSpec(self.ny, self.nx)
+        self.gs.update(hspace = 0.5)
         self.axs = np.empty(( self.nx*self.ny ), dtype=np.object)
         
         #Big neutron star visualization panel
@@ -92,7 +90,7 @@ class Visualize:
 
 
         #create line object ready for spot bounding box
-        self.line0, = self.axs[0].plot([0,0,0,0,0],[0,0,0,0,0],"k-")
+        #self.line0, = self.axs[0].plot([0,0,0,0,0],[0,0,0,0,0],"k-")
 
 
         #Other minor figures
@@ -101,6 +99,7 @@ class Visualize:
 
         self.axs[3] = subplot( self.gs[0, 2] )
         self.axs[4] = subplot( self.gs[1, 2] )
+
 
         for i in range(1,5):
             self.axs[i].minorticks_on()
@@ -111,7 +110,6 @@ class Visualize:
         self.axs[3].set_title(r'$\phi$')
         self.axs[4].set_title(r'$\theta$')
           
-
 
         self.pixel_dx = 2*self.x_span / self.x_bins
         self.pixel_dy = 2*self.y_span / self.y_bins
@@ -139,7 +137,9 @@ class Visualize:
 
         for i, xi in enumerate(self.xs):
             for j, yi in enumerate(self.ys):
+
                 time, phi, theta, cosa, reds = img.get_pixel(xi, yi)
+                #time, phi, theta, cosa, reds = img.get_exact_pixel(xi, yi)
         
                 self.redshift[i,j]      = reds
                 self.obs_hit_angle[i,j] = cosa
@@ -210,7 +210,7 @@ class Visualize:
                 cmap=cm.get_cmap('Greys'), 
                 vmin=0.8, 
                 vmax=2.0, 
-                alpha=0.6, 
+                alpha=0.8, 
                 origin=self.origin
                 )
 
@@ -226,7 +226,7 @@ class Visualize:
                 alpha=0.95
                 )
     
-        levels = np.linspace(0.9*self.compactness, 1.2*self.compactness, 20)
+        levels = np.linspace(0.8*self.compactness, 1.2*self.compactness, 20)
 
         self.axs[0].contour(
                 redshift,
@@ -291,7 +291,7 @@ class Visualize:
                 vmax=1.15*self.compactness
                 )
         
-        levels = np.linspace(0.9*self.compactness, 1.1*self.compactness, 20)
+        levels = np.linspace(0.8*self.compactness, 1.2*self.compactness, 20)
         self.axs[2].contour(
                 redshift, 
                 levels, 
@@ -299,8 +299,8 @@ class Visualize:
                 colors='w',
                 origin=self.origin,
                 extent=self.extent, 
-                vmin=0.85*self.compactness, 
-                vmax=1.15*self.compactness
+                vmin=0.8*self.compactness, 
+                vmax=1.2*self.compactness
                 )
         #colorbar(cax)
 
