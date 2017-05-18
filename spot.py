@@ -35,8 +35,8 @@ class Spot:
         self.angvel = angvel
 
 
-    def circular_spot(self, phi, theta):
-        ang_distance = great_circle_distance(0.0, phi, self.colat, theta)
+    def circular_spot(self, rot_phi, phi, theta):
+        ang_distance = great_circle_distance(rot_phi, phi, self.colat, theta)
 
         if ang_distance <= self.rho:
             return True
@@ -49,10 +49,10 @@ class Spot:
         theta = coords[1]
         phi   = coords[2]
 
-        #time = 0.0
-        phi_rot = phi - (time - self.star_time)*self.angvel
+        #phi_rot = (time - self.star_time)*self.angvel
+        phi_rot = (self.star_time-time)*self.angvel
 
-        inside = self.circular_spot(phi_rot, theta)
+        inside = self.circular_spot(phi_rot, phi, theta)
 
         #If we are inside, lets construct an emission class
         if inside:

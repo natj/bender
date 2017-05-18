@@ -66,9 +66,8 @@ solar_mass_per_s  = 2.03e5
 
 ## conversion factors
 kelvin_per_kev = 1.16045e7
-km_per_kpc     = 3.086e16
+km_per_kpc     = 3.08567758135e16
 kg_per_Msun    = 1.988435e30
-
 cm_tenkpc = 3.24077929e-23 #1cm/10kpc # 3.08567758135
 
 # Variables in units of solar mass are derived here
@@ -84,6 +83,8 @@ imgscale    = (mass/solar_mass_per_km*1.0e5)**2 #cm^2/Msun
 ##################################################
 #Create spots
 spot = Spot(colat, rho, angvel) #initalize spot(s)
+
+
 
 
 
@@ -111,10 +112,15 @@ pyac.Log.set_file()
 
 
 #Spherical (isoareal) Schwarzchild 
-metric = pyac.SchwarzschildMetric(mass)
-ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
-compactness = 2.0*mass/radius #isoradial radius compactness
+#metric = pyac.SchwarzschildMetric(mass)
+#ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
+#compactness = 2.0*mass/radius #isoradial radius compactness
 
+
+#Full AGM metric with spherical surface
+metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
+ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
+compactness = np.sqrt(1 - 2/radius) #isotropic radius compactness
 
 
 #metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
@@ -159,6 +165,7 @@ def flux(xy):
     time, phi, theta, cosa, reds = img.get_pixel(x, y) 
     #time, phi, theta, cosa, reds = img.get_exact_pixel(x, y) 
 
+    EEd = reds #E_obs/E_surf
 
     coords = np.array([time, theta, phi])
 
@@ -167,11 +174,11 @@ def flux(xy):
     if hit:
         beam = radiation.isotropic_beaming(cosa)
 
-        fluxNB = (1.0/reds**3) * radiation.NB(teff) * beam
-        fluxB  = (1.0/reds**4) * radiation.EB(teff) * beam
+        fluxNB = (EEd**3) * radiation.NB(teff) * beam
+        fluxB  = (EEd**4) * radiation.EB(teff) * beam
 
-        fluxE  = (1.0/reds**3) * radiation.BE(teff, energies*reds) * beam
-        fluxNE = (1.0/reds**2) * radiation.NBE(teff, energies*reds) * beam
+        fluxE  = (EEd**3) * radiation.BE(teff, energies/EEd) * beam
+        fluxNE = (EEd**2) * radiation.NBE(teff, energies/EEd) * beam
 
         fluxarray = np.hstack((fluxNE, fluxNB, fluxB, fluxE))*normalization
 
@@ -201,7 +208,7 @@ visz.axs[5].set_xlim(0,1)
 
 #step in time
 ##################################################
-Nt = 32
+Nt = 16
 times = np.linspace(0.0, 1.0/freq, Nt)*(solar_mass_per_s/mass)
 phase = np.linspace(0.0, 1.0, Nt)
 
@@ -225,9 +232,24 @@ for t, time_step in enumerate(times):
                           2, 8, 
                           min_lims, max_lims,
                           relerr=1.0e-3,
-                          maxEval=100000,
+                          maxEval=1000000,
                           adaptive='p'
                           )
+
+    #Sometimes polynomial cubature does not find the spot so
+    # we fall back to area splitted cubature. It is more robust
+    # but slower & less accurate
+    if max(vals) == 0.0:
+        print "    fallback to area splitting cubature"
+        vals, errs = cubature( flux, 
+                              2, 8, 
+                              min_lims, max_lims,
+                              relerr=1.0e-3,
+                              maxEval=1000000,
+                              adaptive='h'
+                              )
+
+
     end = timer()
     print '   flux {:6.2f} +- {:6.2f}%  | elapsed time: {}'.format(vals[3], 100.0*errs[3]/vals[3], end-start)
 
@@ -242,11 +264,22 @@ for t, time_step in enumerate(times):
 
 
 ioff()
-show()
+#show()
 
 
 #Finally save to file
-np.savetxt('pulse.csv', 
+fname = 'f{:03d}_bb_r{:02d}_m{:03.1f}_d{:02d}_i{:02d}_x{:02d}.csv'.format(
+        np.int(freq),
+        np.int(R),
+        M,
+        np.int(colat),
+        np.int(incl),
+        np.int(rho)
+        )
+print 'Saving to a file: '+fname
+
+
+np.savetxt('out/'+fname,
         fluxes, 
         delimiter=',', 
         fmt = '%10.9e',
