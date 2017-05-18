@@ -39,9 +39,9 @@ mpl.rcParams['image.cmap'] = 'inferno'
 
 ##################################################
 # Star parameters
-R = 12.0
+R = 15.0
 M = 1.6
-freq = 400.0
+freq = 600.0
 #freq = 1.0
 incl = 60.0
 
@@ -111,24 +111,17 @@ pyac.Log.set_file()
 #Define metric and surfaces of the spacetime 
 
 
-#Spherical (isoareal) Schwarzchild 
-#metric = pyac.SchwarzschildMetric(mass)
-#ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
-#compactness = 2.0*mass/radius #isoradial radius compactness
+#Oblate Sch #WORKS
+#metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_no_quadrupole)
+#ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.agm_no_quadrupole)
+#compactness = np.sqrt(1 - 2/radius) #isotropic radius compactness
 
 
-#Full AGM metric with spherical surface
+#Full AGM metric & surface #WORKS
 metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
-ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
+ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.agm)
 compactness = np.sqrt(1 - 2/radius) #isotropic radius compactness
 
-
-#metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
-#metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_no_quadrupole)
-#ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
-#ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.oblate)
-#ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.agm)
-#compactness = np.sqrt(1 - 2/radius) #isotropic radius compactness
 
 surfaces = [ ns_surface ]
 
@@ -143,10 +136,10 @@ img.distance = 100.0*mass #set distance
 
 
 #Locate star edges
-img.find_boundaries()
+img.find_boundaries(Nedge=10)
 
 #Build internal coarse grid for the interpolation routines
-img.generate_internal_grid(Nrad = 50, Nchi = 50 )
+img.generate_internal_grid(Nrad = 20, Nchi = 20 )
 img.dissect_geos()
 
 
@@ -221,6 +214,8 @@ for t, time_step in enumerate(times):
     spot.star_time = time_step
 
     visz.star(img, spot)
+
+    visz.improve_on_spot_boundaries()
     bounds = visz.spot_bounding_box()
 
     #integrate
@@ -248,9 +243,10 @@ for t, time_step in enumerate(times):
                               maxEval=1000000,
                               adaptive='h'
                               )
-
-
     end = timer()
+
+
+    
     print '   flux {:6.2f} +- {:6.2f}%  | elapsed time: {}'.format(vals[3], 100.0*errs[3]/vals[3], end-start)
 
 

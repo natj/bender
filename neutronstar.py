@@ -36,8 +36,8 @@ mpl.rcParams['image.cmap'] = 'inferno'
 # Star parameters
 R = 12.0
 M = 1.4
-freq = 600.0
-incl = 10.0
+freq = 700.0
+incl = 60.0
 
 
 
@@ -85,12 +85,18 @@ pyac.Log.set_file()
 #Define metric and surfaces of the spacetime 
 
 #metric = pyac.SchwarzschildMetric(mass/radius)
-metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
-#metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_no_quadrupole)
+#metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
+#ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
 
-ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
-#ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.oblate)
-#ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.agm)
+
+
+#Oblate Kerr
+#metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_no_quadrupole)
+#ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.agm_no_quadrupole)
+
+#Full AGM + oblate
+metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
+ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.agm)
 surfaces = [ ns_surface ]
 
 
@@ -141,8 +147,14 @@ phis          = np.zeros((x_bins, y_bins))
 
 # Finally, loop over pixels to build image
 for i, xi in enumerate(xs):
+    if i % 10 == 0:
+        print "{} % done".format(float(i)/len(xs) * 100)
+
     for j, yi in enumerate(ys):
         time, phi, theta, cosa, reds = img.get_pixel(xi, yi)
+
+
+        #time, phi, theta, cosa, reds = img.get_exact_pixel(xi, yi)
 
         redshift[i,j]      = reds
         obs_hit_angle[i,j] = cosa
@@ -156,8 +168,7 @@ for i, xi in enumerate(xs):
 # Compute line profile
 es, yy2 = lineprofile(redshift**3, redshift)
 #es = es/compactness
-
-
+dE = np.max( np.abs(es[0] - compactness), np.abs(compactness - es[-1]))
 
 
 ##################################################
@@ -222,15 +233,18 @@ chess         = clean_image(chess)
 extent=( xs[0], xs[-1], ys[0], xs[-1] )
 interpolation = 'nearest'
 
+#redshift limits
+vmin = compactness - dE
+vmax = compactness + dE
 
 # General image
 ax = subplot(gs[0:2,0:2])
 ax.axis('off')
 ax.imshow(chess, interpolation=interpolation, extent=extent, cmap=cm.get_cmap('Greys'), vmin=0.8, vmax=2.0, alpha=0.6)
 ax.imshow(redshift, interpolation=interpolation, origin='lower', extent=extent,
-        cmap=cm.get_cmap('coolwarm_r'), vmin=0.9*compactness, vmax=1.1*compactness, alpha=0.95)
+        cmap=cm.get_cmap('coolwarm_r'), vmin=vmin, vmax=vmax, alpha=0.95)
 
-levels = np.linspace(0.9*compactness, 1.2*compactness, 20)
+levels = np.linspace(vmin, vmax, 20)
 ax.contour(redshift, levels, hold='on', colors='w',
         origin='lower', extent=extent, vmin=0.8*compactness, vmax=1.2*compactness)
 
@@ -248,11 +262,11 @@ ax.set_title(r'emitter angle $\alpha$')
 ax = subplot(gs[2,1])
 ax.minorticks_on()
 cax = ax.imshow(redshift, interpolation=interpolation, origin='lower', extent=extent,
-        cmap=cm.get_cmap('coolwarm_r'), vmin=0.85*compactness, vmax=1.15*compactness)
+        cmap=cm.get_cmap('coolwarm_r'), vmin=vmin, vmax=vmax)
 
-levels = np.linspace(0.9*compactness, 1.1*compactness, 20)
+levels = np.linspace(vmin, vmax, 20)
 ax.contour(redshift, levels, hold='on', colors='w',
-        origin='lower', extent=extent, vmin=0.85*compactness, vmax=1.15*compactness)
+        origin='lower', extent=extent, vmin=vmin, vmax=vmax)
 colorbar(cax)
 ax.set_title('redshift')
 
@@ -281,3 +295,26 @@ ax.set_title(r'line profile')
 
 
 savefig('neutronstar.png')
+
+
+#save lineprofile
+
+
+#Finally save to file
+fname = 'lineprofile_f{:03d}_bb_r{:02d}_m{:03.1f}_i{:02d}.csv'.format(
+        np.int(freq),
+        np.int(R),
+        M,
+        np.int(incl),
+        )
+print 'Saving to a file: '+fname
+
+
+np.savetxt('out/'+fname,
+        np.vstack((es, yy2)).T, 
+        delimiter=',', 
+        fmt = '%10.9e',
+        header='Energy, pdf'
+        )
+
+

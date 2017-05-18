@@ -182,7 +182,7 @@ class Imgplane:
             rlims[i] = rmid
 
 
-        self.rmax = np.max(rlims)*1.001
+        self.rmax = np.max(rlims)*1.01
         if self.verbose > 1:
             print "Maximum edge {}".format(self.rmax)
 
@@ -240,8 +240,9 @@ class Imgplane:
         self.grid = np.empty((Nrad,Nchi), dtype=np.object)
         
         for i, chi in enumerate(self.chi_grid):
-            if self.verbose > 1:
-                print "{} % done".format(float(i)/len(self.chi_grid) * 100)
+            if self.verbose > 0:
+                if i % 10 == 0:
+                    print "{} % done".format(float(i)/len(self.chi_grid) * 100)
 
             for j, rad in enumerate(self.rad_grid):
                 if self.verbose > 2:
@@ -288,8 +289,8 @@ class Imgplane:
                 #skip if we did not hit
                 hit = geo.front_termination().hit_surface
 
-                #if not(hit):
-                #    continue
+                if not(hit):
+                    continue
 
 
                 #coordinates 

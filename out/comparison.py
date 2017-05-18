@@ -111,7 +111,7 @@ for j in range(2):
          ax1.yaxis.set_major_formatter(formatter)
 
 
-         fscale = 2.0
+         fscale = 1.0
          
          if i == 0:
              ax1.set_ylabel('$N$ (2 keV)\n[ph cm$^{-2}$ s$^{-1}$ keV$^{-1}$]',size=lsize)

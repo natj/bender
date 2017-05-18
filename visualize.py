@@ -187,6 +187,59 @@ class Visualize:
 
 
 
+    # Locate spot boundaries by projecting spot array to x/y axis 
+    # then look for edges of histogram
+    def improve_on_spot_boundaries(self):
+
+        yproj = np.sum(self.spotarea, 0)
+        xproj = np.sum(self.spotarea, 1)
+
+        xmi = np.argmax(xproj)
+        ymi = np.argmax(yproj)
+        xm = self.xs[xmi]
+        ym = self.ys[ymi]
+
+        ymin = 0.0
+        ymax = 0.0
+
+        i = ymi
+        while i > 0:
+            if yproj[i] == 0.0:
+                break
+            ymin = self.ys[i]
+            i -= 1
+
+        i = ymi
+        while i < len(self.ys):
+            if yproj[i] == 0.0:
+                break
+            ymax = self.ys[i]
+            i += 1
+
+        self.frame_y1 = ymin
+        self.frame_y2 = ymax
+
+        xmin = 0.0
+        xmax = 0.0
+
+        i = xmi
+        while i > 0:
+            if xproj[i] == 0.0:
+                break
+            xmin = self.xs[i]
+            i -= 1
+
+        i = xmi
+        while i < len(self.xs):
+            if xproj[i] == 0.0:
+                break
+            xmax = self.xs[i]
+            i += 1
+
+        self.frame_x1 = xmin
+        self.frame_x2 = xmax
+
+
     ################################################## 
     #Actual visualizations
 
