@@ -234,4 +234,4 @@ for j in range(4):
 
 
 #savefig('fig2a.pdf', bbox_inches='tight')
-savefig('fig2b.pdf', bbox_inches='tight')
+savefig('comparison.pdf', bbox_inches='tight')

@@ -76,19 +76,18 @@ for j in range(3):
 #for j in [2]:
 
     if j == 0:
-        fname = path_JP  + 'HT_30.csv'
-        fname2 = path_JP + 'polar_f600_bb_r10_m1.8_d40_i30_x10.csv'
+        fname = path_JP  + 'HT10_30.csv'
+        fname2 = path_JP + 'polarE_f600_bb_r10_m1.8_d40_i30_x10.csv'
     if j == 1:
-        fname = path_JP  + 'HT_60.csv'
-        fname2 = path_JP + 'polar_f600_bb_r10_m1.8_d40_i60_x10.csv'
+        fname = path_JP  + 'HT10_60.csv'
+        fname2 = path_JP + 'polarE_f600_bb_r10_m1.8_d40_i60_x10.csv'
     if j == 2:
-        fname = path_JP  + 'HT_90.csv'
-        fname2 = path_JP + 'polar_f600_bb_r15_m1.8_d40_i90_x10.csv'
+        fname = path_JP  + 'HT10_90.csv'
+        fname2 = path_JP + 'polar_f600_bb_r10_m1.8_d40_i90_x10.csv'
 
 
     #read JP data
     phase, N6kev = read_csv_files(fname)
-    #phase, N2kev, N6kev, N12kev, Nbol, Fbol, F2kev, F6kev, F12kev = read_JN_files(fname) 
 
     #read JN data
     phase2, N2kev2, N6kev2, N12kev2, Nbol2, Fbol2, F2kev2, F6kev2, F12kev2 = read_JN_files(fname2) 
@@ -129,7 +128,7 @@ for j in range(3):
              ax1.set_ylabel('$N$ (6 keV)',size=lsize)
 
              flux  = N6kev 
-             flux2 = N6kev2
+             flux2 = F6kev2
 
          elif i == 2:
              ax1.set_ylabel('$N$ (12 keV)',size=lsize)
@@ -145,10 +144,15 @@ for j in range(3):
 
          #flux  /= np.max(flux)
          #flux2 /= np.max(flux2)
-         print np.max(flux2)
+         #print np.max(flux2)
          #flux2 *= 1000.0
-         flux2 *= 6.0e11
-             
+         #flux2 *= 6.0e11
+
+         print "F ratio:", np.max(flux) / np.max(flux2)
+         flux2 *= np.max(flux) / np.max(flux2)
+         print np.max(flux2)
+
+
          indxs = []
          for q in range(len(flux2)):
              if not (np.isnan(flux2[q])):
@@ -183,13 +187,13 @@ for j in range(3):
          phase2 = phase2 + pshft
          
          if j == 0:
-             phase2 = phase2 + 0.00 #- pshft
+             phase2 = phase2 + 0.0 - pshft
          elif j == 1:
-             phase2 = phase2 + 0.00 #- pshft
+             phase2 = phase2 + 0.0 - pshft
          elif j == 2:
-             phase2 = phase2 + 0.035 - pshft
+             phase2 = phase2 + 0.0 - pshft
          elif j == 3:
-             phase2 = phase2 + 0.05 - pshft
+             phase2 = phase2 + 0.0 - pshft
              
 
          #phase = phase - 0.01
@@ -247,4 +251,4 @@ for j in range(3):
     
 
 
-savefig('fig4.pdf', bbox_inches='tight')
+savefig('fig9.pdf', bbox_inches='tight')

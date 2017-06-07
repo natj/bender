@@ -75,15 +75,25 @@ nu = '600'
 for j in range(3):
 #for j in [2]:
 
+    #if j == 0:
+    #    fname = path_JP  + 'HT_30.csv'
+    #    fname2 = path_JP + 'polar_f600_bb_r15_m1.8_d40_i30_x10.csv'
+    #if j == 1:
+    #    fname = path_JP  + 'HT_60.csv'
+    #    fname2 = path_JP + 'polar_f600_bb_r15_m1.8_d40_i60_x10.csv'
+    #if j == 2:
+    #    fname = path_JP  + 'HT_90.csv'
+    #    fname2 = path_JP + 'polar_f600_bb_r15_m1.8_d40_i90_x10.csv'
+
     if j == 0:
-        fname = path_JP  + 'HT_30.csv'
-        fname2 = path_JP + 'polar_f600_bb_r10_m1.8_d40_i30_x10.csv'
+        fname = path_JP  + 'HT1.csv'
+        fname2 = path_JP + 'polarE_f600_bb_r15_m1.8_d40_i30_x10.csv'
     if j == 1:
-        fname = path_JP  + 'HT_60.csv'
-        fname2 = path_JP + 'polar_f600_bb_r10_m1.8_d40_i60_x10.csv'
+        fname = path_JP  + 'HT3.csv'
+        fname2 = path_JP + 'polarE_f600_bb_r15_m1.8_d40_i30_x10.csv'
     if j == 2:
-        fname = path_JP  + 'HT_90.csv'
-        fname2 = path_JP + 'polar_f600_bb_r15_m1.8_d40_i90_x10.csv'
+        fname = path_JP  + 'HT5.csv'
+        fname2 = path_JP + 'polarE_f600_bb_r15_m1.8_d40_i30_x10.csv'
 
 
     #read JP data
@@ -142,6 +152,13 @@ for j in range(3):
              #flux = Fbol
              #flux2 = Fbol2
 
+
+         if j == 0:
+             flux2 = F2kev2
+         if j == 1:
+             flux2 = F6kev2
+         if j == 2:
+             flux2 = F12kev2
 
          #flux  /= np.max(flux)
          #flux2 /= np.max(flux2)

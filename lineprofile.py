@@ -39,8 +39,8 @@ def lineprofile(fluxc, redsc):
 
     #Discard 0.5% of tails (=nonsense values)
     NN = len(xarrs)
-    emin = xarrs[np.int(0.005*NN)]
-    emax = xarrs[np.int(0.995*NN)]
+    emin = xarrs[np.int(0.002*NN)]
+    emax = xarrs[np.int(0.998*NN)]
 
     #emin = np.min(xarrs)*0.99
     #emax = np.max(xarrs)*1.01

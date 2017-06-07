@@ -11,6 +11,9 @@ def trans(mat):
     #return np.flipud(mat.T) #trans
     return np.flipud(mat).T  #detrans
 
+def detrans(mat):
+    return mat  #detrans
+
 
 #mask all 0.0 elements and self.origin
 def mask(mat):
@@ -57,14 +60,17 @@ class Visualize:
 
     #gridspec size
     nx = 3
-    ny = 5
+    ny = 6
 
     #image plane width & height
-    x_span = 10.0
-    y_span = 10.0
+    x_span = 14.0
+    y_span = 14.0
     
-    x_bins = 200
-    y_bins = 200
+    x_bins = 500
+    y_bins = 500
+
+    px_bins = 200
+    py_bins = 200
 
     #Interpolation type for the imshow 
     interpolation = 'nearest'
@@ -99,9 +105,10 @@ class Visualize:
 
         self.axs[3] = subplot( self.gs[0, 2] )
         self.axs[4] = subplot( self.gs[1, 2] )
+        self.axs[5] = subplot( self.gs[2, 2] )
 
 
-        for i in range(1,5):
+        for i in range(1,6):
             self.axs[i].minorticks_on()
 
         
@@ -109,6 +116,7 @@ class Visualize:
         self.axs[2].set_title(r'redshift')
         self.axs[3].set_title(r'$\phi$')
         self.axs[4].set_title(r'$\theta$')
+        self.axs[5].set_title(r'time')
           
 
         self.pixel_dx = 2*self.x_span / self.x_bins
@@ -129,16 +137,28 @@ class Visualize:
 
 
         # other settings for imshow
-        self.extent=( self.xs[0], self.xs[-1], self.ys[0], self.xs[-1] )
+        self.extent=( self.xs[0], self.xs[-1], self.ys[0], self.ys[-1] )
 
 
         #polar grid
-        self.axs[6] = subplot( self.gs[4,:] )
-        self.axs[6].minorticks_on()
-        self.axs[6].set_xlabel(r'$\chi$')
-        self.axs[6].set_ylabel(r'$r$')
+        self.axs[7] = subplot( self.gs[4:6,:] )
+        self.axs[7].minorticks_on()
+        self.axs[7].set_xlabel(r'$\chi$ $[R_{max}]$ ')
+        self.axs[7].set_ylabel(r'$r$ $[\pi]$ ')
 
-        
+        self.pxs = np.linspace(0.0, 2.0, self.px_bins)
+        self.pys = np.linspace(0.0, 1.0, self.py_bins)
+
+        self.pextent=( self.pxs[0], self.pxs[-1], self.pys[0], self.pys[-1] )
+
+        #build interpolated array
+        self.polar_spotarea      = np.zeros((self.px_bins, self.py_bins))
+        self.polar_redshift      = np.zeros((self.px_bins, self.py_bins))
+        self.polar_obs_hit_angle = np.zeros((self.px_bins, self.py_bins))
+        self.polar_times         = np.zeros((self.px_bins, self.py_bins))
+        self.polar_thetas        = np.zeros((self.px_bins, self.py_bins))
+        self.polar_phis          = np.zeros((self.px_bins, self.py_bins))
+
 
 
     #Get observables from img
@@ -155,6 +175,49 @@ class Visualize:
                 self.times[i,j]         = time
                 self.thetas[i,j]        = theta
                 self.phis[i,j]          = phi
+
+
+
+    #Get observables from img
+    def polar_dissect(self, img):
+
+        for i, c in enumerate(self.pxs):
+            for j, r in enumerate(self.pys):
+
+                #rad = r*img.rmax
+                chi = c*np.pi
+                rad = img.radius_stretch(r, chi) #* img.rmax
+
+                time, phi, theta, cosa, reds  = img.get_poxel(rad, chi)
+                self.polar_redshift[i,j]      = reds
+                self.polar_obs_hit_angle[i,j] = cosa
+                self.polar_times[i,j]         = time
+                self.polar_thetas[i,j]        = theta
+                self.polar_phis[i,j]          = phi
+
+
+
+
+
+    #Separate dissection for patterns on the surface
+    def polar_dissect_spot(self, img, spot):
+        for i, c in enumerate(self.pxs):
+            for j, r in enumerate(self.pys):
+
+                #rad = r*img.rmax
+                #chi = c*np.pi
+
+                time  = self.polar_times[i,j]
+                phi   = self.polar_phis[i,j]
+                theta = self.polar_thetas[i,j]
+        
+                hits_spot = spot.hit([time, theta, phi])
+
+                #Change state if we found the spot
+                #if hits_spot:
+
+                #record hit pixels
+                self.polar_spotarea[i,j] = 1.0 if hits_spot else 0.0
 
 
 
@@ -176,6 +239,9 @@ class Visualize:
                 time  = self.times[i,j]
                 phi   = self.phis[i,j]
                 theta = self.thetas[i,j]
+
+                if self.redshift[i,j] == 0.0:
+                    continue
         
                 hits_spot = spot.hit([time, theta, phi])
 
@@ -311,6 +377,68 @@ class Visualize:
                 )
     
 
+    def polar_plot(self, star_rotation):
+
+        #Compute chess pattern
+        chess = chess_layer(self.polar_phis, self.polar_thetas, star_rotation)
+        chess    = trans(mask(chess))
+
+        redshift = trans(mask(self.polar_redshift))
+        spotarea = trans(mask(self.polar_spotarea))
+
+        self.axs[7].clear()
+        #self.axs[6].axis('off')
+
+        self.axs[7].imshow(
+                chess,
+                interpolation=self.interpolation, 
+                extent=self.pextent, 
+                cmap=cm.get_cmap('Greys'), 
+                vmin=0.8, 
+                vmax=2.0, 
+                alpha=0.8, 
+                aspect='auto',
+                origin=self.origin
+                )
+
+
+        self.axs[7].imshow(
+                redshift,
+                interpolation=self.interpolation, 
+                origin=self.origin,
+                extent=self.pextent,
+                cmap=cm.get_cmap('coolwarm_r'), 
+                vmin=0.9*self.compactness, 
+                vmax=1.1*self.compactness, 
+                aspect='auto',
+                alpha=0.95
+                )
+    
+        levels = np.linspace(0.8*self.compactness, 1.2*self.compactness, 20)
+
+        self.axs[7].contour(
+                redshift,
+                levels, 
+                hold='on', 
+                colors='w',
+                origin=self.origin,
+                extent=self.pextent, 
+                aspect='auto',
+                vmin=0.8*self.compactness, 
+                vmax=1.2*self.compactness
+                )
+    
+        self.axs[7].imshow(
+                spotarea,
+                interpolation=self.interpolation, 
+                extent=self.pextent, 
+                cmap=cm.get_cmap('inferno'), 
+                alpha=0.7,
+                aspect='auto',
+                origin=self.origin
+                )
+    
+
 
     #Plot img class & spot
     def star(self, img, spot):
@@ -320,6 +448,16 @@ class Visualize:
 
         phirot = -spot.star_time * spot.angvel
         self.star_plot(phirot)
+
+
+    def polar(self, img, spot):
+
+        self.polar_dissect(img)
+        self.polar_dissect_spot(img, spot)
+
+        phirot = -spot.star_time * spot.angvel
+        self.polar_plot(phirot)
+
 
 
     def plot(self, img):
@@ -385,6 +523,24 @@ class Visualize:
                 )
         #colorbar(cax)
 
+        cax = self.axs[5].imshow(
+                times, 
+                interpolation=self.interpolation, 
+                extent=self.extent,
+                origin=self.origin
+                )
+        #levels = np.linspace(0.8*self.compactness, 1.2*self.compactness, 20)
+        self.axs[5].contour(
+                times, 
+                10, 
+                hold='on', 
+                colors='w',
+                origin=self.origin,
+                extent=self.extent, 
+                #vmin=0.8*self.compactness, 
+                #vmax=1.2*self.compactness
+                )
+
 
 
 
@@ -392,8 +548,8 @@ class Visualize:
     def spot_bounding_box(self):
 
         #expand image a bit
-        frame_expansion_x = 4.0*np.abs(self.xs[1] - self.xs[0])
-        frame_expansion_y = 4.0*np.abs(self.ys[1] - self.ys[0])
+        frame_expansion_x = 1.0*np.abs(self.xs[1] - self.xs[0])
+        frame_expansion_y = 1.0*np.abs(self.ys[1] - self.ys[0])
 
         self.frame_x1 -= frame_expansion_x
         self.frame_x2 += frame_expansion_x

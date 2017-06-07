@@ -35,9 +35,9 @@ mpl.rcParams['image.cmap'] = 'inferno'
 ##################################################
 # Star parameters
 R = 12.0
-M = 1.4
-freq = 700.0
-incl = 60.0
+M = 1.6
+freq = 400.0
+incl = 15.0
 
 
 
@@ -83,16 +83,14 @@ pyac.Log.set_file()
 
 ##################################################
 #Define metric and surfaces of the spacetime 
-
-#metric = pyac.SchwarzschildMetric(mass/radius)
-#metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
+#S+D
+#metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_no_quadrupole)
 #ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
 
-
-
-#Oblate Kerr
+#Oblate Sch #WORKS
 #metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_no_quadrupole)
 #ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.agm_no_quadrupole)
+
 
 #Full AGM + oblate
 metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
@@ -106,14 +104,14 @@ img = Imgplane(conf, metric, surfaces)
 
 img.verbose  = 1
 img.incl     = np.deg2rad(incl) #set inclination
-img.distance = 100.0*mass #set distance
+img.distance = 100000.0*mass #set distance
 
 
 #Locate star edges
-img.find_boundaries()
+img.find_boundaries(Nedge=100, reltol=1.0e-4, max_iterations=30)
 
 #Build internal coarse grid for the interpolation routines
-img.generate_internal_grid(Nrad = 30, Nchi = 30 )
+img.generate_internal_grid(Nrad = 100, Nchi = 100 )
 
 img.dissect_geos()
 
@@ -121,11 +119,14 @@ img.dissect_geos()
 
 #Construct output xy image plane from img object
 ##################################################
-x_span = 1.5*radius
-y_span = 1.5*radius
+#x_span = 1.5*radius
+#y_span = 1.5*radius
+x_span = 11.0
+y_span = 11.0
 
-x_bins = 200
-y_bins = 200
+
+x_bins = 500
+y_bins = 500
 
 pixel_dx = 2*x_span / x_bins
 pixel_dy = 2*y_span / y_bins
@@ -166,7 +167,7 @@ for i, xi in enumerate(xs):
 
 ##################################################
 # Compute line profile
-es, yy2 = lineprofile(redshift**3, redshift)
+es, yy2 = lineprofile(redshift**4, redshift)
 #es = es/compactness
 dE = np.max( np.abs(es[0] - compactness), np.abs(compactness - es[-1]))
 
@@ -220,6 +221,56 @@ def chess_layer(phis, thetas):
 #Compute chess pattern
 chess = chess_layer(phis, thetas)
 
+
+##################################################
+#Save redshift into a file
+fname = 'reds_f{:03d}_bb_r{:02d}_m{:03.1f}_i{:02d}.csv'.format(
+        np.int(freq),
+        np.int(R),
+        M,
+        np.int(incl),
+        )
+print 'Saving to a file: '+fname
+
+np.savetxt('out/'+fname,
+        redshift.flatten(),
+        delimiter=',', 
+        fmt = '%10.9e'
+        )
+
+#Save thetas into a file
+fname = 'thetas_f{:03d}_bb_r{:02d}_m{:03.1f}_i{:02d}.csv'.format(
+        np.int(freq),
+        np.int(R),
+        M,
+        np.int(incl),
+        )
+print 'Saving to a file: '+fname
+
+np.savetxt('out/'+fname,
+        thetas.flatten(),
+        delimiter=',', 
+        fmt = '%10.9e'
+        )
+
+#Save phi into a file
+fname = 'phis_f{:03d}_bb_r{:02d}_m{:03.1f}_i{:02d}.csv'.format(
+        np.int(freq),
+        np.int(R),
+        M,
+        np.int(incl),
+        )
+print 'Saving to a file: '+fname
+
+np.savetxt('out/'+fname,
+        phis.flatten(),
+        delimiter=',', 
+        fmt = '%10.9e'
+        )
+
+
+
+
 #Clean images for imshow
 obs_hit_angle = clean_image(obs_hit_angle)
 redshift      = clean_image(redshift)
@@ -261,15 +312,21 @@ ax.set_title(r'emitter angle $\alpha$')
 # Redshift with contours
 ax = subplot(gs[2,1])
 ax.minorticks_on()
-cax = ax.imshow(redshift, interpolation=interpolation, origin='lower', extent=extent,
-        cmap=cm.get_cmap('coolwarm_r'), vmin=vmin, vmax=vmax)
+#cax = ax.imshow(redshift, interpolation=interpolation, origin='lower', extent=extent,
+#        cmap=cm.get_cmap('coolwarm_r'), vmin=vmin, vmax=vmax)
+#
+#levels = np.linspace(vmin, vmax, 20)
+#ax.contour(redshift, levels, hold='on', colors='w',
+#        origin='lower', extent=extent, vmin=vmin, vmax=vmax)
 
-levels = np.linspace(vmin, vmax, 20)
-ax.contour(redshift, levels, hold='on', colors='w',
-        origin='lower', extent=extent, vmin=vmin, vmax=vmax)
+# Redshift^4 (monoenergetic flux)
+cax = ax.imshow(redshift**4, interpolation=interpolation, origin='lower', extent=extent,
+        cmap=cm.get_cmap('coolwarm_r'))
+ax.contour(redshift**4, 20, hold='on', colors='w',
+        origin='lower', extent=extent)
+
 colorbar(cax)
 ax.set_title('redshift')
-
 
 # Phi angle
 ax = subplot(gs[0,2])

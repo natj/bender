@@ -29,13 +29,12 @@ def xy2pol(x, y):
 
 
 
-
 class Imgplane:
 
 
     incl     = 90.0
     distance = 150.0
-    rmax     = 10.0
+    rmax     = 12.0
     time0    = 0.0
 
     verbose  = 0
@@ -44,6 +43,23 @@ class Imgplane:
         self.conf  = conf
         self.metric = metric
         self.surfaces = surfaces
+
+    def radius_stretch(self, r, c):
+        tau = 8.0
+        norm = 1.0 - np.exp(-tau)
+
+        #return self.rmax * (1.0 - np.exp(-tau*r**2))/norm
+        return self.edge(c) * (1.0 - np.exp(-tau*r**2))/norm
+
+    def radius_inv(self, rad, chi):
+        tau = 8.0
+        norm = 1.0 - np.exp(-tau)
+
+        #rinv = norm * rad / self.rmax
+        rinv = norm * rad / self.edge(chi)
+
+        return ( -np.log(1.0-rinv)/tau )**(1.0/2.0)
+
 
 
     # in the limit m -> 0, BL coordinates go to oblate spheroidal minkowski. These
@@ -182,8 +198,8 @@ class Imgplane:
             rlims[i] = rmid
 
 
-        self.rmax = np.max(rlims)*1.01
-        if self.verbose > 1:
+        self.rmax = np.max(rlims)*1.0001
+        if self.verbose > 0:
             print "Maximum edge {}".format(self.rmax)
 
         #Build edge location interpolator
@@ -213,16 +229,17 @@ class Imgplane:
         chimin    = 0.0 - dchi_edge
         chimax    = 2.0*np.pi + dchi_edge
         
-        chi_diffs     = 0.8 + np.sin( np.linspace(0.0, 2.0*np.pi, Nchi-3) )**2
-        chi_diffs     = np.insert(chi_diffs, 0, 0.0)
-        self.chi_grid = chimin + (chimax - chimin) * np.cumsum(chi_diffs)/np.sum(chi_diffs)
-        self.chi_grid = np.insert(self.chi_grid, 0, self.chi_grid[0] - dchi_edge)
-        self.chi_grid = np.append(self.chi_grid, self.chi_grid[-1] + dchi_edge)
+        #chi_diffs     = 0.8 + np.sin( np.linspace(0.0, 2.0*np.pi, Nchi-3) )**2
+        #chi_diffs     = np.insert(chi_diffs, 0, 0.0)
+        #self.chi_grid = chimin + (chimax - chimin) * np.cumsum(chi_diffs)/np.sum(chi_diffs)
+        #self.chi_grid = np.insert(self.chi_grid, 0, self.chi_grid[0] - dchi_edge)
+        #self.chi_grid = np.append(self.chi_grid, self.chi_grid[-1] + dchi_edge)
     
 
         #If true, we fall back to linear angle spacing
-        if use_flat_chi:
-            self.chi_grid = np.linspace(0.0, 2.0*np.pi, Nchi)
+        #if use_flat_chi:
+        #self.chi_grid = np.linspace(0.0, 2.0*np.pi, Nchi)
+        self.chi_grid = np.linspace(chimin, chimax, Nchi)
         
         
         # Build non-equidistant radius grid
@@ -232,10 +249,12 @@ class Imgplane:
         #
         # Actual computations are black magic so only
         # modify these if you know what you are doing
-        rad_diffs     = 1.0 / np.exp( np.linspace(1.2, 2.0, Nrad-1)**2)
-        self.rad_grid = self.rmax * np.cumsum(rad_diffs)/np.sum(rad_diffs)
-        self.rad_grid = np.insert(self.rad_grid, 0, 0.001)
+        #rad_diffs     = 1.0 / np.exp( np.linspace(1.2, 2.0, Nrad-1)**2)
+        #self.rad_grid = self.rmax * np.cumsum(rad_diffs)/np.sum(rad_diffs)
+        #self.rad_grid = np.insert(self.rad_grid, 0, 0.001)
         
+        self.rad_grid = np.linspace(0.0, 1.01, Nrad)
+
         
         self.grid = np.empty((Nrad,Nchi), dtype=np.object)
         
@@ -244,9 +263,12 @@ class Imgplane:
                 if i % 10 == 0:
                     print "{} % done".format(float(i)/len(self.chi_grid) * 100)
 
-            for j, rad in enumerate(self.rad_grid):
+            for j, rad_s in enumerate(self.rad_grid):
                 if self.verbose > 2:
                     print "  tracing geodesic at chi={} and r={}".format(chi, rad) 
+
+                rad = self.radius_stretch(rad_s, chi)
+                
 
                 #Trace geodesic from image plane to star
                 geo = self.polar2geo(rad, chi)
@@ -255,6 +277,26 @@ class Imgplane:
                 self.grid[j,i] = geo
         
 
+
+    #def generate_polar_grid(self,
+    #                        Nrad = 20,
+    #                        Nchi = 20
+    #                        ):
+    #    if self.verbose > 0:
+    #        print "Generating polar grid..."
+    #    chi_grid = np.linspace(0.0, 2.0*np.pi, Nchi)
+    #    rad_grid = np.linspace(0.0, self.rmax, Nrad)
+    #    self.pgrid = np.empty( (Nrad, Nchi), dtype=np.object)
+    #    for i, chi in enumerate(chi_grid):
+    #        if i % 10 == 0 and self.verbose > 0:
+    #                print "{} % done".format(float(i)/len(self.chi_grid) * 100)
+    #        for j, rad in enumerate(rad_grid):
+    #            #Trace geodesic from image plane to star
+    #            geo = self.polar2geo(rad, chi)
+    #            self.compute_element(geo)
+    #            self.pgrid[j,i] = geo
+                
+                
 
     #Reduce geodesic into physical quantities
     def dissect_geos(self):
@@ -290,6 +332,11 @@ class Imgplane:
                 hit = geo.front_termination().hit_surface
 
                 if not(hit):
+                    self.Times[j,i]    = self.Times[j-1,i]
+                    self.Thetas[j,i]   = self.Thetas[j-1,i]
+                    self.Phis_sin[j,i] = self.Phis_sin[j-1,i]
+                    self.Phis_cos[j,i] = self.Phis_cos[j-1,i]
+                    self.Reds[j,i]     = self.Reds[j-1,i]
                     continue
 
 
@@ -310,6 +357,14 @@ class Imgplane:
                 #hit angle
                 cosa = self.Cosas[j,i] = \
                     geo.front_termination().observer_hit_angle
+                
+                #if rad > 0.85:
+                #    self.Times[j,i]    = self.Times[j-1,i]
+                #    self.Thetas[j,i]   = self.Thetas[j-1,i]
+                #    self.Phis_sin[j,i] = self.Phis_sin[j-1,i]
+                #    self.Phis_cos[j,i] = self.Phis_cos[j-1,i]
+                #    self.Reds[j,i]     = self.Reds[j-1,i]
+                
     
 
 
@@ -317,8 +372,10 @@ class Imgplane:
         if self.verbose > 0:
             print "Building spline coefficients..."
 
-        kx = ky = 2
-        s = 0
+        #kx = ky = 1
+        kx = 2
+        ky = 2
+        s = 0.0
 
 
         #Shift time XXX
@@ -353,21 +410,62 @@ class Imgplane:
         cosa = 0.0
         reds = 0.0
 
+        redge = self.edge(chi)
 
-        if rad <= self.edge(chi):
-            time  = self.intp_Times.ev(rad, chi)
+        if rad <= redge:
+        #if rad < 0.98*redge:
+        #if rad <= self.edge(chi):
 
-            phis  = self.intp_Phis_sin.ev(rad, chi)
-            phic  = self.intp_Phis_cos.ev(rad, chi)
+            rs = self.radius_inv(rad, chi)
+
+            #if rs > 0.875:
+            #    return self.get_exact_pixel(x, y)
+
+            time  = self.intp_Times.ev(rs, chi)
+            phis  = self.intp_Phis_sin.ev(rs, chi)
+            phic  = self.intp_Phis_cos.ev(rs, chi)
             phi   = np.arctan2(phis, phic)
 
-            theta = self.intp_Thetas.ev(rad, chi)
-            cosa  = self.intp_Cosas.ev(rad, chi)
-            reds  = self.intp_Reds.ev(rad, chi)
+            theta = self.intp_Thetas.ev(rs, chi)
+            cosa  = self.intp_Cosas.ev(rs, chi)
+            reds  = self.intp_Reds.ev(rs, chi)
+
+        #elif 0.98*redge <= rad < 1.01*redge:
+        #    return self.get_exact_pixel(x, y)
+
+
 
             #pix = pixel([time, theta, phi], reds, cosa)
 
         return time, phi, theta, cosa, reds
+
+    #Return polar pixel (i.e. poxel)
+    def get_poxel(self, rad, chi):
+
+        time = 0.0
+        phi  = 0.0
+        theta = 0.0
+        cosa = 0.0
+        reds = 0.0
+
+        redge = self.edge(chi)
+
+        if rad <= redge:
+            rs = self.radius_inv(rad, chi)
+
+            time  = self.intp_Times.ev(rs, chi)
+
+            phis  = self.intp_Phis_sin.ev(rs, chi)
+            phic  = self.intp_Phis_cos.ev(rs, chi)
+            phi   = np.arctan2(phis, phic)
+
+            theta = self.intp_Thetas.ev(rs, chi)
+            cosa  = self.intp_Cosas.ev(rs, chi)
+            reds  = self.intp_Reds.ev(rs, chi)
+
+        return time, phi, theta, cosa, reds
+
+
     
     def get_exact_pixel(self, x, y):
 
