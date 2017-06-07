@@ -94,7 +94,7 @@ freq = 600
 xmin = 10.0
 xmax = 16.0
 ymin = 0.0
-ymax = 90.0
+ymax = 10.0
 
 
 gs = plt.GridSpec(1, 3)
@@ -234,8 +234,8 @@ for i, mass in enumerate(mass_grid):
             return r'$\Delta E/E$ = {:.2f}'.format(x)
 
     elif mode == 'rel':
-        #levels = [0.1, 0.2, 0.4, 0.6, 0.8, 0.85, 0.9, 0.95]
-        levels = [0.1, 0.5, 0.8, 0.85, 0.9, 0.95]
+        levels = [0.1, 0.2, 0.4, 0.6, 0.8, 0.85, 0.9, 0.95]
+        #levels = [0.1, 0.5, 0.8, 0.85, 0.9, 0.95]
         def fmt(x):
             a = 100*x
             return '{:2d}%'.format(np.int(a))
