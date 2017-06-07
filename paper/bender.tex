@@ -132,7 +132,7 @@ The Full Width at Tenth Maximum and Full Width at Half Maximum are also reported
 These can be then used to quantitatively estimate the effects of rotational smearing on the observed spectra.
 }
 We also calculate accurate pulse profiles and observer skymaps of emission from hot spots on \textbf{rapidly rotating} accreting millisecond pulsars.
-\textbf{These allow us to quantify the strength of the pulse fractions one expects to observe from typical fasly spinning millisecond pulsars.}
+\textbf{These allow us to quantify the strength of the pulse fractions one expects to observe from typical fastly spinning millisecond pulsars.}
 }
 
 \keywords{gravitation - methods: numerical --- radiative transfer --- stars: neutron}
@@ -313,7 +313,7 @@ The coordinate invariant quadrupole moment, on the other hand, is a combination 
 \textbf{
 \citet{YY13} showed that when the NS mass, radius, and spin are known, the star's structure (and hence the surrounding metric) is almost fully characterized by these three quantities only.
 In other words, irrespective of the unknown microphysics of the underlying matter, the NS parameters are bound by what is called an (approximative) universal relations.
-\citet{BBP13} defined an empirical relations for these parameters in the Hartle-Thorne metric based on their computations of rotating NSs with various different equations of state.
+\citet{BBP13} defined empirical relations for these parameters in the Hartle-Thorne metric based on their computations of rotating NSs with various different equations of state.
 Later on, \citet{aGM14} refined these relations for the metric representation \eqref{eq:BWmetric} by \citet{BI76}.
 }
 In practice, we can then parameterize the previously presented quantities with great accuracy by using only the dimensionless angular velocity $\Ob$ and the compactness factor
@@ -782,7 +782,7 @@ Example of a non-equidistant polar grid used in our ray tracing with $N_r = 20$ 
 }
 
 We trace the photons from the image plate at infinity%
-\footnote{\textbf{Real numerical infinity we use is around $\sim 10^5 \sch$ radii.}}
+\footnote{\textbf{Real numerical infinity we use is around $\sim 10^5 R_{\mathrm{e}}$.}}
 all the way to the surface of the star by solving the first order
 differential equations \eqref{eq:deltatime}--\eqref{eq:deltaphi} or the full geodesic equations backwards in time.  
 For the Hamilton-Jacobi formalism, we make a simple variable substitution $\tilde{x} = 1/r$
@@ -929,10 +929,10 @@ Lastly, we note that in cases of extreme rotation or when high precision is requ
 \centering
     \includegraphics[width=18cm]{../out/sweep_grid.pdf}
 \caption{\label{fig:sweep}
-\textbf{Exact shapes of line profiles for different neutron star spinning $600~\mathrm{Hz}$.
+\textbf{Exact shapes of line profiles for different neutron star spinning at $600~\mathrm{Hz}$.
 Observer inclinations span a range from $i=5\deg$ (red), $10\deg$ (blue), $20\deg$ (green), $40\deg$ (purple), $60\deg$ (orange), to $90\deg$ (black).
-Energy in the $x$-axis is scaled with the compactness $\sqrt{1-u} = \sqrt{1-2GM/R_{\mathrm{e}}}$ that would be expected from the gravitational redshift alone.
-Likewise, the flux in the $y$-axis is always normalized with the peak flux to better show the evolution of the profile shape.
+Energy in the horizontal axis is scaled with the compactness $\sqrt{1-u} = \sqrt{1-2GM/R_{\mathrm{e}}}$ that would be expected from the gravitational redshift alone.
+Likewise, the flux in the vertical axis is always normalized with the peak flux to better show the evolution of the profile shape.
     }
 }
 \end{figure*}
@@ -943,7 +943,7 @@ Likewise, the flux in the $y$-axis is always normalized with the peak flux to be
     \includegraphics[width=18cm]{../out/fwhm_abs.pdf}
     \includegraphics[width=18cm]{../out/fwhm_rel.pdf}
 \caption{\label{fig:fwhm}
-\textbf{Line profile Full Width at Tenth Maximum (FWTM; top row) and Full Width at Half Maximum (FWHM; middle row) as a function of radius and observer inclination computed for different neutron star configurations of $M=1.1~\Msun$, $1.5~\Msun$, and $1.8~\Msun$ spinning $600~\mathrm{Hz}$.
+\textbf{Line profile Full Width at Tenth Maximum (FWTM; top row) and Full Width at Half Maximum (FWHM; middle row) as a function of radius and observer inclination computed for different neutron star configurations of $M=1.1~\Msun$, $1.5~\Msun$, and $1.8~\Msun$ spinning at $600~\mathrm{Hz}$.
 Additionally, the bottom row shows the ratio of these two that can be used to quantify how narrow the upper part of the profile is.
 Note the different inclination scale that is used to highlight the region $i < 10\deg$, where the profile evolves from a smooth to a spiky shape.
     }
@@ -1013,6 +1013,7 @@ In this case, they found a similar suppression of the core formation and we can 
 \textbf{
 Let us now study the line profile shape in full detail using the \textsc{bender} code.
 In order to fully map the line profile shape evolution, we calculated different profiles for three different cases: $M=1.1~\Msun$, $1.5~\Msun$, and $1.8~\Msun$.
+Here we consider only rapidly spinning stars and hence set the spin to $600~\mathrm{Hz}$, close to the maximum value observed for any AMPs.
 For each mass, the equatorial radius $R_{\mathrm{e}}$ and observer inclination $i$ were taken to span the full range from $10$ to $16~\mathrm{km}$, and $0$ to $90\deg$, respectively.
 Examples of the observed line profiles are shown in Fig.~\ref{fig:sweep} for $i=5\deg$, $10\deg$, $20\deg$, $40\deg$, $60\deg$, and $90~\deg$.
 From here it is easy to see that the profile appears smooth to almost all observer viewing angles.
@@ -1022,7 +1023,8 @@ Hence, for a spectral energy feature at around $10~\mathrm{keV}$, a resolution o
 }
 
 \textbf{
-We can also try and quantify the observed effect more thoroughly by introducing the Full Width at Half Maximum (FWHM) of the profile, in addition to Full Width at Tenth Maximum (FWTM). 
+    We can also try and quantify the observed effect more thoroughly by introducing the Full Width at Half Maximum (FWHM) of the profile (i.e., width of the profile at $F_{\mathrm{max}}/2$).
+In addition we consider the Full Width at Tenth Maximum (FWTM) that reflects the total width of the profile (i.e., width of the profile at $F_{\mathrm{max}}/10$).
 These values are shown for different radii and observer inclinations in Fig.~\ref{fig:fwhm}.
 They are also a useful measure of how the rotation would smear the observed spectra:
 FWTM gives a quantitative estimate of how widely smeared any narrow feature, such as a line or an absorption edge, would be observed.

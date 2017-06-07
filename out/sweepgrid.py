@@ -124,7 +124,7 @@ for i, mass in enumerate([1.8, 1.5, 1.1]):
         if j == 3:
             axl = ax.twinx()
             axl.set_yticklabels( [] )
-            axl.set_ylabel(r'$M=$'+str(mass), size=12, rotation=270, labelpad=10)
+            axl.set_ylabel(r'$M=$'+str(mass)+' M$_{\odot}$', size=12, rotation=270, labelpad=10)
 
 
 
