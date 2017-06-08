@@ -11,13 +11,19 @@ from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
 
 
+def smooth(xx, yy):
+    yy = savgol_filter(yy, 7, 2)
+    np.clip(yy, 0.0, 1000.0, out=yy)
+    yy[0] = 0.0
+    yy[-1] = 0.0
+    return xx, yy
 
 #Read JN files
 def read_lineprof(fname):
     da = np.genfromtxt(fname, delimiter=",")
-
     des = np.diff(da[:,0])[2]
     norm = np.sum(des*da[:,1])
+
     return da[:,0],da[:,1]/norm
 
 
@@ -51,7 +57,8 @@ eymax = 0.5
 
 
 #path to files
-path_JN = "../../out3/lines/"
+#path_JN = "../../out3/lines/"
+path_JN = "../../out/lines2/"
 
 #labels size
 tsize = 10.0
@@ -92,6 +99,13 @@ files_JN = [
 "lineprof_obl_HTq1_f700pbbr10m1.4i20.csv"]
 #"lineprof_obl_HTq4_f700pbbr10m1.4i20.csv"]
 
+
+files_JN = ['sch/lineprofile_f700_bb_r10_m1.4_i20.csv',
+'obl/lineprofile_f700_bb_r10_m1.4_i20.csv',
+'q/lineprofile_f700_bb_r10_m1.4_i20.csv']
+
+
+
 cols = ["black",
         "blue",
         "red",
@@ -101,30 +115,34 @@ i = 0
 for file_name in files_JN:
 
     xx, yy = read_lineprof(path_JN+file_name)
+    xx, yy = smooth(xx, yy)
     ax1.plot(xx, yy, color=cols[i], linestyle="solid")
     i += 1
 
-xx, yy = read_lineprof(path_JN+"lineprof_obl_HTq4_f700pbbr10m1.4i20.csv")
+
+#path_JN = "../../out3/lines/"
+xx, yy = read_lineprof("../../out3/lines/lineprof_obl_HTq4_f700pbbr10m1.4i20.csv")
 ax1.plot(xx, yy, color="red", linestyle="dashed")
 
 
 
-files_Bau = [
-"sch+dopp.csv",
-"sch+dopp+obl.csv",
-"HT.csv",
-"HT_obl.csv"]
+#files_Bau = [
+#"sch+dopp.csv",
+#"sch+dopp+obl.csv",
+#"HT.csv",
+#"HT_obl.csv"]
 
+files_Bau = ['sch.csv', 'obl.csv', 'ht.csv']
 
-#i = 0
-#for file_name in files_Bau:
-#
-#    xx, yy = read_csv(path_JN+file_name)
-#
-#    #rescale xx for correct scaling
-#    xx = (xx-0.72)/(0.89-0.72)*(0.8-0.72) + 0.72
-#    ax1.plot(xx, yy, color=cols[i], linestyle="dashed")
-#    i += 1
+i = 0
+for file_name in files_Bau:
+
+    xx, yy = read_csv(path_JN+file_name)
+
+    #rescale xx for correct scaling
+    #xx = (xx-0.72)/(0.89-0.72)*(0.8-0.72) + 0.72
+    #ax1.plot(xx, yy, color=cols[i], linestyle="dashed")
+    i += 1
 
 
 
@@ -149,4 +167,4 @@ files_Bau = [
 #for label in legend.get_texts():
 #    label.set_fontsize('x-small')
 
-savefig('fig9.pdf', bbox_inches='tight')
+savefig('fig9_testi.pdf', bbox_inches='tight')

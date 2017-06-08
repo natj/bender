@@ -24,7 +24,7 @@ def read_lineprof(fname):
 
     des = np.diff(da[:,0])[2]
     norm = np.sum(des*da[:,1])
-    return da[:,0],da[:,1]/norm
+    return da[:,0],da[:,1] /norm
 
 
 #Read JN files
@@ -53,7 +53,7 @@ xmax = 0.82
 
 
 #path to files
-path_JN = "../../out/"
+path_JN = "../../out/line/"
 
 #labels size
 tsize = 10.0
@@ -70,7 +70,7 @@ nu = '700'
 ax1 = subplot(gs[0,0])
 ax1.minorticks_on()
 ax1.set_xlim(xmin, xmax)
-ax1.set_ylim(0.0, 1.05)
+#ax1.set_ylim(0.0, 1.05)
 
 ax1.set_ylabel('Normalized flux',size=lsize)
 ax1.set_xlabel('Energy $E/E\'$',size=lsize)
@@ -97,7 +97,7 @@ for i, fname in enumerate(files):
 
     col = cmap( i/float(len(files)) )
 
-    yy /= np.max(yy)
+    #yy /= np.max(yy)
     ax1.plot(xx, yy, "-", linestyle ='solid', color=col)
 
 
@@ -108,7 +108,7 @@ for i, fname in enumerate(files):
 
 
 
-path_Bau = "../../out/bau/"
+path_Bau = "../../out/line/bau/"
 
 files_Bau = [
         "obl_HT_fit.csv"
@@ -118,7 +118,7 @@ files_Bau = [
 for i, fname in enumerate(files_Bau):
     xx, yy = read_lineprof(path_Bau+fname)
 
-    yy /= np.max(yy)
+    #yy /= np.max(yy)
     ax1.plot(xx, yy, "b-", linestyle ='dashed')
 
 

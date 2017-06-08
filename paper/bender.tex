@@ -312,7 +312,7 @@ The coordinate invariant quadrupole moment, on the other hand, is a combination 
 
 \textbf{
 \citet{YY13} showed that when the NS mass, radius, and spin are known, the star's structure (and hence the surrounding metric) is almost fully characterized by these three quantities only.
-In other words, irrespective of the unknown microphysics of the underlying matter, the NS parameters are bound by what \ppst{is} \pp{are} called \ppst{an} (approximative) universal relations.
+In other words, irrespective of the unknown microphysics of the underlying matter, the NS parameters are bound by what are called (approximative) universal relations.
 \citet{BBP13} defined empirical relations for these parameters in the Hartle-Thorne metric based on their computations of rotating NSs with various different equations of state.
 Later on, \citet{aGM14} refined these relations for the metric representation \eqref{eq:BWmetric} by \citet{BI76}.
 }
@@ -394,8 +394,8 @@ See Fig.~\ref{fig:geom} for a clarification of the angles.
 \subsection{Geodesic motion through Hamilton-Jacobi equation}\label{sect:hamjac}
 \textbf{
 In general, the motion of light rays in curved spacetime is governed by the second-order geodesic equation.
-In this section we, however, present an equivalent theoretical formalism\ppst{,} based on Hamilton-Jacobi (sometimes also known as super-Hamiltonian) description \citep{MTW73, cha}.
-\pp{The a}dvantage of this alternative representation is its physical intuitiveness as the formalism relies heavily on identifying and using the constants of motion of the problem.
+In this section we, however, present an equivalent theoretical formalism based on Hamilton-Jacobi (sometimes also known as super-Hamiltonian) description \citep{MTW73, cha}.
+The advantage of this alternative representation is its physical intuitiveness as the formalism relies heavily on identifying and using the constants of motion of the problem.
 %The Hamilton-Jacobi method is also computationally faster, as it is based on solving first-order partial differential equations \red{(tämä mietityttää)} but it is, in theory, only valid up to first order in rotation \red{(H-J on eksakti, pitää painottaa, että ero johtuu separoituvuusolettamasta, joka pätee vain 1 kertalukuun asti)}.
 In the end, when we apply our methods, we use both approaches -- the first-order Hamilton-Jacobi equations and the second-order geodesic equations -- in our calculations to show that for physically relevant problems, the results obtained are equivalent up to good numerical precision.
 Hence, when speed is needed, we apply the Hamilton-Jacobi method presented here, and when accuracy is the main factor we fall back to solving the full geodesic equations.
@@ -929,7 +929,7 @@ Lastly, we note that in cases of extreme rotation or when high precision is requ
 \centering
     \includegraphics[width=18cm]{../out/sweep_grid.pdf}
 \caption{\label{fig:sweep}
-    \textbf{Exact shapes of line profiles for different neutron star\pp{s} spinning at $600~\mathrm{Hz}$.
+    \textbf{Exact shapes of line profiles for different neutron stars spinning at $600~\mathrm{Hz}$.
 Observer inclinations span a range from $i=5\deg$ (red), $10\deg$ (blue), $20\deg$ (green), $40\deg$ (purple), $60\deg$ (orange), to $90\deg$ (black).
 Energy in the horizontal axis is scaled with the compactness $\sqrt{1-u} = \sqrt{1-2GM/R_{\mathrm{e}}}$ that would be expected from the gravitational redshift alone.
 Likewise, the flux in the vertical axis is always normalized with the peak flux to better show the evolution of the profile shape.
@@ -944,8 +944,8 @@ Likewise, the flux in the vertical axis is always normalized with the peak flux 
     \includegraphics[width=18cm]{../out/fwhm_rel.pdf}
 \caption{\label{fig:fwhm}
 \textbf{Line profile Full Width at Tenth Maximum (FWTM; top row) and Full Width at Half Maximum (FWHM; middle row) as a function of radius and observer inclination computed for different neutron star configurations of $M=1.1~\Msun$, $1.5~\Msun$, and $1.8~\Msun$ spinning at $600~\mathrm{Hz}$.
-    Additionally, the bottom row shows the ratio of these two that can be used to quantify how narrow the \ppst{upper} \pp{spiky} part of the \pp{line} profile is.
-    Note the different inclination scale \pp{on the bottom row} that is used to highlight the region $i < 10\deg$, where the profile evolves from a smooth to a spiky shape.
+    Additionally, the bottom row shows the ratio of these two that can be used to quantify how narrow the spiky part of the line profile is.
+    Note the different inclination scale on the bottom row that is used to highlight the region $i < 10\deg$, where the profile evolves from a smooth to a spiky shape.
     }
 }
 \end{figure*}
@@ -989,6 +989,7 @@ Radius they imposed was $R = 10~\mathrm{km}$.
 One should, however, note that by fixing the EoS to FPS, mass to $1.4~\Msun$, and angular momentum to $j=0.357$, the radius of the star is already determined if we consider physically realistic parameters combinations.
 \textbf{
 In this case, the FPS EoS would yield $R_{\mathrm{e}} \approx 11.8~\mathrm{km}$, an eccentricity of $\epsilon \approx 0.444$, $\beta \approx 0.013$, $q \approx -0.613$, and $\qinv \approx -0.595$, as tabulated by \citet{LP99} for $q$ and by \citet{CST94} for the rest of the parameters.
+It is also important to note that the pressure quadrupole moment ($\beta$ in our notation) is not taken into account in their calculations, increasing the value of the quadrupole moment further \citep{PA12}.
 %Note also that $R_0 = 10.85~\mathrm{km}$ for $M=1.4~\Msun$ for a stiffness characterized by the FPS EoS \citep{CST94}.
 }
 
@@ -1006,21 +1007,21 @@ Here the large difference to the spherical configuration is explained by the inc
 \textbf{
 Hence, it is crucial to consider not only correct quadrupole moment strength but also a correct eccentricity at the same time.
 In conclusion, we are only able to reproduce the narrow peak shown in \citet{BPO13} with enhanced quadrupole moment but not with a quadrupole moment value originating from our $q$ parameterization.
-Later on, \citet{BBP13} revised their calculations and re-computed their observed line profile in Hartle-Thorne metric with values of quadrupole and eccentricity originating from a similar physically consistent empirical parameterization.
+Later on, \citet{BBP13} revised their calculations and re-computed their observed line profile in Hartle-Thorne metric with values of quadrupole (now consisting of energy and pressure terms) and eccentricity originating from a similar physically consistent empirical parameterization.
 In this case, they found a similar suppression of the core formation and we can see that a considerably smaller inclination is needed to change the smooth line profile to have a spiky shape (see fig. 5 in \citealt{BBP13}).
 }
 
 \textbf{
 Let us now study the line profile shape in full detail using the \textsc{bender} code.
 In order to fully map the line profile shape evolution, we calculated different profiles for three different cases: $M=1.1~\Msun$, $1.5~\Msun$, and $1.8~\Msun$.
-Here we consider only rapidly spinning stars and hence set the spin to $600~\mathrm{Hz}$, close to the maximum value observed for \ppst{any} AMPs.
+Here we consider only rapidly spinning stars and hence set the spin to $600~\mathrm{Hz}$, close to the maximum value observed for AMPs.
 For each mass, the equatorial radius $R_{\mathrm{e}}$ and observer inclination $i$ were taken to span the full range from $10$ to $16~\mathrm{km}$, and $0$ to $90\deg$, respectively.
 Examples of the observed line profiles are shown in Fig.~\ref{fig:sweep} for $i=5\deg$, $10\deg$, $20\deg$, $40\deg$, $60\deg$, and $90~\deg$.
-From here it is easy to see that the profile appears smooth \ppst{to} \pp{at} almost all observer viewing angles.
+From here it is easy to see that the profile appears smooth at almost all observer viewing angles.
 It is only at $i \lesssim 5\deg$ that a sharp spike starts to form.
 In this case, however, the actual observed width of the profile is already below $0.03 \times E$, whereas the spike is as narrow as $0.01 \times E$.
 Hence, for a spectral energy feature at around $10~\mathrm{keV}$, a resolution of $0.1~\mathrm{keV}$ would be needed to resolve it.
-\red{(Pitääkö seuraava oikeasti paikkaansa?)} \pp{At the moment, there are no existing observational facilities or facilities currently being built with sufficient resolution to separate the compact spike from the rest of the line profile.}
+At the moment, there are no existing observational facilities with sufficient resolution to separate the compact spike from the rest of the line profile.
 }
 
 \textbf{
@@ -1032,7 +1033,7 @@ FWTM gives a quantitative estimate of how widely smeared any narrow feature, suc
 FWHM, on the other hand, quantifies the energy resolution needed to resolve the exact effects from rotation itself.
 Finally, we can also use their ratio to describe the shape of the line profile:
 More narrow (and hence localized) the line profile feature is, smaller we expect this fraction to be.
-Hence, for a narrow peak we expect FWHM/FWHM of around $\sim 10~\%$.
+For a narrow peak we expect FWHM/FWHM of around $\sim 10~\%$.
 This ratio is shown in the bottom panels of Fig.~\ref{fig:fwhm}.
 For a star rotating at an extreme velocity of $600~\mathrm{Hz}$ we then constrain any narrow feature to appear only at a very narrow observer inclination range of $3\deg < i < 6\deg$, irrespective of the mass or the radius of the star.
 }
