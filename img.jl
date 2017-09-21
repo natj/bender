@@ -1,11 +1,5 @@
 #Compute image in cartesian grid and make plots from raw image grid
 
-include("plot2d.jl")
-include("bender.jl")
-
-#include("rtrace.jl")
-
-
 #p00 = plot2d(Times, x_grid, y_grid)
 #p11 = plot2d(Phis, x_grid, y_grid)
 #p21 = plot2d(Thetas, x_grid, y_grid)
@@ -31,8 +25,8 @@ include("bender.jl")
 #wrapper for tan(phi) formalism
 #phi_interp_atan(y,x) = atan2(phi_interp_sin[y,x], phi_interp_cos[y,x])
 
-Ny_dense = 1000
-Nx_dense = 1000
+Ny_dense = 500
+Nx_dense = 500
 
 Times_dense = zeros(Ny_dense, Nx_dense)
 Phis_dense = zeros(Ny_dense, Nx_dense)
@@ -746,7 +740,8 @@ function line_prof(Fluxc, Redsc)
     energ = 1.0
     for jj = 1:Ny_dense, ii = 1:Nx_dense
         fy =  Fluxc[jj, ii]
-        xii = Redsc[jj, ii]
+        #xii = Redsc[jj, ii] # full redshift
+        xii = Redsc[jj, ii] / sqrt(1-U)  #normalized redshift
         
         if xii > 0
             push!(xarr, xii*energ)
@@ -764,12 +759,15 @@ function line_prof(Fluxc, Redsc)
     emax = maximum(xarrs)
 
     #r 10-12
-    emin = 0.65
-    emax = 0.88
+    #emin = 0.65
+    #emax = 0.88
 
     # r 12-14
     #emin = 0.72
     #emax = 1.0
+
+    emin = 0.6
+    emax = 1.5
 
     println("emin=$emin emax=$emax")
     Nr = 100
@@ -819,7 +817,9 @@ wmatr[:,1] = es
 wmatr[:,2] = yy2
 fbeam = "bb"
 #fbeam = "hopf"
-fname = "lineprof_obl_HTq1_f$(round(Int,fs))p"*fbeam*"r$(round(Int,R/1e5))m$(round(M/Msun,1))i$(int((rad2deg(incl)))).csv"
+
+
+fname = "lineprof_obl_HTq1_f$(round(Int,fs))p"*fbeam*"r$(round(Int,R/1e5))m$(round(M/Msun,1))i$(round(Int, (rad2deg(incl)))).csv"
 writecsv("out/"*fname, wmatr)
 
 savefig(p7, "dopps_"*fbeam*".png")
@@ -910,3 +910,18 @@ println("xmin=",x_grid_d[minimum(x1s[y1s:y2s])]*corr," xmax=",x_grid_d[maximum(x
 println("ymin=",y_grid_d[y1s]*corr," ymax=",y_grid_d[y2s]*corr)
 
 
+##################################################
+wmatr = vec(Reds_cart)
+fname = "reds_f$(round(Int,fs))p"*fbeam*"r$(round(Int,R/1e5))m$(round(M/Msun,1))i$(round(Int, (rad2deg(incl)))).csv"
+writecsv("out/"*fname, wmatr)
+
+
+
+wmatr = vec(Thetas_dense)
+fname = "thetas_f$(round(Int,fs))p"*fbeam*"r$(round(Int,R/1e5))m$(round(M/Msun,1))i$(round(Int, (rad2deg(incl)))).csv"
+writecsv("out/"*fname, wmatr)
+
+
+wmatr = vec(Phis_dense)
+fname = "phis_f$(round(Int,fs))p"*fbeam*"r$(round(Int,R/1e5))m$(round(M/Msun,1))i$(round(Int, (rad2deg(incl)))).csv"
+writecsv("out/"*fname, wmatr)

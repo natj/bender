@@ -1,16 +1,4 @@
-using Cubature
-
 #Compute spot on the NS
-include("plot2d.jl")
-
-#Load photon bender
-#include("bender.jl")
-
-#Compute raw image
-#include("rtrace.jl")
-
-#Interpolate from raw image and compute radiation processes
-#include("radiation.jl")
 
 rho = deg2rad(30.0)
 colat = deg2rad(50.0)

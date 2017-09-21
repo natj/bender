@@ -1,5 +1,4 @@
 #Compute flux in polar coordinates
-include("bender.jl")
 
 
 #Planck function B_E(T) = erg cm^-2 s^-1 str^-1 keV^-1

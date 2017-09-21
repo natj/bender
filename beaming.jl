@@ -1,6 +1,3 @@
-using Winston
-using Cubature
-using Interpolations
 
 #Rayleigh (Thomson) scattering
 psi(mu) = (3/16)*(3-mu^2)

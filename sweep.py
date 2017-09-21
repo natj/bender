@@ -20,7 +20,7 @@ import scipy.interpolate as interp
 #import multiprocessing
 
 
-outdir = 'out/sweep/'
+outdir = 'out/lines2/'
 
 
 ##################################################
@@ -61,20 +61,21 @@ pyac.Log.set_file()
 # Star parameters
 #R = 12.0
 #M = 1.6
-freq = 600.0
+freq = 700.0
 #incl = 15.0
 
-for M in [1.5, 1.1, 1.8]:
+#for M in [1.5, 1.1, 1.8]:
+for M in [1.4]:
     print "##################################################"
     print "M = ", M
 
-    for R in [10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0]:
+    for R in [10.0]:
         print "##################################################"
         print "  R = ", R
     
         #for incl in [90, 80, 70, 60, 50, 40, 30, 20, 15, 10, 5, 1]:
         #for incl in [9, 8, 7, 6, 4, 3, 2, 0.5]:
-        for incl in [90, 80, 70, 60, 50, 40, 30, 20, 15, 10, 9, 8, 7, 6, 5, 4,3,2,1,0.5]:
+        for incl in [20.0]:
             print "##################################################"
             print "    i = ",incl
         
@@ -102,8 +103,8 @@ for M in [1.5, 1.1, 1.8]:
             ##################################################
             #Define metric and surfaces of the spacetime 
             #S+D
-            #metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_no_quadrupole)
-            #ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
+            metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_no_quadrupole)
+            ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
             
             #Oblate Sch #WORKS
             #metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_no_quadrupole)
@@ -111,8 +112,8 @@ for M in [1.5, 1.1, 1.8]:
             
             
             #Full AGM + oblate
-            metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
-            ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.agm)
+            #metric = pyac.AGMMetric(radius, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
+            #ns_surface = pyac.AGMSurface(radius, 1.0, angvel, pyac.AGMSurface.SurfaceType.agm)
             surfaces = [ ns_surface ]
             
             

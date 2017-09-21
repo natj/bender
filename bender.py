@@ -36,7 +36,7 @@ mpl.rcParams['image.cmap'] = 'inferno'
 #Setup star
 R_in            = 12.0
 m_in            = 1.4
-freq_in         = 600.0
+freq_in         = 400.0
 colat_in        = 10.0
 
 spot_temp_in    = 2.0
@@ -112,14 +112,13 @@ conf.store_only_endpoints     = True
 
 
 #Define metric of the spacetime
-#metric = pyac.SchwarzschildMetric(mass/R_eq)
+#metric = pyac.SchwarzschildMetric(2.0*mass/R_eq)
 metric = pyac.AGMMetric(R_eq, 1.0, angvel, pyac.AGMMetric.MetricType.agm_standard)
 
 
-ns_surface = pyac.AGMSurface(R_eq, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
-#ns_surface = pyac.AGMSurface(R_eq, 1.0, angvel, pyac.AGMSurface.SurfaceType.agm)
+#ns_surface = pyac.AGMSurface(R_eq, 1.0, angvel, pyac.AGMSurface.SurfaceType.spherical)
+ns_surface = pyac.AGMSurface(R_eq, 1.0, angvel, pyac.AGMSurface.SurfaceType.oblate)
 surfaces = [ ns_surface ]
-
 
 
 #pyac.Log.set_console()
@@ -270,13 +269,6 @@ def bb_intensity(nu, T):
 
 
 
-class ImagePlane:
-
-    def __init__(self, metric, dist, incl):
-
-        self.metric = metric
-        self.dist   = dist
-        self.incl   = incl
 
 
 class Pixel:
@@ -474,7 +466,7 @@ def grid_interpolate(rads, chis, z,
     #Using spline; XXX is this a good idea, I dunno!
     ir = interp.RectBivariateSpline(rads, chis, z, 
                                     #bbox=[0.01, max(rads), 0.0, 2*np.pi], 
-                                    kx=1, ky=1, s=0)
+                                    kx=2, ky=2, s=0)
 
     #build interpolated array
     z2 = np.zeros((len(x2), len(y2)))

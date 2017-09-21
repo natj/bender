@@ -1,13 +1,13 @@
 #Compute image using polar coordinate system
-include("bender.jl")
 
 
 #grid setup
 #Nrad = 2000
 #Nchi = 2000
 
-Nrad = 300
-Nchi = 70
+#Nrad = 100
+#Nchi = 70
+
 
 rmin = 0.0
 rmax = 12.0

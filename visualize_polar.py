@@ -63,8 +63,8 @@ class Visualize:
     ny = 6
 
     #image plane width & height
-    x_span = 14.0
-    y_span = 14.0
+    x_span = 10.0
+    y_span = 10.0
     
     x_bins = 500
     y_bins = 500
