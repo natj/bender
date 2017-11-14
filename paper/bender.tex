@@ -143,14 +143,14 @@ By introducing \textsc{bender},%
 \footnote{ \url{ http://github.com/natj/bender} } 
 we aim to provide a similar publicly available platform for ray tracing problems focused on spinning compact objects.
 
-\refedel{Compared to black holes, a further complication with neutron stars is that the radiation originates not only from the vicinity of the object but also from the surface of the star itself, which is rapidly rotating.}
-\refedel{This introduces additional complications to the radiative transfer problem: }
-\refedel{We have static general relativistic effects such as bending of photon trajectories similar to black hole calculations, but, in addition, rotational effects such as Doppler boosting and aberration of the observed angles, too.}
+%\refedel{Compared to black holes, a further complication with neutron stars is that the radiation originates not only from the vicinity of the object but also from the surface of the star itself, which is rapidly rotating.}
+%\refedel{This introduces additional complications to the radiative transfer problem: }
+%\refedel{We have static general relativistic effects such as bending of photon trajectories similar to black hole calculations, but, in addition, rotational effects such as Doppler boosting and aberration of the observed angles, too.}
 \refe{
 Compared to black holes, a further complication with neutron stars is that the spacetime is not bent by point-like source but by a rotating ball of plasma held together by gravity.
 This introduce additional complications to the ray-tracing problem because in this case the spacetime will not be spherically symmetric.
 }
-\refedel{Combining these effects is a challenging task both theoretically and numerically.}
+%\refedel{Combining these effects is a challenging task both theoretically and numerically.}
 \refe{Following the path of photons in such a spacetime is a challenging task both theoretically and numerically.}
 Current and future observations, on the other hand, demand highly accurate models.
 For example, computing accurate pulse profiles of hot spots on spinning neutron stars has been recently intensively investigated, motivated by many upcoming or planned new spaceborne X-ray observatories like ESA's \textit{XIPE} \citep{XIPE}, CNSA's \textit{eXTP} \citep{eXTP}, as well as the already deployed ISRO's \textit{Astrosat} \citep{Astrosat} \refe{and NASA's NICER \citep{NICER}.}
@@ -296,7 +296,7 @@ The coordinate invariant quadrupole moment\refedel{, on the other hand,} is a co
 \be
 \qinv = \left( q + \frac{4}{3} \beta \right).
 \ee
-\refe{This nuance should be taken into account when comparing the strength of the quadrupole deviations between different metric descriptions.}
+\refe{This detail should be taken into account when comparing the strength of the quadrupole deviations between different metric descriptions.}
 
 
 \citet{YY13} showed that when the NS mass, radius, and spin are known, the star's structure (and hence the surrounding metric) is almost fully characterized by these three quantities only. %\refe{when considering currently viable EoSs.}
@@ -602,11 +602,13 @@ From the Cartesian form of the co-rotating metric it is also easy to obtain the 
 This is the angle between points $(\theta, \phi)$ and $(\theta_{\mathrm{s}}, 0)$, and can be used to define the \textit{angular} size of spots as measured by the co-rotating observer in $K'$.
 Note that the circumference of the star as measured by this co-rotating observer is now $>2\pi R$ because the azimuthal direction is Lorentz stretched.
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Quantities here are also relevant for the so-called Schwarzschild+Doppler (S+D) approximation \cite[see e.g.,][]{PB06}.
 In the S+D approximation the observer's polar coordinate plane $(b,\chi)$ is connected to the co-rotating spherical coordinates $(\phi', \theta')$ of the star.
-In this method, the calculations are done in a special relativistic framework assuming infinitesimally small spots.
-We will now show how to expand this approximation to a full general relativistic exact form valid also for finite sized spots (see also \citealt{CML07}, for an alternative derivation).
+\refe{This connections is, however, done algebraically and there is no need to determine the full path of the ray as the problem reduces to calculating the so-called lensing integral only.}
+In this method, the calculations are done in a special relativistic framework \refe{where quantities are defined in a co-rotating coordinate system that is then Lorentz boosted into the static non-rotating frame.}
+We will now show how to define this \refe{change of frame properly, in order for the results to match the backwards-in-time method} (see also \citealt{CML07}, for an alternative derivation).
 In (areal) \sch metric the impact parameter $b$ can be obtained as a function of the emission angle $\alpha$ \eqref{eq:cosa} as
 \be
 %b = e^{-2\nu} R \sin\alpha.
@@ -702,9 +704,14 @@ Note that the original longitudinal coordinate of the emission is easily obtaine
 %I'_{E'}(t_*, \alpha') &\rightarrow I'_{E'}(t_*, \cos\alpha'; \theta, \phi) \rightarrow I'_{E'}(t_*, \cos\alpha'; b, \chi)
 %\end{align}
 %in the observers plane for the flux calculations.
+\refe{This allows us to connect the observables that our distant observer will see to the local rest frame of the gas where most of the physical processes are naturally defined.}
 
+\refedel{
 This ends our discussion of ray tracing from the image plane to the star.
 In many ways, it is the more intuitive direction, even though the time coordinate is propagated backwards, because it forces us to think from the point of view of the observer.
+}
+%\refe{The immediate benefit of the method is that it forces us to think from the point of view of the observer.
+%}
 
 
 
@@ -753,11 +760,10 @@ with a starting guess of
   H_0(\mu) = 1 + 2.3\mu - 0.3\mu^2.
 \end{equation}
 
-\refe{We note that equation \eqref{eq:hopf} is physically inconsistent (blackbody radiation must be isotropic) but adopt this spectrum and beaming pattern for the sake of illustration. 
+\refe{We note that equation \eqref{eq:hopf} is physically inconsistent (blackbody radiation must be isotropic) but we adopt this spectrum and beaming pattern for the sake of illustration. 
 Electron scattering atmospheres can produce spectra that have spectral shapes similar to a Planck function but are much less efficient. 
 Equation \eqref{eq:hopf} can describe such emission approximately, but only if it is preceded by an efficiency factor $\sim 0.2$.
 }
-
 We also note that even the simple polynomial expansion \eqref{eq:apprx_hopf} already has an accuracy better than $<2\%$, and as such it can be used in approximate solutions with a corresponding first moment of $\alpha_1 = 1.19167$.
 
 
@@ -818,12 +824,18 @@ either in \refe{a} polar grid (by constraining minimum and maximum $\chi$ and
 $b$) or in \refe{a} Cartesian image grid (by constraining minimum and maximum
 $\hat{x}$ and $\hat{y}$) depending on the total area covered in the observer's sky.  To
 calculate the total flux $F(t)$ we then integrate this small subgrid by
-using an adaptive multidimensional integration.  The algorithm is based
-on a tensor product of nested Clenshaw-Curtis quadrature rules and is
-implemented using the \textsc{Cubature} package.\footnote{
+using an adaptive multidimensional integration.  
+The algorithm is based on a tensor product of nested Clenshaw-Curtis quadrature rules and is implemented using the \textsc{Cubature} package.\footnote{
 \url{http://ab-initio.mit.edu/wiki/index.php/Cubature}}
 
-
+\refe{
+Such a general way to treat the problem has, of course, its disadvantages too.
+Ray tracing photons is, in general, computationally very expensive problem.
+Typical photon propagation takes usually around a minute for a polar grid of $N_b \sim 100$ and $N_{\chi} \sim 100$ points.
+After the image plane is constructed, a typical flux integration takes about $0.1$ to $1$ second depending on the integration tolerance.
+For fast calculations there exists other more approximate ways to solve the problem, such as the oblate \sch method where the symmetries of the \sch spacetimes are extensively used and the ray tracing reduces to lensing angle integrals \citep[see e.g.][]{PB06, aGM14}.
+We emphasize that our focus is not to compete against these methods in speed, but to verify their results using more general description of the problem.
+}
 
 \begin{figure*}
 \centering
@@ -972,7 +984,7 @@ Hence, the convolution kernel, or the so-called line profile, we are after is th
 \mathcal{G}(E,E') =  \iint \frac{1}{(1+z)^4} ~\delta \left[E - \frac{E'}{1+z} \right]  \frac{bdb d\chi}{D^2}.
 \ee
 
-
+\refe{In order to minimize any source of error in this section we use \textsc{arcmancer} to solve the geodesics in all of the subsequent calculations.}
 Examples of line profiles are shown in Fig.~\ref{fig:line_profiles} for different spacetimes and star configurations.
 The flux is normalized so that the emitted bolometric flux is unity, i.e., the area encapsulated by the profile is one.
 In each case, the star is taken to have $\nu = 700~\mathrm{Hz}$, $R_{\mathrm{e}} = 10~\mathrm{km}$, and $M=1.4~\Msun$.
@@ -982,7 +994,6 @@ Observer inclination is $i=20^{\circ}$ and emission is taken to be isotropic, fo
 This figure shows results for spherical and oblate stars, assuming for simplicity that the exterior spacetime is the Schwarzschild spacetime, as well as results for oblate stars in the appropriate second-order exterior spacetime, 
 i.e., a spacetime with the appropriate quadrupole moment given by relations \eqref{eq:quad}-\eqref{eq:I}.
 }
-\red{JN: IS THIS REALLY BETTER?}
 
 
 The obtained profiles can be compared to the ones in fig.~2 of \citet{BPO13} where the \sch results are seen to match well with our calculations.
@@ -1046,22 +1057,25 @@ Here a hot spot \refedel{on top of} \refe{on the stellar} surface is emitting an
 \refe{The internal accuracy is only set by the error tolerance of the numerical integration of the flux.
 Hereafter we use a relative tolerance of $5 \times 10^{-3}$.
 Results here were obtained using both the split Hamilton-Jacobi propagator and \textsc{arcmancer} and were seen to match perfectly given the numerical error tolerance.
-In the following discussion, we will only show the results obtained by the split Hamilton-Jacobi method.
+For simplicity, in the following discussion we will only show the results obtained by the split Hamilton-Jacobi method.
 }
 
-%\subsubsection{Schwarzchild $+$ Doppler}
+\refe{
+We compared our calculations to the results obtained with the forward-in-time method \citep[see e.g.,][]{PB06, MLCB07}.
+Results presented here using this formulation are computed by T. Salmi and J. Poutanen (private communications) with a code described in \citet{PG04, PB06}; Salmi et al. 2018 (in preparation).
+Note that here the definition of the differential surface element follows Sect.~\ref{sect:coords} and hence correctly includes the $\lgamma$ factor.
+Such a comparison is crucial in order to verify that all of the physics is correctly incorporated to the formulations of the given methods.
+Hence, results between the two methods should agree up to the numerical tolerance.
+}
 
 First, a general comparison of the ray tracing algorithm with the S+D approximation was done. 
-\refe{Note that here the definition of the differential surface element follows Sect.~\ref{sect:coords} and hence correctly includes the $\lgamma$ factor.}
-\refe{JN: SHOULD WE ADD SOME KIND OF PRIVATE COMMUNICATION BY J. POUTANEN FOR THE CODE?}
-
 For simplicity, only spherical stars were considered here.
 Main parameters were: the stellar mass $M = 1.6~\Msun$, the stellar radius $R = 12~\mathrm{km}$, the observer inclination $i = 60^{\circ}$ and the colatitude of the spot $\theta_{\mathrm{s}} = 50^{\circ}$.  
 The effective temperature of the radiation was set to $T_{\mathrm{eff}} = 2~\mathrm{keV}$.  
 The distance to the source was assumed to be $D = 10~\mathrm{kpc}$.  
 We defined a circular spot with an angular radius $\rho$ of either $1$ or $30$ degrees.
-Here the spot is defined using an angle as measured by the \refedel{non-}rotating observer.
-Hence, the spot size is measured using \refe{the \textit{angular} size, not the \textit{spatial} size.}
+Here the spot size is defined using its \refe{\emph{angular} size}.
+\refedel{Hence, the spot size is measured using the \textit{angular} size, not the \textit{spatial} size.}
 Angular distribution of radiation corresponds either to isotropic blackbody with constant intensity or an electron scattering dominated atmosphere, i.e., the Hopf profile.
 
 
@@ -1074,7 +1088,7 @@ We computed curves for the five following quantities: monochromatic photon flux 
 \includegraphics[width=18cm]{figs/fig2a.pdf}
 \caption{\label{fig:sch_comp1}
   Light curve comparisons for \sch spacetime with slowly rotating spherical star ($R = 12~\mathrm{km}$, $M = 1.6~\Msun$, $\nu = 1~\mathrm{Hz}$, $i = 60^{\circ}$, $\theta_{\mathrm{s}} = 50^{\circ}$, $\rho = 1^{\circ}$, and $T_{\mathrm{eff}} = 2~\mathrm{keV}$) emitting according to blackbody or Hopf profile with spot size either $1$ or $30$ degrees.
-    Black solid line shows the pulse profiles computed using the S+D approximation (forward-in-time) code (see text) and red dashed line is a profile computed with the code presented here.
+    Black solid line shows the pulse profiles computed using the S+D approximation \refe{(forward-in-time method; see text)} and red dashed line is a profile computed with the code presented here.
   The lower panel shows the residuals as $\Delta = (\mathrm{model_{JP}}/\mathrm{model} -1) \times 100\%$.
 }
 \end{figure*}
@@ -1142,6 +1156,7 @@ A comparison of the oblate lightcurves is shown in Fig.~\ref{fig:osch_comp700}.
 Again we obtain an excellent agreement with the forward-in-time method, with similar errors as in the spherical case (relative error $< 0.2\%$).
 This agreement is, of course, expected since our method is general and does not depend on the shape of the emitting surface.
 The only large deviation is again seen when the spot is viewed from an extreme angle for $\theta_{\mathrm{s}} = 90^{\circ}$, just before the \refedel{eclipse}\refe{occultation}.
+\refe{Hence, conclude that the two methods, forward-in-time and backwards-in-time, agree all the way up to the numerical tolerance when the differential surface element described in Sect. \ref{sect:coords} is used.}
 
 %\subsection{Hartle-Thorne -like spacetimes}
 %\begin{figure*}
@@ -1220,7 +1235,8 @@ Effects like redshift, Doppler boosting and emission angle of the photon were di
 \refedel{,hence also verifying the previous ad-hoc special relativistic formulations}% \citep[see e.g.][]{PG03, PB06}.}
 In the special relativistic formulation \citep[see e.g.,][]{PB06} the calculations are done in a flat spacetime and then Lorentz boosted to the rotating relativistic frame.
 In Section \ref{sect:coords}, we \refedel{derived a connection to}\refe{expand} this method by introducing a way to measure the angular size of a pattern in the co-rotating frame.
-\refe{Derivation of the} full solid angle element is also \refe{shown} that can then be used with forward-in-time \refe{formulations so that the results match with the backwards-in-time formulation}.
+\refe{This result highlights how it is crucial to specify if the pattern size is defined using linear or angular sizes when dealing with rotating coordinate systems in special relativity.}
+\refe{Derivation of the} full solid angle element is also \refe{shown} that can then be used with forward-in-time \refe{formulations so that the results match with the backwards-in-time formulation, as one expects from purely physical arguments}.
 \refedel{Most notably, this leads to an addition of $\lgamma$, a Lorentz boost factor, on the observed flux, understood to originate from a simple Lorentz contraction in \sch metric.}
 We also briefly discussed the actual intensity of the emerging radiation and review an iterative method to solve the Chandrasekhar-Ambartsumian integral, along a new approximative polynomial expansion, that is related to the angle-dependent electron scattering atmosphere, in Section \ref{sect:angular_distr}.
 We then describe the actual intensity of the emerging radiation and as a simple model use the angle-dependent electron scattering atmosphere, presented in Section \ref{sect:angular_distr}.
