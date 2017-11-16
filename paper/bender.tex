@@ -563,53 +563,69 @@ This helps us in connecting the previously presented backwards-in-time method to
 Transforming from the observer's non-rotating frame $K$ to the fluid's rest frame $K'$ is easily done using the previously defined projection operator $\bar{h}_{ab}$ \refe{(expressed in isotropic coordinates)}. 
 Our metric tensor for the rotating observer is 
 \be
-\bar{h}_{ab} dx^a dx^b = e^{2(\zetab - \nub)} (d\rb^2 + \rb^2 d\theta) + \frac{\Bb^2 e^{-2\nub} \rb^2 \sin^2\theta}{1-v_Z^2} d{\phi'}^{2},
+%\bar{h}_{ab} dx^a dx^b = e^{2(\zetab - \nub)} (d\rb^2 + \rb^2 d\theta') + \frac{\Bb^2 e^{-2\nub} \rb^2 \sin^2\theta'}{1-v_Z^2} d{\phi'}^{2},
+\bar{h}_{ab} dx^a dx^b = e^{2(\zetab - \nub)} (d\rb^2 + \rb^2 d\theta) + \frac{\Bb^2 e^{-2\nub} \rb^2 \sin^2\theta}{1-v_Z^2} (d\phi - \Omega dt)^2,
 \ee
-where we have defined a new angular coordinate $\phi' = \phi - \Omega t$ that is used by the rotating observer.%
+where we can define a new \refe{azimuthal} angular coordinate as $\phi' \equiv \phi - \Omega t$ that is to be used by the rotating observer.%
 \footnote{We thank S. Morsink for pointing this out.}
 It is important to notice here that because of the rotation the azimuthal angle $\phi$ and the time $t$ are now coupled for the co-moving observer.
-The normalized longitudinal coordinate ensures that both, rotating and stationary observer, agree that a circle drawn around the star has $2\pi$ radians.
+\refe{This} normalized longitudinal coordinate ensures that both, rotating and stationary observer, agree that a circle drawn around the star has $2\pi$ radians.
 This new longitudinal coordinate is also seen to be Lorentz contracted by a factor of $\lgamma = (1-\vz^2)^{-1/2}$.
 
-Next we move to a normal (areal) \sch coordinate system so that the emission regions with similar coordinate extents at different latitudes have the same area.
+\refe{Next we transform to the normal (areal) coordinate system} so that the emission regions with similar coordinate extents at different latitudes have the same area.
 By using the equations \eqref{eq:rb2r} and \eqref{eq:drb2dr} we obtain a longitudinally Lorentz-boosted metric tensor 
 \be \label{eq:gammaSch} 
-h_{ab} dx^a dx^b = e^{-2\nub}dr^2 + \frac{e^{2\zetab}}{\Bb^2} r^2 d\theta + \lgamma^2 r^2 \sin^2\theta d{\phi'}^2.
+%h_{ab} dx^a dx^b = e^{-2\nub}dr^2 + \frac{e^{2\zetab}}{\Bb^2} r^2 d\theta + \lgamma^2 r^2 \sin^2\theta d{\phi'}^2.
+h_{ab} dx^a dx^b = e^{-2\nub}dr^2 + \frac{e^{2\zetab}}{\Bb^2} r^2 d\theta^2 + \lgamma^2 r^2 \sin^2\theta (d\phi - \Omega dt)^2.
 \ee 
 %where $\gamma_\text{L}$ is standard the Lorentz boost factor.
 The result agrees with (areal) \sch coordinate system up to first order in rotation due to the fact that $e^{\zetab}/\Bb \approx 1 + \mathcal{O}(\Ob^2)$.  
-Additionally we can drop the gravitational redshift term $e^{-2\nub}$ of the radial coordinate because we do not consider any finite height for the system later on.
-Next we can define a radial vector in (3D) Cartesian coordinate system as 
-\be
-\vec{r} = (x_r, y_r, z_r) = r (\cos\phi' \sin\theta, \sin\phi' \sin\theta, \cos\theta).
+\refe{The co-rotating observer can then use this projection operator to define spacelike vectors orthogonal to her wordline.}
+
+%\refedel{Additionally we can drop the gravitational redshift term $e^{-2\nub}$ of the radial coordinate because we do not consider any finite height for the system later on.}
+%%REMOVE FROM HERE
+%\refedel{Next we can define a radial vector in (3D) Cartesian coordinate system as}
+%\be
+%\vec{r} = (x_r, y_r, z_r) = r (\cos\phi' \sin\theta, \sin\phi' \sin\theta, \cos\theta).
+%\ee
+%%where normalization factor $\hat{R} = \sqrt{x_r^2 + y_r^2 + z_r^2}$.
+%\refedel{By using the Jacobian $\partial(x_r, y_r, z_r)/\partial (r, \theta, \phi')$ the spherical coordinate system \eqref{eq:gammaSch} can be transformed into a Cartesian coordinate basis, and by setting $\phi'=0$ we define our frame with $y$-axis along the direction of the motion, $x$-axis along the meridian towards the equator, and $z$ axis along the radial direction.}
+%\refedel{Hence, the co-rotating observer has a Cartesian metric}%
+%%\footnote{ It is also possible to generalize the Cartesian basis for oblate surfaces by considering a projection operator $\hat{h}_{ab} = g_{ab} + s_a s_b - n_a n_b$ with an additional projection against $n_a$, which is the normal to the oblate surface.
+%%}
+%\begin{align}\begin{split}
+%%&\hat{g}_{ij} dx^i dx^j &= \frac{\partial(r, \theta, \phi_*)}{\partial{(x, y, z)} h_{ab} dx^a dx^b  \\
+%    & \hat{g}_{ij} d\hat{x}^i d\hat{x}^j = \frac{\partial x^a}{\partial \hat{x}^i} \frac{\partial x^b}{\partial \hat{x}^j} h_{ab} dx^a dx^b  \\
+%&= \gamma_L^2 dy^2 + \frac{1}{2} \Biggl[ \Bigl(1+ \frac{e^{2\zetab}}{\Bb^2}\Bigr)(dx^2 + dz^2) \\
+%&+ \Bigl(\frac{e^{2\zetab}}{\Bb^2} - 1\Bigr)(dx-dz)(dx + dz) \cos(2\theta) - 2dx dz \sin(2\theta) \Biggr] \\
+%& = dx^2 + \gamma_L^2 dy^2 + dz^2 + \mathcal{O}(\Ob^2)
+%\end{split}\end{align}
+%\refedel{From the Cartesian form of the co-rotating metric it is also easy to obtain the great circle distance (on a unit sphere) as measured by the co-rotating observer by using the generalized inner-product \eqref{eq:gen_angle} as}
+%\be\label{eq:rel_cos}
+%\cos\rho' = \frac{\cos\theta \cos\theta_\mathrm{s} + \cos\phi \sin\theta \sin\theta_{\mathrm{s}}}{\sqrt{ \cos^2\theta + \sin^2\theta (\cos\phi^2 + \lgamma^2 \sin\phi^2)}} + \mathcal{O}(\Ob^2),
+%\ee
+%\refedel{This is the angle between points $(\theta, \phi)$ and $(\theta_{\mathrm{s}}, 0)$, and can be used to define the \textit{angular} size of spots as measured by the co-rotating observer in $K'$.}
+%\refedel{Note that the circumference of the star as measured by this co-rotating observer is now $>2\pi R$ because the azimuthal direction is Lorentz stretched.}
+%%TO HERE
+
+\refe{Additionally, it is useful to consider another projection operator $m$ that will project from the 3D space to the 2D surface of the star.}
+\refe{We can define this projection as}
+\be\label{eq:2dmetric}
+m_{ab} = g_{ab} + s_a s_b - n_a n_b = h_{ab} - n_a n_b,
 \ee
-%where normalization factor $\hat{R} = \sqrt{x_r^2 + y_r^2 + z_r^2}$.
-By using the Jacobian $\partial(x_r, y_r, z_r)/\partial (r, \theta, \phi')$ the spherical coordinate system \eqref{eq:gammaSch} can be transformed into a Cartesian coordinate basis, and by setting $\phi'=0$ we define our frame with $y$-axis along the direction of the motion, $x$-axis along the meridian towards the equator, and $z$ axis along the radial direction.
-Hence, the co-rotating observer has a Cartesian metric%
-\footnote{ It is also possible to generalize the Cartesian basis for oblate surfaces by considering a projection operator $\hat{h}_{ab} = g_{ab} + s_a s_b - n_a n_b$ with an additional projection against $n_a$, which is the normal to the (oblate) surface.
-}
-\begin{align}\begin{split}
-%&\hat{g}_{ij} dx^i dx^j &= \frac{\partial(r, \theta, \phi_*)}{\partial{(x, y, z)} h_{ab} dx^a dx^b  \\
-    & \hat{g}_{ij} d\hat{x}^i d\hat{x}^j = \frac{\partial x^a}{\partial \hat{x}^i} \frac{\partial x^b}{\partial \hat{x}^j} h_{ab} dx^a dx^b  \\
-&= \gamma_L^2 dy^2 + \frac{1}{2} \Biggl[ \Bigl(1+ \frac{e^{2\zetab}}{\Bb^2}\Bigr)(dx^2 + dz^2) \\
-&+ \Bigl(\frac{e^{2\zetab}}{\Bb^2} - 1\Bigr)(dx-dz)(dx + dz) \cos(2\theta) - 2dx dz \sin(2\theta) \Biggr] \\
-& = dx^2 + \gamma_L^2 dy^2 + dz^2 + \mathcal{O}(\Ob^2)
-\end{split}\end{align}
-From the Cartesian form of the co-rotating metric it is also easy to obtain the great circle distance (on a unit sphere) as measured by the co-rotating observer by using the generalized inner-product \eqref{eq:gen_angle} as
-\be\label{eq:rel_cos}
-\cos\rho' = \frac{\cos\theta \cos\theta_\mathrm{s} + \cos\phi \sin\theta \sin\theta_{\mathrm{s}}}{\sqrt{ \cos^2\theta + \sin^2\theta (\cos\phi^2 + \lgamma^2 \sin\phi^2)}} + \mathcal{O}(\Ob^2),
-\ee
-This is the angle between points $(\theta, \phi)$ and $(\theta_{\mathrm{s}}, 0)$, and can be used to define the \textit{angular} size of spots as measured by the co-rotating observer in $K'$.
-Note that the circumference of the star as measured by this co-rotating observer is now $>2\pi R$ because the azimuthal direction is Lorentz stretched.
+\refe{where $n_a$ is the unit normal to the surface.}
+\refe{From here it is easy to verify that it is perpendicular to the surface of the star as $m_{ab} n^a = 0$ and to the velocity of the surface as $m_{ab} s^a = 0$.}
+\refe{This is effectively a 2D metric tensor of the star's surface that is perpendicular to the wordline of the co-rotating observer.}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Quantities here are also relevant for the so-called Schwarzschild+Doppler (S+D) approximation \cite[see e.g.,][]{PB06}.
-In the S+D approximation the observer's polar coordinate plane $(b,\chi)$ is connected to the co-rotating spherical coordinates $(\phi', \theta')$ of the star.
-\refe{This connections is, however, done algebraically and there is no need to determine the full path of the ray as the problem reduces to calculating the so-called lensing integral only.}
-In this method, the calculations are done in a special relativistic framework \refe{where quantities are defined in a co-rotating coordinate system that is then Lorentz boosted into the static non-rotating frame.}
-We will now show how to define this \refe{change of frame properly, in order for the results to match the backwards-in-time method} (see also \citealt{CML07}, for an alternative derivation).
-In (areal) \sch metric the impact parameter $b$ can be obtained as a function of the emission angle $\alpha$ \eqref{eq:cosa} as
+\refe{Definitions} here are also relevant for the so-called Schwarzschild+Doppler (S+D) approximation \cite[see e.g.,][]{PB06}.
+In the S+D approximation the observer's polar coordinate plane $(b,\chi)$ is connected to the co-rotating spherical coordinates $(\phi', \theta')$ of the star.%
+\footnote{ \refe{This connection is, however, done algebraically in the S+D method and there is no need to determine the full path of the ray using partial differential equations as the problem reduces to calculating the so-called lensing integral only.}
+}
+\refe{The S+D} calculations are done in a special relativistic framework \refe{where quantities are defined in a co-rotating coordinate system that are then Lorentz boosted into the static non-rotating frame.}
+We will now show how to express this \refe{change of frame correctly, in order for the results to match the backwards-in-time method} (see also \citealt{CML07}, for an alternative derivation).
+In \refe{the usual} \sch metric the impact parameter $b$ can be obtained as a function of the emission angle $\alpha$ \eqref{eq:cosa} as
 \be
 %b = e^{-2\nu} R \sin\alpha.
 b = \frac{1}{\sqrt{1-u}} R \sin\alpha.
@@ -621,49 +637,69 @@ In this case, the solid angle is then simplified to
 d\Omega_o = bdb \, d\chi = \frac{1}{1-u} \frac{d \cos\alpha}{d \cos\psi} R^2 \cos\alpha ~ \frac{d\chi d\cos\psi}{D^2},
 \ee
 where $\psi$ is the lensing angle.
-Using the symmetry of the \sch metric we can then directly connect the $\psi$ and $\theta$ along with $\chi$ and $\phi$ to obtain
+Using the \refe{spherical} symmetry of the \sch metric we can directly connect the $\psi$ and $\theta$ along with $\chi$ and $\phi$ to obtain
 \be
 d\Omega_o = \frac{1}{1-u} \frac{d \cos\alpha}{d \cos\psi} ~\cos\alpha ~ \frac{dS}{D^2},
 \ee
-where $dS = R^2 d\cos\theta d\phi$ is the area element for the non-rotating static observer in $K$.
+where $dS = R^2 \sin\theta d\theta d\phi$ is the area element for the non-rotating static observer in $K$.
 Using $d\Omega_o$ to compute the flux we would then get the observed (received) flux valid for the observer in frame $K$.
 
-Integration over some finite sized features, on the other hand, is done on top of the surface of the star in the co-rotating frame $K'$.
+Integration over some finite sized features, on the other hand, is done on the surface of the star in the co-rotating frame $K'$.
 This results in a mixing of the different frames because we would like the integration to happen simultaneously for the observer in $K$, i.e., we need a connection between $t$, $\phi$ and $\phi'$.
-From the projection operator we can work out the total differential area element as
-\begin{align}\begin{split}\label{eq:dSp}
-dS' &= \sqrt{\det h_{ab}} d\theta d\phi d t\\
-%&= \frac{e^{\zetab}}{B} \lgamma r^2 \sin\theta d\theta d\phi' = \lgamma d\cos\theta d\phi' + \mathcal{O}(\Ob^2). \\
-&= \frac{e^{\zetab}}{B} \lgamma R^2 \sin\theta d\theta d\phi' = \lgamma R^2 d\cos\theta d\phi' + \mathcal{O}(\Ob^2).
-%&= \lgamma dS'' + \mathcal{O}(\Ob^2).
-\end{split}\end{align}
+\refe{To do this, we need to define what is the differential area element in the co-rotating frame.}
+\refe{This can be obtained by considering the 2D metric tensor $m$ of the surface (see Eq. \eqref{eq:2dmetric}).}
+\refe{For simplicity, let us consider a spherical star so that the surface normal reduces to $n^a = e^{\nub} \delta_r^a$, where $\delta_a^b$ is the Kronecker delta function.}
+\refe{Then $m$ can be expressed as}
+\be
+m_{ab} dx^a dx^b = \frac{e^{2\zetab}}{\Bb^2} r^2 d\theta^2 + \lgamma^2 r^2 \sin^2\theta (d\phi - \Omega dt)^2.
+\ee
+From \refe{this} projection operator we can \refe{derive} the \refe{co-rotating} differential area element as
+%\begin{align}\begin{split}\label{eq:dSp}
+%dS' &= \sqrt{\det h_{ab}} d\theta d\phi d t\\
+%%&= \frac{e^{\zetab}}{B} \lgamma r^2 \sin\theta d\theta d\phi' = \lgamma d\cos\theta d\phi' + \mathcal{O}(\Ob^2). \\
+%&= \frac{e^{\zetab}}{B} \lgamma R^2 \sin\theta d\theta d\phi' 
+% = \lgamma R^2 d\cos\theta d\phi' + \mathcal{O}(\Ob^2).
+%%&= \lgamma dS'' + \mathcal{O}(\Ob^2).
+%\end{split}\end{align}
+\be\label{eq:dSp}
+dS' = \sqrt{\det m_{ab}} x^a x^b = \frac{e^{\zetab}}{B} \lgamma R^2 \sin\theta d\theta (d\phi - \Omega dt) 
+\ee
 Hence, a change of $t$ and $\phi$  will result in a stretching of the area element by a factor of $\lgamma$.
 This result is obtained purely from differential geometry.
 
-Next we will work only in the \sch case and consider only terms up to $\mathcal{O}(\Ob^2)$.
+Next we will work only in the \sch \refe{metric to draw a direct connection to the S+D approximation.} \refedel{and consider only terms up to $\mathcal{O}(\Ob^2)$.}
 To transform from the non-rotating $K$ frame to the co-rotating frame $K'$ we can use the Lorentz invariance of the photon beam cross-section given as \citep{Terrell60, LB85}
 \be
 \cos\alpha ~dS = \cos\alpha' ~dS'.
 \ee
 %This follows from the fact that the photon beam cross-section is Lorentz invariant, i.e., $\cos\alpha ~dS = \cos\alpha' ~dS'_o$.
 Connection between the emission angles $\cos\alpha'$ and $\cos\alpha$ is also known from equations \eqref{eq:cosap} and \eqref{eq:cosa} and is seen to be a simple Doppler boost factor $\delta$.
-From here we then obtain
+\refe{Hence, we get that}
 \be
-dS = \lgamma \delta R^2 \sin\theta d\theta d\phi',
+dS = \delta dS'.
 \ee
-as given by the co-rotating frame coordinates.
+\refe{From here we then obtain by using \eqref{eq:dSp}}
+\be
+dS = \lgamma \delta R^2 \sin\theta d\theta (d\phi - \Omega dt).
+\ee
+%as given by the co-rotating \refedel{frame} coordinates.
+\refe{When transforming into the co-rotating coordinate system we define co-rotating coordinates as $\theta' = \theta$ and $\phi' = \phi - \Omega dt$, after which we obtain}
+\be
+dS = \lgamma \delta R^2 \sin\theta' d\theta' d\phi'.
+\ee
 %when taking into account also the transformation of frames $K$ and $K'$ using the differential area from \eqref{eq:dSp}.
 %A possible misconception here might arise from the fact that the power emitted is Lorentz invariant but the power received is not \citep[see e.g.][]{Ghi99}!
 Finally, the total observed angular size is then seen to be 
 \be
-d\Omega_o = \frac{\lgamma \delta}{1-u} \frac{d \cos\alpha}{d \cos\psi} ~\cos\alpha ~ \frac{R^2 \sin\theta d\theta d\phi'}{D^2}.
+d\Omega_o = \frac{\lgamma \delta}{1-u} \frac{d \cos\alpha}{d \cos\psi} ~\cos\alpha ~ \frac{R^2 \sin\theta' d\theta' d\phi'}{D^2}.
 \ee
-It differs by a factor of $\lgamma$ compared to the infinitesimally small spot case.
-In special relativity we could say that the surface element $dS'$ must be defined based on simultaneous measurements of local \textit{static} observers --- not using simultaneous measurements of comoving observers --- when dealing with finite sized spots on the surface.
+
+\refe{It differs by a factor of $\lgamma$ from an incorrect result that one would get by naively assuming that $dS'$ can be obtained from $dS =R^2 \sin\theta d\theta d\phi$ by just substituting $\theta = \theta'$ and $\phi = \phi'$ and not taking into account the time component $t$.}
+\refe{In special relativity we could say that the surface element $dS'$ must be defined based on simultaneous measurements of \textit{non-rotating} observers and not by using simultaneous measurements of comoving observers.}
 Simultaneous measurements made by different static observers are not simultaneous for moving observers due to the coupling between time and space.
-Hence, ray tracing photons from the observer to the star and using the frame of the static observer our time coordinate is automatically correct and the difference is seen in the size of the spots (see eq. \ref{eq:rel_cos}).
-Working in the co-rotating frame $K'$ the lengths (i.e., spot size and shape) are taken to be correct and it is a question of how to connect the time intervals to the time measurements.
-Here the error in time might then be interpreted as not taking into account the different photon arrival times to the detector.
+%By ray tracing photons from the observer to the star and using the frame of the static observer, our time coordinate is automatically \refe{taken into account} and \refe{the 
+%Working in the co-rotating frame $K'$ the lengths (i.e., spot size and shape) are taken to be correct and it is a question of how to connect the time intervals to the time measurements.
+%Here the error in time might then be interpreted as not taking into account the different photon arrival times to the detector.
 
 
 \subsection{Emission}\label{sect:emission}
@@ -831,9 +867,9 @@ The algorithm is based on a tensor product of nested Clenshaw-Curtis quadrature 
 \refe{
 Such a general way to treat the problem has, of course, its disadvantages too.
 Ray tracing photons is, in general, computationally very expensive problem.
-Typical photon propagation takes usually around a minute for a polar grid of $N_b \sim 100$ and $N_{\chi} \sim 100$ points.
+Typical propagation of all the photons takes usually around a minute for a polar grid of $N_b \sim 100$ and $N_{\chi} \sim 100$ points.
 After the image plane is constructed, a typical flux integration takes about $0.1$ to $1$ second depending on the integration tolerance.
-For fast calculations there exists other more approximate ways to solve the problem, such as the oblate \sch method where the symmetries of the \sch spacetimes are extensively used and the ray tracing reduces to lensing angle integrals \citep[see e.g.][]{PB06, aGM14}.
+For fast calculations there exists other more approximate ways to solve the problem, such as the oblate \sch method where the symmetries of the \sch spacetimes are extensively used and the ray tracing reduces to lensing angle integrals \citep[see e.g.][]{PB06, MLCB07}.
 We emphasize that our focus is not to compete against these methods in speed, but to verify their results using more general description of the problem.
 }
 
